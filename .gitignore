@@ -1,0 +1,38 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+
+# IntelliJ IDEA
+.idea/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Maven
+log/
+target/
+
+# Gradle
+.gradle/
+build/
+
+# JavaScript
+node_modules/
+dist/
+
+# Visual Studio Code
+.vscode/
+
+# Logs
+*.log
+log/
+
+# Temporary files
+*~
+.DS_Store

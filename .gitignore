@@ -1,0 +1,60 @@
+# Compiled Java class files
+*.class
+
+# Compiled Java bytecode
+*.jar
+
+# Compiled Java source files
+*.war
+
+# IntelliJ IDEA project files
+.idea/
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+
+# NetBeans project files
+nbproject/
+dist/
+build/
+nbbuild/
+nbdist/
+nbactions.xml
+
+# Maven build directory
+target/
+
+# Gradle build directory
+build/
+
+# Node.js dependencies
+node_modules/
+
+# Compiled JavaScript files
+*.js
+
+# Sourcemap files
+*.map
+
+# Webpack build directory
+dist/
+
+# Parcel build directory
+dist/
+
+# Babel cache directory
+.cache/
+
+# ESLint cache directory
+.eslintcache/
+
+# Log files
+*.log
+
+# Mac-specific files
+.DS_Store
+
+# Windows-specific files
+Thumbs.db

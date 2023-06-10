@@ -1,15 +1,15 @@
-import LoginForm from "./Front End Components/loginform";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import LoginForm from "./Front End Components/loginform";  // Importing the LoginForm component
+import { createTheme, ThemeProvider } from '@mui/material/styles'; // Importing the createTheme and ThemeProvider functions from MUI
 
-
+// Creating a custom theme
 const theme = createTheme({
   components: {
     MuiTextField: {
       styleOverrides: {
         root: {
-          '--TextField-brandBorderColor': '#fff',
-          '--TextField-brandBorderHoverColor': '#fff',
-          '--TextField-brandBorderFocusedColor': '#fff',
+          '--TextField-brandBorderColor': '#fff', // Customizing the brand border color
+          '--TextField-brandBorderHoverColor': '#fff', // Customizing the brand border hover color
+          '--TextField-brandBorderFocusedColor': '#fff', // Customizing the brand border focused color
         }
       }
     }
@@ -17,13 +17,13 @@ const theme = createTheme({
   MuiOutlinedInput: {
     styleOverrides: {
       notchedOutline: {
-        borderColor: '#fff',
+        borderColor: '#fff', // Customizing the outlined input border color
       },
     }
   }
 });
 
-
+// App component
 function App() {
 
   return (
@@ -35,4 +35,5 @@ function App() {
   );
 }
 
+// Exporting the App component
 export default App;

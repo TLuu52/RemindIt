@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import { auth } from "../../firebase";  // import firebase
 import { styled } from '@mui/system';
 import { Button, Input, TextField, useTheme } from "@mui/material";
-import CustomInput from './Utility/CustomInput'
-import CustomButton from "./Utility/CustomButton";
-import CustomLine from "./Utility/CustomLine";
-import CustomGoogleButton from "./Utility/CustomGoogleButton";
-import Logo from "./Utility/Logo";
+import CustomInput from './Utility/CustomInput' // Importing the CustomInput component
+import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton component
+import CustomLine from "./Utility/CustomLine"; // Importing the CustomLine component
+import CustomGoogleButton from "./Utility/CustomGoogleButton"; // Importing the CustomGoogleButton component
+import Logo from "./Utility/Logo"; // Importing the Logo component
 
 const Title = styled('h1')({
     color: 'white',
@@ -73,4 +74,5 @@ const LoginForm = () => {
 
 }
 
+ // Exporting the LoginForm component
 export default LoginForm

@@ -1,6 +1,7 @@
-import { styled } from "@mui/material"
-import { FcGoogle } from 'react-icons/fc'
+import { styled } from "@mui/material" // Importing the 'styled' function from the MUI library
+import { FcGoogle } from 'react-icons/fc' // Importing the 'FcGoogle' icon from the 'react-icons/fc' package
 
+// Defining a styled component for the button
 const StyledButton = styled('button')({
     width: '130px',
     height: '50px',
@@ -18,9 +19,13 @@ const StyledButton = styled('button')({
     margin: 'auto',
     marginTop: '20px',
 })
+
+// Defining a styled component for the span element
 const StyleSpan = styled('span')({
     fontSize: '40px'
 })
+
+// CustomGoogleButton component
 function CustomGoogleButton() {
 
     return (
@@ -31,4 +36,5 @@ function CustomGoogleButton() {
     )
 }
 
+// Exporting the CustomGoogleButton component
 export default CustomGoogleButton

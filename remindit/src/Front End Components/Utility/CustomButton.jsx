@@ -1,5 +1,6 @@
-import { styled } from "@mui/material"
+import { styled } from "@mui/material" // Importing the 'styled' function from the MUI library
 
+// Defining a styled component for the main button
 const StyledButtonMain = styled('button')(({ theme }) => ({
     cursor: 'pointer',
     background: theme.palette.primary.main,
@@ -13,6 +14,7 @@ const StyledButtonMain = styled('button')(({ theme }) => ({
     width: '500px',
     margin: 'auto'
 }));
+// Defining a styled component for the secondary button
 const StyledButtonSecondary = styled('button')(({ theme }) => ({
     cursor: 'pointer',
     background: theme.palette.primary.light,
@@ -27,6 +29,7 @@ const StyledButtonSecondary = styled('button')(({ theme }) => ({
     margin: 'auto'
 }));
 
+// CustomButton component
 function CustomButton({ text, color }) {
     return (
         <>
@@ -36,4 +39,5 @@ function CustomButton({ text, color }) {
     )
 }
 
+// Exporting the CustomButton component
 export default CustomButton

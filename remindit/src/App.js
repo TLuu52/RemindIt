@@ -1,12 +1,13 @@
-import LoginForm from "./Front End Components/loginform";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import SignUp from "./Front End Components/SignUp";
-import ProfileSettings from "./Front End Components/ProfileSettings";
-import Dashboard from "./Front End Components/Dashboard";
+import LoginForm from "./Front End Components/loginform"; // Importing the LoginForm component
+import { createTheme, ThemeProvider } from '@mui/material/styles'; // Importing the createTheme and ThemeProvider functions from MUI
+import { createBrowserRouter, RouterProvider } from "react-router-dom"; // Importing Routing from react-routere-dom
+import SignUp from "./Front End Components/SignUp"; // Importing SignUp component
+import ProfileSettings from "./Front End Components/ProfileSettings";// Importing ProfileSettings component
+import Dashboard from "./Front End Components/Dashboard";// Importing Dashboard component
 
 
 
+// Creating a custom theme
 const theme = createTheme({
   palette: {
     primary: {
@@ -43,7 +44,7 @@ const router = createBrowserRouter([
   }
 ])
 
-
+//App Component
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -53,4 +54,5 @@ function App() {
   );
 }
 
+// Exporting the App component
 export default App;

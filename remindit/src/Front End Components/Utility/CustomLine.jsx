@@ -1,5 +1,6 @@
-import { styled } from "@mui/material"
+import { styled } from "@mui/material" // Importing the 'styled' function from the MUI library
 
+// Defining a styled component for the line
 const StyledLine = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
     fontWeight: '200',
@@ -27,10 +28,12 @@ const StyledLine = styled('h1')(({ theme }) => ({
     }
 }))
 
+// CustomLine component
 function CustomLine({ text }) {
     return (
         <StyledLine>{text}</StyledLine>
     )
 }
 
+// Exporting the CustomLine component
 export default CustomLine

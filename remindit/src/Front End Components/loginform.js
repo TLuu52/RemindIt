@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { auth } from "../../firebase";  // import firebase
 import { styled } from '@mui/system';
 import { Button, Input, TextField, useTheme } from "@mui/material";
 import CustomInput from './Utility/CustomInput' // Importing the CustomInput component

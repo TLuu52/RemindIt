@@ -1,11 +1,11 @@
 import { styled } from "@mui/material"
 import { FcGoogle } from 'react-icons/fc'
 
-const StyledButton = styled('button')({
+const StyledButton = styled('button')(({ theme }) => ({
     width: '130px',
     height: '50px',
     borderRadius: '5px',
-    border: '1px solid #fefefe',
+    border: `1px solid ${theme.palette.primary.contrastText}`,
     backgroundColor: "transparent",
     color: '#fefefe',
     fontSize: '18px',
@@ -17,10 +17,7 @@ const StyledButton = styled('button')({
     cursor: 'pointer',
     margin: 'auto',
     marginTop: '20px',
-})
-const StyleSpan = styled('span')({
-    fontSize: '40px'
-})
+}))
 function CustomGoogleButton() {
 
     return (

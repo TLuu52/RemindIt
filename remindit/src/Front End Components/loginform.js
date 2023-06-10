@@ -7,12 +7,12 @@ import CustomLine from "./Utility/CustomLine";
 import CustomGoogleButton from "./Utility/CustomGoogleButton";
 import Logo from "./Utility/Logo";
 
-const Title = styled('h1')({
-    color: 'white',
+const Title = styled('h1')(({ theme }) => ({
+    color: theme.palette.primary.contrastText,
     fontWeight: '600',
     paddingBottom: '45px',
     margin: 'auto'
-});
+}));
 const Cover = styled('div')({
     display: 'flex',
     flexDirection: 'column',
@@ -28,7 +28,6 @@ const Page = styled('div')({
     height: "100vh",
     width: '100vw'
 })
-
 const Group = styled('div')({
     display: 'flex',
     flexDirection: 'column',
@@ -42,15 +41,21 @@ const TopCorner = styled('div')({
     width: '260px',
     padding: '20px'
 })
+const BottomText = styled('p')(({ theme }) => ({
+    color: theme.palette.primary.contrastText,
+    fontWeight: '200',
+    fontSize: '14px',
+    margin: '20px auto'
+}))
+const SpanText = styled('span')(({ theme }) => ({
+    color: theme.palette.primary.main,
+    cursor: 'pointer',
+    '&:hover': {
+        textDecoration: 'underline'
+    }
+}))
 
 const LoginForm = () => {
-    const theme = useTheme();
-    const [popupStyle, showPopup] = useState("hide")
-
-    const popup = () => {
-        showPopup("login-popup")
-        setTimeout(() => showPopup("hide"), 3000)
-    }
 
     return (
         <Page>
@@ -60,13 +65,13 @@ const LoginForm = () => {
             <Cover>
                 <Title>Log into your account</Title>
                 <Group>
-                    <CustomInput placeholder={'Email'}></CustomInput>
-                    <CustomInput placeholder={'Password'}></CustomInput>
+                    <CustomInput placeholder={'Email'} />
+                    <CustomInput placeholder={'Password'} />
                 </Group>
-                <CustomButton text={'Log in'} color={1}>Log in</CustomButton>
-                <CustomLine text={'Or Sign in With'}></CustomLine>
-                <CustomGoogleButton></CustomGoogleButton>
-                <p style={{ color: '#fefefe', fontWeight: '200', fontSize: '14px', margin: '20px auto' }}>Don't have an account yet? <span style={{ color: "#4BCFFA", cursor: 'pointer' }}>Sign Up.</span></p>
+                <CustomButton text={'Log in'} color={1} />
+                <CustomLine text={'Or Sign in With'} />
+                <CustomGoogleButton />
+                <BottomText>Don't have an account yet? <SpanText>Sign Up.</SpanText></BottomText>
             </Cover >
         </Page>
     )

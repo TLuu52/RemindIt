@@ -1,7 +1,7 @@
 import { styled } from "@mui/material"
 
-const StyledLine = styled('h1')({
-    color: '#fefefe',
+const StyledLine = styled('h1')(({ theme }) => ({
+    color: theme.palette.primary.contrastText,
     fontWeight: '200',
     fontSize: '16px',
     overflow: 'hidden',
@@ -17,17 +17,15 @@ const StyledLine = styled('h1')({
         verticalAlign: 'middle',
         width: '50%'
     },
-
     ':before': {
         right: '20px',
         marginLeft: '-50%'
     },
-
     ':after': {
         left: '20px',
         marginRight: '-50%'
     }
-})
+}))
 
 function CustomLine({ text }) {
     return (

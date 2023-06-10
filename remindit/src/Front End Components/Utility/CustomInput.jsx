@@ -9,18 +9,39 @@ const StyledInput = styled('input')(({ theme }) => ({
     padding: '19px 22px',
     fontSize: '20px',
     width: '500px',
-    margin: 'auto',
     color: theme.palette.primary.contrastText,
     '::placeholder': {
         color: theme.palette.primary.contrastText,
         opacity: .6
     }
 }))
+const StyledTextArea = styled('textArea')(({ theme }) => ({
+    outline: 'none',
+    backgroundColor: 'transparent',
+    border: `2px solid ${theme.palette.primary.light}`,
+    width: '500px',
+    color: theme.palette.primary.contrastText,
+    '::placeholder': {
+        color: theme.palette.primary.contrastText,
+        opacity: .6
+    },
+    height: '200px',
+    fontSize: '14px',
+    padding: '10px',
+    borderRadius: '8px'
+}))
 
 // CustomInput component
-function CustomInput({ placeholder }) {
+function CustomInput({ placeholder, size }) {
+    console.log(placeholder, size)
     return (
-        <StyledInput placeholder={placeholder}></StyledInput>
+        <>
+            {size == 's' ? <StyledInput placeholder={placeholder} style={{ fontSize: '16px', padding: '10px 22px', borderRadius: '20px' }} />
+                : size == 'm' ?
+                    <StyledInput placeholder={placeholder} />
+                    : <StyledTextArea placeholder={placeholder} />
+            }
+        </>
     )
 }
 

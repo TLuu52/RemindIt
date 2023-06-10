@@ -11,35 +11,38 @@ import Dashboard from "./Front End Components/Dashboard";// Importing Dashboard 
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#4BCFFA",
-      light: "#6B8594",
-      dark: "#263238",
-      contrastText: "#fff",
-      border: '#37474F'
+      main: "#4BCFFA", // Main Light Blue color
+      light: "#6B8594", // Foreground Color
+      dark: "#263238", // Background Color
+      contrastText: "#fff", // Text Color
+      border: '#37474F', // Border color
     },
   },
   typography: {
     allVariants: {
       color: '#fff'
+    },
+    h5: {
+      fontWeight: '300'
     }
-  }
+  },
 });
 
 const router = createBrowserRouter([
   {
-    path: '/login',
+    path: '/login', // Access login page manually with with this path
     element: <LoginForm />
   },
   {
-    path: '/signup',
+    path: '/signup', // Access SignUp page manually with with this path
     element: <SignUp />
   },
   {
-    path: '/profile',
+    path: '/profile', // Access Profile page manually with with this path
     element: <ProfileSettings />
   },
   {
-    path: '/',
+    path: '/', // Access Dashboard page manually with with this path, if user is logged in, otherwise redirect to /login
     element: <Dashboard />
   }
 ])

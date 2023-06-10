@@ -65,8 +65,8 @@ const LoginForm = () => {
             <Cover>
                 <Title>Log into your account</Title>
                 <Group>
-                    <CustomInput placeholder={'Email'} />
-                    <CustomInput placeholder={'Password'} />
+                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} />
+                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} />
                 </Group>
                 <CustomButton text={'Log in'} color={1} />
                 <CustomLine text={'Or Sign in With'} />
@@ -78,5 +78,5 @@ const LoginForm = () => {
 
 }
 
- // Exporting the LoginForm component
+// Exporting the LoginForm component
 export default LoginForm

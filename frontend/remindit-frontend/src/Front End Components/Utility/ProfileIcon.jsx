@@ -1,4 +1,4 @@
-import { styled, useTheme } from '@mui/material'
+import { styled } from '@mui/material'
 import ProfileImg from '../../Icons/ProfileIcon.png'
 
 const CustomImg = styled('img')(({ theme }) => ({
@@ -8,7 +8,6 @@ const CustomImg = styled('img')(({ theme }) => ({
 }))
 
 function ProfileIcon({ size, open, setOpen }) {
-    const theme = useTheme();
     return (
         // USE IMAGE FROM DB IF USER HAS CUSTOM IMAGE
         <>

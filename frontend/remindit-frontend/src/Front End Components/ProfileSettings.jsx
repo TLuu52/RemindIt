@@ -1,12 +1,10 @@
-import { Typography, styled, useTheme } from "@mui/material"
+import { Typography, styled } from "@mui/material"
 import Logo from "./Utility/Logo"
 import Header from "./Utility/Header";
 import CustomButton from "./Utility/CustomButton";
 import CustomInput from "./Utility/CustomInput";
 import ProfileIcon from "./Utility/ProfileIcon";
 import { BsUpload } from "react-icons/bs";
-import { useNavigate } from 'react-router-dom';
-
 
 const TopCorner = styled('div')({
     position: 'absolute',
@@ -70,8 +68,6 @@ const CustomLabel = styled('label')(({ theme }) => ({
     background: theme.palette.primary.main
 }))
 function ProfileSettings() {
-    const theme = useTheme();
-    const navigate = useNavigate();
 
     return (
         <Page>

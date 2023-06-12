@@ -5,7 +5,6 @@ import CustomLine from "./Utility/CustomLine"; // Importing the CustomLine compo
 import CustomGoogleButton from "./Utility/CustomGoogleButton"; // Importing the CustomGoogleButton component
 import { Link } from "react-router-dom";
 import Logo from "./Utility/Logo"; // Importing the Logo component
-import { useNavigate } from 'react-router-dom'
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -58,7 +57,6 @@ const CustomLink = styled(Link)(({ theme }) => ({
 
 
 const LoginForm = () => {
-    const navigate = useNavigate();
     return (
         <Page>
             <TopCorner>

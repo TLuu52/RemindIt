@@ -20,11 +20,6 @@ const StyledButton = styled('button')(({ theme }) => ({
     marginTop: '20px',
 }))
 
-// Defining a styled component for the span element
-const StyleSpan = styled('span')({
-    fontSize: '40px'
-})
-
 // CustomGoogleButton component
 function CustomGoogleButton() {
 

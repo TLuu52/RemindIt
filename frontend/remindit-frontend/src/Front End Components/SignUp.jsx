@@ -3,7 +3,6 @@ import CustomInput from './Utility/CustomInput' // Importing the CustomInput com
 import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton component
 import Logo from "./Utility/Logo"; // Importing the Logo component
 import { Link } from "react-router-dom";
-import { useNavigate } from 'react-router-dom'
 
 
 const Title = styled('h1')(({ theme }) => ({
@@ -55,7 +54,6 @@ const CustomLink = styled(Link)(({ theme }) => ({
     }
 }))
 function SignUp() {
-    const navigate = useNavigate();
 
     return (
         <Page>

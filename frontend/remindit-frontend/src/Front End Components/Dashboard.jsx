@@ -1,7 +1,6 @@
 import Logo from './Utility/Logo'
 import Header from './Utility/Header'
-import { styled, useTheme } from '@mui/material'
-import Calendar from 'react-calendar';
+import { styled } from '@mui/material'
 import { useState } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import CustomCalendar from './Utility/CustomCalendar';

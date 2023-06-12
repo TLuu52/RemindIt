@@ -4,6 +4,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom"; // Impor
 import SignUp from "./Front End Components/SignUp"; // Importing SignUp component
 import ProfileSettings from "./Front End Components/ProfileSettings";// Importing ProfileSettings component
 import Dashboard from "./Front End Components/Dashboard";// Importing Dashboard component
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+
 
 
 
@@ -17,6 +20,9 @@ const theme = createTheme({
       contrastText: "#fff", // Text Color
       border: '#37474F', // Border color
     },
+    secondary: {
+      main: '#4d636e'
+    }
   },
   typography: {
     allVariants: {
@@ -50,10 +56,12 @@ const router = createBrowserRouter([
 //App Component
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      {/* REMINDER TO REDIRECT IF USER IS NOT LOGGED IN */}
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ThemeProvider theme={theme}>
+        {/* REMINDER TO REDIRECT IF USER IS NOT LOGGED IN */}
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 }
 

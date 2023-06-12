@@ -9,6 +9,7 @@ const StyledInput = styled('input')(({ theme }) => ({
     padding: '19px 22px',
     fontSize: '20px',
     width: '500px',
+    margin: 'auto',
     color: theme.palette.primary.contrastText,
     '::placeholder': {
         color: theme.palette.primary.contrastText,
@@ -32,13 +33,13 @@ const StyledTextArea = styled('textArea')(({ theme }) => ({
 }))
 
 // CustomInput component
-function CustomInput({ placeholder, size }) {
+function CustomInput({ placeholder, size, type = 'text' }) {
     console.log(placeholder, size)
     return (
         <>
-            {size == 's' ? <StyledInput placeholder={placeholder} style={{ fontSize: '16px', padding: '10px 22px', borderRadius: '20px' }} />
+            {size == 's' ? <StyledInput placeholder={placeholder} style={{ margin: '0', fontSize: '16px', padding: '10px 22px', borderRadius: '20px' }} type={type} />
                 : size == 'm' ?
-                    <StyledInput placeholder={placeholder} />
+                    <StyledInput placeholder={placeholder} type={type} />
                     : <StyledTextArea placeholder={placeholder} />
             }
         </>

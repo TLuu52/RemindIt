@@ -1,10 +1,9 @@
-import React, { useState } from "react";
 import { styled } from '@mui/system';
-import { Button, Input, TextField, useTheme } from "@mui/material";
 import CustomInput from './Utility/CustomInput' // Importing the CustomInput component
 import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton component
 import CustomLine from "./Utility/CustomLine"; // Importing the CustomLine component
 import CustomGoogleButton from "./Utility/CustomGoogleButton"; // Importing the CustomGoogleButton component
+import { Link } from "react-router-dom";
 import Logo from "./Utility/Logo"; // Importing the Logo component
 
 const Title = styled('h1')(({ theme }) => ({
@@ -47,9 +46,10 @@ const BottomText = styled('p')(({ theme }) => ({
     fontSize: '14px',
     margin: '20px auto'
 }))
-const SpanText = styled('span')(({ theme }) => ({
+const CustomLink = styled(Link)(({ theme }) => ({
     color: theme.palette.primary.main,
     cursor: 'pointer',
+    textDecoration: 'none',
     '&:hover': {
         textDecoration: 'underline'
     }
@@ -67,12 +67,12 @@ const LoginForm = () => {
                 <Title>Log into your account</Title>
                 <Group>
                     <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} />
-                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} />
+                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type='password' />
                 </Group>
                 <CustomButton text={'Log in'} color={1} />
                 <CustomLine text={'Or Sign in With'} />
                 <CustomGoogleButton />
-                <BottomText>Don't have an account yet? <SpanText>Sign Up.</SpanText></BottomText>
+                <BottomText>Don't have an account yet? <CustomLink to='/signup'>Sign Up.</CustomLink></BottomText>
             </Cover >
         </Page>
     )

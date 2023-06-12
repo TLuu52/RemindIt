@@ -37,8 +37,8 @@ function CustomInput({ placeholder, size, type = 'text' }) {
     console.log(placeholder, size)
     return (
         <>
-            {size == 's' ? <StyledInput placeholder={placeholder} style={{ margin: '0', fontSize: '16px', padding: '10px 22px', borderRadius: '20px' }} type={type} />
-                : size == 'm' ?
+            {size === 's' ? <StyledInput placeholder={placeholder} style={{ margin: '0', fontSize: '16px', padding: '10px 22px', borderRadius: '20px' }} type={type} />
+                : size === 'm' ?
                     <StyledInput placeholder={placeholder} type={type} />
                     : <StyledTextArea placeholder={placeholder} />
             }

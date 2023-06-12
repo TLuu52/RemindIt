@@ -3,6 +3,8 @@ import CustomInput from './Utility/CustomInput' // Importing the CustomInput com
 import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton component
 import Logo from "./Utility/Logo"; // Importing the Logo component
 import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom'
+
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -53,6 +55,7 @@ const CustomLink = styled(Link)(({ theme }) => ({
     }
 }))
 function SignUp() {
+    const navigate = useNavigate();
 
     return (
         <Page>
@@ -62,12 +65,12 @@ function SignUp() {
             <Cover>
                 <Title>Create a RemindIt Account</Title>
                 <Group>
-                    <CustomInput placeholder={'First Name'} size={'m'} style={{ margin: 'auto' }}/>
-                    <CustomInput placeholder={'Last Name'} size={'m'} style={{ margin: 'auto' }}/>
-                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }}/>
-                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'}/>
+                    <CustomInput placeholder={'First Name'} size={'m'} style={{ margin: 'auto' }} />
+                    <CustomInput placeholder={'Last Name'} size={'m'} style={{ margin: 'auto' }} />
+                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} />
+                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'} />
                 </Group>
-                <CustomButton text={'Create Account'} color={1} />
+                <CustomButton text={'Create Account'} color={1} link={'/'} />
                 <BottomText>Already have an account? <CustomLink to='/login'>Log in.</CustomLink></BottomText>
             </Cover >
         </Page>

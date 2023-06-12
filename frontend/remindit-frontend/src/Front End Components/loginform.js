@@ -5,6 +5,7 @@ import CustomLine from "./Utility/CustomLine"; // Importing the CustomLine compo
 import CustomGoogleButton from "./Utility/CustomGoogleButton"; // Importing the CustomGoogleButton component
 import { Link } from "react-router-dom";
 import Logo from "./Utility/Logo"; // Importing the Logo component
+import { useNavigate } from 'react-router-dom'
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -57,7 +58,7 @@ const CustomLink = styled(Link)(({ theme }) => ({
 
 
 const LoginForm = () => {
-
+    const navigate = useNavigate();
     return (
         <Page>
             <TopCorner>
@@ -69,7 +70,7 @@ const LoginForm = () => {
                     <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} />
                     <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type='password' />
                 </Group>
-                <CustomButton text={'Log in'} color={1} />
+                <CustomButton text={'Log in'} color={1} link={'/'} />
                 <CustomLine text={'Or Sign in With'} />
                 <CustomGoogleButton />
                 <BottomText>Don't have an account yet? <CustomLink to='/signup'>Sign Up.</CustomLink></BottomText>

@@ -32,7 +32,6 @@ const Right = styled('div')({
 })
 function Dashboard() {
     const [value, onChange] = useState(new Date());
-    const theme = useTheme();
 
     return (
         <Page>

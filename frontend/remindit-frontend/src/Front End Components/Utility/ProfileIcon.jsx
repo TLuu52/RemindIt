@@ -7,13 +7,13 @@ const CustomImg = styled('img')(({ theme }) => ({
     border: `solid 2px ${theme.palette.primary.border}`
 }))
 
-function ProfileIcon({ size }) {
+function ProfileIcon({ size, open, setOpen }) {
     const theme = useTheme();
     return (
         // USE IMAGE FROM DB IF USER HAS CUSTOM IMAGE
         <>
-            {size == 'l' ? <CustomImg src={ProfileImg} alt="Profile Picture" style={{ height: '150px' }} /> :
-                <CustomImg src={ProfileImg} alt="Profile Picture" />
+            {size === 'l' ? <CustomImg src={ProfileImg} alt="Profile Picture" style={{ height: '150px' }} /> :
+                <CustomImg src={ProfileImg} alt="Profile Picture" onClick={() => setOpen(!open)} />
             }
         </>
     )

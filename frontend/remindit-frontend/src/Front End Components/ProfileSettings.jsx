@@ -5,6 +5,8 @@ import CustomButton from "./Utility/CustomButton";
 import CustomInput from "./Utility/CustomInput";
 import ProfileIcon from "./Utility/ProfileIcon";
 import { BsUpload } from "react-icons/bs";
+import { useNavigate } from 'react-router-dom';
+
 
 const TopCorner = styled('div')({
     position: 'absolute',
@@ -69,6 +71,7 @@ const CustomLabel = styled('label')(({ theme }) => ({
 }))
 function ProfileSettings() {
     const theme = useTheme();
+    const navigate = useNavigate();
 
     return (
         <Page>
@@ -109,8 +112,8 @@ function ProfileSettings() {
             </Row>
             <CustomHr />
             <End>
-                <CustomButton text={'Cancel'} color={0} size={'s'} />
-                <CustomButton text={'Save'} color={1} size={'s'} />
+                <CustomButton text={'Cancel'} color={0} size={'s'} link={'/'} />
+                <CustomButton text={'Save'} color={1} size={'s'} link={'/'} />
             </End>
 
         </Page>

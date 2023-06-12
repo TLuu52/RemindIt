@@ -1,4 +1,4 @@
-package com.remindit.remindit;
+package com.remindit.reminditbackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

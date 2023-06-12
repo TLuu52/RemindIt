@@ -20,7 +20,9 @@ const Title = styled('h1')(({ theme }) => ({
     margin: 'auto'
 }));
 const Page = styled('div')({
-    padding: '20px'
+    padding: '20px',
+    height: '100vh',
+    overflowY: 'auto'
 })
 const Row = styled('div')({
     display: 'flex',

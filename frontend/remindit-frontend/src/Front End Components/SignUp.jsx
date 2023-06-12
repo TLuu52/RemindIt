@@ -4,7 +4,6 @@ import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton
 import Logo from "./Utility/Logo"; // Importing the Logo component
 import { Link } from "react-router-dom";
 
-
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
     fontWeight: '600',
@@ -54,6 +53,7 @@ const CustomLink = styled(Link)(({ theme }) => ({
     }
 }))
 function SignUp() {
+
     return (
         <Page>
             <TopCorner>
@@ -62,10 +62,10 @@ function SignUp() {
             <Cover>
                 <Title>Create a RemindIt Account</Title>
                 <Group>
-                    <CustomInput placeholder={'First Name'} size={'m'} style={{ margin: 'auto' }} />
-                    <CustomInput placeholder={'Last Name'} size={'m'} style={{ margin: 'auto' }} />
-                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} />
-                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'} />
+                    <CustomInput placeholder={'First Name'} size={'m'} style={{ margin: 'auto' }}/>
+                    <CustomInput placeholder={'Last Name'} size={'m'} style={{ margin: 'auto' }}/>
+                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }}/>
+                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'}/>
                 </Group>
                 <CustomButton text={'Create Account'} color={1} />
                 <BottomText>Already have an account? <CustomLink to='/login'>Log in.</CustomLink></BottomText>

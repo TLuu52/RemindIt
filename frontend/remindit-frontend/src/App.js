@@ -21,7 +21,9 @@ const theme = createTheme({
       border: '#37474F', // Border color
     },
     secondary: {
-      main: '#4d636e'
+      main: '#4d636e',
+      dark: '#7a95a2',
+      light: '#4BCFFA22'
     }
   },
   typography: {

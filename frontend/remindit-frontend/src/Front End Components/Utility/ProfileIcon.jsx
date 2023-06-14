@@ -4,7 +4,8 @@ import ProfileImg from '../../Icons/ProfileIcon.png'
 const CustomImg = styled('img')(({ theme }) => ({
     height: '45px',
     borderRadius: '50%',
-    border: `solid 2px ${theme.palette.primary.border}`
+    border: `solid 2px ${theme.palette.primary.border}`,
+    cursor: 'pointer'
 }))
 
 function ProfileIcon({ size, open, setOpen }) {

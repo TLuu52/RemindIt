@@ -6,8 +6,8 @@ import CustomGoogleButton from "./Utility/CustomGoogleButton"; // Importing the 
 import { Link } from "react-router-dom";
 import Logo from "./Utility/Logo"; // Importing the Logo component
 import React, {useState} from "react";
-import { auth} from "../firebase";
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from "../firebase";
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -67,9 +67,13 @@ const LoginForm = () => {
     const loginForm = (e) => {
         e.preventDefault();
         signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {console.log(userCredential)})
-        .catch((error) => {console.log(error)} );
-    }
+          .then((userCredential) => {
+            console.log(userCredential);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      };
     
     return (
         <form onSubmit={loginForm}>

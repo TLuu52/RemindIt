@@ -38,7 +38,7 @@ const theme = createTheme({
 
 const router = createBrowserRouter([
   {
-    path: '/login', // Access login page manually with with this path
+    path: '/', // Access login page manually with with this path, if user is logged in, otherwise redirect to /Dashboard
     element: <LoginForm />
   },
   {
@@ -50,7 +50,7 @@ const router = createBrowserRouter([
     element: <ProfileSettings />
   },
   {
-    path: '/', // Access Dashboard page manually with with this path, if user is logged in, otherwise redirect to /login
+    path: '/Dashboard', // Access Dashboard page manually with with this path
     element: <Dashboard />
   }
 ])

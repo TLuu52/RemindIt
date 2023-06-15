@@ -1,5 +1,8 @@
 import { styled } from "@mui/material" // Importing the 'styled' function from the MUI library
 import { FcGoogle } from 'react-icons/fc' // Importing the 'FcGoogle' icon from the 'react-icons/fc' package
+import React, { useState } from 'react';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../../firebase';
 
 // Defining a styled component for the button
 const StyledButton = styled('button')(({ theme }) => ({
@@ -20,16 +23,35 @@ const StyledButton = styled('button')(({ theme }) => ({
     marginTop: '20px',
 }))
 
-// CustomGoogleButton component
-function CustomGoogleButton() {
+const CustomGoogleButton = () => {
+
+    const [isSigningIn, setIsSigningIn] = useState(false);
+
+    const handleGoogleSignIn = () => {
+        setIsSigningIn(true);
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+          .then((result) => {
+            // Handle successful sign-in
+            console.log(result);
+          })
+          .catch((error) => {
+            // Handle sign-in error
+            console.log(error);
+          })
+          .finally(() => {
+            setIsSigningIn(false);
+          });
+      };
 
     return (
-        <StyledButton>
+        <StyledButton onClick={handleGoogleSignIn} disabled={isSigningIn}>
             <FcGoogle size={'24px'} />
             Google
         </StyledButton>
-    )
-}
+    );
+
+};
 
 // Exporting the CustomGoogleButton component
 export default CustomGoogleButton

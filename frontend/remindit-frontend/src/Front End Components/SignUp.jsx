@@ -84,11 +84,11 @@ const SignUp = () => {
                 <Group>
                     <CustomInput placeholder={'First Name'} size={'m'} style={{ margin: 'auto' }} />
                     <CustomInput placeholder={'Last Name'} size={'m'} style={{ margin: 'auto' }} />
-                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} onChange ={(e) => setEmail(e.target.value)}/>
+                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} value = {email} onChange ={(e) => setEmail(e.target.value)}/>
                     <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'} value = {password} onChange ={(e) => setPassword(e.target.value)}/>
                 </Group>
                 <CustomButton text={'Create Account'} color={1} />
-                <BottomText>Already have an account? <CustomLink to='/login'>Log in.</CustomLink></BottomText>
+                <BottomText>Already have an account? <CustomLink to='/'>Log in.</CustomLink></BottomText>
             </Cover >
         </Page>
         </form>

@@ -3,7 +3,9 @@ import CustomInput from './Utility/CustomInput' // Importing the CustomInput com
 import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton component
 import Logo from "./Utility/Logo"; // Importing the Logo component
 import { Link } from "react-router-dom";
-
+import React, { useState } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -53,9 +55,26 @@ const CustomLink = styled(Link)(({ theme }) => ({
         textDecoration: 'underline'
     }
 }))
-function SignUp() {
+
+const SignUp = () => {
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const signUp = (e) => {
+        e.preventDefault();
+        createUserWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            console.log(userCredential);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    
 
     return (
+        <form onSubmit = {signUp}>
         <Page>
             <TopCorner>
                 <Logo />
@@ -65,13 +84,14 @@ function SignUp() {
                 <Group>
                     <CustomInput placeholder={'First Name'} size={'m'} style={{ margin: 'auto' }} />
                     <CustomInput placeholder={'Last Name'} size={'m'} style={{ margin: 'auto' }} />
-                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} />
-                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'} />
+                    <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} onChange ={(e) => setEmail(e.target.value)}/>
+                    <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'} value = {password} onChange ={(e) => setPassword(e.target.value)}/>
                 </Group>
-                <CustomButton text={'Create Account'} color={1} link={'/'} />
+                <CustomButton text={'Create Account'} color={1} />
                 <BottomText>Already have an account? <CustomLink to='/login'>Log in.</CustomLink></BottomText>
             </Cover >
         </Page>
+        </form>
     )
 }
 

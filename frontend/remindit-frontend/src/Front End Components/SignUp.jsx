@@ -2,9 +2,9 @@ import { styled } from '@mui/system';
 import CustomInput from './Utility/CustomInput' // Importing the CustomInput component
 import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton component
 import Logo from "./Utility/Logo"; // Importing the Logo component
-import { Link } from "react-router-dom";
-import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth, firestore } from '../firebase';
 
 const Title = styled('h1')(({ theme }) => ({
@@ -62,41 +62,36 @@ const SignUp = () => {
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
 
-    const signUp = (e) => {
+
+    const signUp = async (e) => {
         e.preventDefault();
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Save user information to Firestore
-                const user = userCredential.user;
-                const userRef = firestore.collection('users').doc(user.uid);
-
-                // Set the user data
-                userRef
-                    .set({
-                        firstName,
-                        lastName,
-                        email,
-                        password
-                    })
-                    .then(() => {
-                        console.log('User information saved to Firestore');
-                    })
-                    .catch((error) => {
-                        console.log('Error saving user information:', error);
-                    });
-            })
-            .catch((error) => {
-                console.log('Error creating user:', error);
-            });
+        try {
+            await createUserWithEmailAndPassword(auth, email, password).catch(err => console.log(err))
+            await updateProfile(auth.currentUser, { displayName: `${firstName} ${lastName}` }).catch(err => console.log(err)).then(console.log(auth.currentUser))
+            if (auth.currentUser) {
+                navigate('/dashboard')
+            }
+        } catch (err) {
+            console.log(err)
+        }
     };
+
+    useEffect(() => {
+        setTimeout(() => {
+            if (auth.currentUser) {
+                navigate('/dashboard')
+            }
+        }, 200)
+    }, [])
 
 
     return (
         <form onSubmit={signUp}>
             <Page>
                 <TopCorner>
-                    <Logo />
+                    <Logo size={'250px'} />
                 </TopCorner>
                 <Cover>
                     <Title>Create a RemindIt Account</Title>
@@ -106,7 +101,7 @@ const SignUp = () => {
                         <CustomInput placeholder={'Email'} size={'m'} style={{ margin: 'auto' }} value={email} onChange={(e) => setEmail(e.target.value)} />
                         <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type={'password'} value={password} onChange={(e) => setPassword(e.target.value)} />
                     </Group>
-                    <CustomButton text={'Create Account'} color={1} />
+                    <CustomButton text={'Create Account'} color={1} type={'submit'} />
                     <BottomText>Already have an account? <CustomLink to='/'>Log in.</CustomLink></BottomText>
                 </Cover >
             </Page>

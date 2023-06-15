@@ -19,14 +19,14 @@ const StyledButton = styled('button')(({ theme }) => ({
     }
 }));
 // CustomButton component
-function CustomButton({ text, color, size, link }) {
+function CustomButton({ text, color, size, link, type }) {
     const theme = useTheme()
     const navigate = useNavigate();
 
     return (
         <>
             {size === 's' ?
-                <StyledButton style={{ background: color === 1 ? theme.palette.primary.main : theme.palette.primary.light, fontSize: '14px', width: '120px', padding: '12px 0px', borderRadiu: '3px' }}
+                <StyledButton type={type} style={{ background: color === 1 ? theme.palette.primary.main : theme.palette.primary.light, fontSize: '14px', width: '120px', padding: '12px 0px', borderRadiu: '3px' }}
                     onClick={() => navigate(link)}>{text}</StyledButton>
                 :
                 <StyledButton style={{ background: color === 1 ? theme.palette.primary.main : theme.palette.primary.light, margin: 'auto' }} onClick={() => navigate(link)}>{text}</StyledButton>

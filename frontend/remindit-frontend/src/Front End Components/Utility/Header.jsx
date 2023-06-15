@@ -3,13 +3,22 @@ import { BsBellFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
+import Logo from './Logo';
 
 
 const End = styled('div')({
     display: 'flex',
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'end',
+    justifyContent: 'space-between',
+    gap: '10px'
+})
+const Container = styled('div')({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: '10px'
 })
 const CustomMenuItem = styled(MenuItem)(({ theme }) => ({
@@ -41,45 +50,54 @@ function Header() {
             setOpen(false);
         }
     }
+    const logout = async () => {
+        await auth.signOut()
+        console.log(auth)
+        navigate('/')
+    }
 
     return (
         <End>
-            <BsBellFill color={theme.palette.primary.light} size="30px" />
-            <Box ref={anchorRef}>
-                <ProfileIcon open={open} setOpen={setOpen} />
-            </Box>
-            <Popper
-                open={open}
-                anchorEl={anchorRef.current}
-                placement="left-start"
-                transition
-                disablePortal
-            >
-                {({ TransitionProps, placement }) => (
-                    <Grow
-                        {...TransitionProps}
-                        style={{
-                            transformOrigin:
-                                placement === 'bottom-start' ? 'right bottom' : 'right top',
-                        }}
-                    >
-                        <CustomPaper>
-                            <ClickAwayListener onClickAway={handleClose}>
-                                <MenuList
-                                    autoFocusItem={open}
-                                    id="composition-menu"
-                                    aria-labelledby="composition-button"
-                                    onKeyDown={handleListKeyDown}
-                                >
-                                    <CustomMenuItem onClick={() => navigate('/profile')}>Profile</CustomMenuItem>
-                                    {/* IMPLEMENT LOGOUT WHEN ABLE TO */}
-                                    <CustomMenuItem onClick={() => navigate('/login')}>Logout</CustomMenuItem>
-                                </MenuList>
-                            </ClickAwayListener>
-                        </CustomPaper>
-                    </Grow>
-                )}
-            </Popper>
+            <Logo size={'180px'} />
+            <Container>
+
+                <BsBellFill color={theme.palette.primary.light} size="30px" />
+                <Box ref={anchorRef}>
+                    <ProfileIcon open={open} setOpen={setOpen} />
+                </Box>
+                <Popper
+                    open={open}
+                    anchorEl={anchorRef.current}
+                    placement="left-start"
+                    transition
+                    disablePortal
+                >
+                    {({ TransitionProps, placement }) => (
+                        <Grow
+                            {...TransitionProps}
+                            style={{
+                                transformOrigin:
+                                    placement === 'bottom-start' ? 'right bottom' : 'right top',
+                            }}
+                        >
+                            <CustomPaper>
+                                <ClickAwayListener onClickAway={handleClose}>
+                                    <MenuList
+                                        autoFocusItem={open}
+                                        id="composition-menu"
+                                        aria-labelledby="composition-button"
+                                        onKeyDown={handleListKeyDown}
+                                    >
+                                        <CustomMenuItem onClick={() => navigate('/profile')}>Profile</CustomMenuItem>
+                                        {/* IMPLEMENT LOGOUT WHEN ABLE TO */}
+                                        <CustomMenuItem onClick={() => logout()}>Logout</CustomMenuItem>
+                                    </MenuList>
+                                </ClickAwayListener>
+                            </CustomPaper>
+                        </Grow>
+                    )}
+                </Popper>
+            </Container>
         </End >
     )
 }

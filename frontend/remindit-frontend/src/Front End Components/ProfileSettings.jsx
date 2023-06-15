@@ -7,7 +7,7 @@ import ProfileIcon from "./Utility/ProfileIcon";
 import { BsUpload } from "react-icons/bs";
 
 const TopCorner = styled('div')({
-    position: 'absolute',
+    position: 'relative',
     top: '0',
     left: '0',
     width: '200px',
@@ -28,7 +28,8 @@ const Row = styled('div')({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '75%',
+    width: '100%',
+    maxWidth: '1500px',
     padding: '20px 0px'
 })
 const End = styled('div')({
@@ -71,7 +72,6 @@ function ProfileSettings() {
 
     return (
         <Page>
-            <TopCorner><Logo /></TopCorner>
             <Header />
             <Title>Profile Settings</Title>
             <CustomHr />
@@ -108,8 +108,8 @@ function ProfileSettings() {
             </Row>
             <CustomHr />
             <End>
-                <CustomButton text={'Cancel'} color={0} size={'s'} link={'/'} />
-                <CustomButton text={'Save'} color={1} size={'s'} link={'/'} />
+                <CustomButton text={'Cancel'} color={0} size={'s'} link={'/dashboard'} />
+                <CustomButton text={'Save'} color={1} size={'s'} link={'/dashboard'} />
             </End>
 
         </Page>

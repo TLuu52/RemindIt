@@ -117,9 +117,6 @@ function Dashboard() {
     }
     return (
         <Page>
-            <TopCorner>
-                <Logo />
-            </TopCorner>
             <Header />
             <Main>
 

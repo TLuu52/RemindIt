@@ -1,6 +1,7 @@
 import { styled } from "@mui/material" // Importing the 'styled' function from the MUI library
 import { FcGoogle } from 'react-icons/fc' // Importing the 'FcGoogle' icon from the 'react-icons/fc' package
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../../firebase';
 
@@ -26,6 +27,7 @@ const StyledButton = styled('button')(({ theme }) => ({
 const CustomGoogleButton = () => {
 
     const [isSigningIn, setIsSigningIn] = useState(false);
+    const navigate = useNavigate();
 
     const handleGoogleSignIn = () => {
         setIsSigningIn(true);
@@ -34,6 +36,7 @@ const CustomGoogleButton = () => {
           .then((result) => {
             // Handle successful sign-in
             console.log(result);
+            navigate('/dashboard');
           })
           .catch((error) => {
             // Handle sign-in error

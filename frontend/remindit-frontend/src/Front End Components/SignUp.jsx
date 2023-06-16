@@ -5,7 +5,7 @@ import Logo from "./Utility/Logo"; // Importing the Logo component
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from 'react';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
-import { auth, firestore } from '../firebase';
+import { auth } from '../firebase';
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -68,13 +68,12 @@ const SignUp = () => {
     const signUp = async (e) => {
         e.preventDefault();
         try {
-            await createUserWithEmailAndPassword(auth, email, password).catch(err => console.log(err))
-            await updateProfile(auth.currentUser, { displayName: `${firstName} ${lastName}` }).catch(err => console.log(err)).then(console.log(auth.currentUser))
-            if (auth.currentUser) {
-                navigate('/dashboard')
-            }
+            await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(auth.currentUser, { displayName: `${firstName} ${lastName}` });
+            await auth.signOut(); // Sign out the user
+            navigate('/'); // Redirect to login page
         } catch (err) {
-            console.log(err)
+            console.log(err);
         }
     };
 

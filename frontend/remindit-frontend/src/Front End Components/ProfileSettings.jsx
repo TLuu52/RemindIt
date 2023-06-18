@@ -9,7 +9,7 @@ import { useContext, useEffect, useState } from "react";
 import { auth, firestore, storage } from "../firebase";
 import { UserContext } from "../App";
 import { updateEmail, updateProfile } from "firebase/auth";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 
@@ -87,7 +87,7 @@ function ProfileSettings() {
     const { user, setUser } = useContext(UserContext)
     const [bio, setBio] = useState('');
     const [bioCharacterCount, setBioCharacterCount] = useState(0);
-
+    const db = firestore;
 
     useEffect(() => {
         // Gather credentials
@@ -136,36 +136,14 @@ function ProfileSettings() {
 
     const submit = async (e) => {
         e.preventDefault();
-        try {
-            // Update the user's display name and email
-            await updateProfile(auth.currentUser, {
-                displayName: `${firstName} ${lastName}`,
-            });
-            await updateEmail(auth.currentUser, email)
 
-            // Check if the "users" collection exists, create it if it doesn't
-            const usersCollectionRef = collection(firestore, "users");
-            const collectionSnapshot = await getDocs(usersCollectionRef);
-            if (collectionSnapshot.empty) {
-                await setDoc(doc(firestore, "metadata", "usersCollection"), {
-                    exists: true,
-                });
-            }
-
-            // Create a new document in the "users" collection with the user's ID
-            const userDocRef = doc(firestore, "users", auth.currentUser.uid);
-            await setDoc(userDocRef, {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                picture: picture, // Assuming you have the URL of the profile picture
-                bio: bio, // Add the user's bio here
-            });
-
-            console.log("Profile settings saved successfully.");
-        } catch (err) {
-            console.log(err);
-        }
+        await setDoc(doc(db, "users", "documentId"), {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            picture: picture,
+            bio: bio
+        });
     };
 
     const handleBioChange = (e) => {

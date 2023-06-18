@@ -9,7 +9,7 @@ import { useContext, useEffect, useState } from "react";
 import { auth, firestore, storage } from "../firebase";
 import { UserContext } from "../App";
 import { updateEmail, updateProfile } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 
@@ -107,26 +107,23 @@ function ProfileSettings() {
         const file = e.target.files[0];
 
         try {
-            // Create a storage reference with a unique filename
             const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}/${file.name}`);
-
-            // Upload the file to the storage reference
             const uploadTask = uploadBytes(storageRef, file);
-            // Listen for upload progress or completion
+
             uploadTask.on('state_changed', (snapshot) => {
-                // Handle upload progress here
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 console.log(`Upload progress: ${progress}%`);
             }, (error) => {
-                // Handle upload error
                 console.log('Upload error:', error);
             }, async () => {
-                // Upload completed successfully
-                // Get the download URL of the uploaded file
                 const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                 console.log('File uploaded successfully:', downloadURL);
 
-                // Update the state with the new picture URL
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, {
+                    picture: downloadURL
+                });
+
                 setPicture(downloadURL);
             });
         } catch (error) {
@@ -137,7 +134,10 @@ function ProfileSettings() {
     const submit = async (e) => {
         e.preventDefault();
 
-        await setDoc(doc(db, "users", "documentId"), {
+        const userId = auth.currentUser.uid; // Get the current user's ID
+        const userRef = doc(db, "users", userId); // Create a document reference for the user
+
+        await setDoc(userRef, {
             firstName: firstName,
             lastName: lastName,
             email: email,

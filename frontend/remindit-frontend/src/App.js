@@ -8,6 +8,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { auth } from './firebase';
 import React, { useState } from 'react';
+import TestDashboard from './Front End Components/TestDashboard';
 
 
 
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
   {
     path: '/Dashboard', // Access Dashboard page manually with with this path
     element: <Dashboard />
+  },
+  {
+    path: '/test', // Access Dashboard page manually with with this path
+    element: <TestDashboard />
   }
 ])
 

@@ -11,7 +11,7 @@ import { UserContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import { updateEmail, updateProfile } from "firebase/auth";
 import { collection, doc, getDocs, setDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 
 
@@ -105,36 +105,6 @@ function ProfileSettings() {
             }
         }, 300)
     }, []);
-    const newPicture = async (e) => {
-        const file = e.target.files[0];
-
-        try {
-            // Create a storage reference with a unique filename
-            const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}/${file.name}`);
-
-            // Upload the file to the storage reference
-            const uploadTask = uploadBytes(storageRef, file);
-            // Listen for upload progress or completion
-            uploadTask.on('state_changed', (snapshot) => {
-                // Handle upload progress here
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log(`Upload progress: ${progress}%`);
-            }, (error) => {
-                // Handle upload error
-                console.log('Upload error:', error);
-            }, async () => {
-                // Upload completed successfully
-                // Get the download URL of the uploaded file
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                console.log('File uploaded successfully:', downloadURL);
-
-                // Update the state with the new picture URL
-                setPicture(downloadURL);
-            });
-        } catch (error) {
-            console.log('Error uploading file:', error);
-        }
-    };
 
     const submit = async (e) => {
         e.preventDefault();
@@ -180,6 +150,27 @@ function ProfileSettings() {
         }
     };
 
+    const newPicture = async (e) => {
+        const file = e.target.files[0];
+
+        try {
+            // Create a storage reference with a unique filename
+            const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}/${file.name}`);
+
+            // Upload the file to the storage reference using the put method
+            const snapshot = await uploadBytesResumable(storageRef, file);
+
+            // Get the download URL of the uploaded file
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            console.log('File uploaded successfully:', downloadURL);
+
+            // Update the state with the new picture URL
+            setPicture(downloadURL);
+        } catch (error) {
+            console.log('Error uploading file:', error);
+        }
+    };
+
     return (
         <Page>
             <form onSubmit={(e) => submit(e)}>
@@ -206,7 +197,7 @@ function ProfileSettings() {
                     <Section>
                         <ProfileIcon size={'l'} img={picture} />
                         <CustomLabel>
-                            <input type="file" accept="image/*" onChange={(e) => newPicture(e)} />
+                            <input type="file" accept=".png, .jpg, .jpeg, image/png, image/jpeg" onChange={newPicture} />
                             <BsUpload size={"20px"} />
                             Upload new Image
                         </CustomLabel>

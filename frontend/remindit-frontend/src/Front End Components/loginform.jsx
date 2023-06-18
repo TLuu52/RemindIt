@@ -5,9 +5,10 @@ import CustomLine from "./Utility/CustomLine"; // Importing the CustomLine compo
 import CustomGoogleButton from "./Utility/CustomGoogleButton"; // Importing the CustomGoogleButton component
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "./Utility/Logo"; // Importing the Logo component
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from "../firebase";
+import { UserContext } from '../App';
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -63,18 +64,21 @@ const LoginForm = () => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { user, setUser } = useContext(UserContext)
     const navigate = useNavigate();
 
     const loginForm = async (e) => {
         e.preventDefault();
         await signInWithEmailAndPassword(auth, email, password).catch((err) => console.log(err));
         if (auth.currentUser) {
+            setUser(auth)
             navigate('/dashboard')
         }
     };
     useEffect(() => {
         setTimeout(() => {
             if (auth.currentUser) {
+                setUser(auth)
                 navigate('/dashboard')
             }
         }, 200)

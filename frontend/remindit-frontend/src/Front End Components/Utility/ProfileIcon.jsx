@@ -1,5 +1,7 @@
 import { styled } from '@mui/material'
 import ProfileImg from '../../Icons/ProfileIcon.png'
+import { useContext, useEffect, useState } from 'react'
+import { UserContext } from '../../App'
 
 const CustomImg = styled('img')(({ theme }) => ({
     height: '45px',
@@ -8,12 +10,21 @@ const CustomImg = styled('img')(({ theme }) => ({
     cursor: 'pointer'
 }))
 
-function ProfileIcon({ size, open, setOpen }) {
+function ProfileIcon({ size, open, setOpen, img }) {
+    const [src, setSrc] = useState(ProfileImg)
+    const { user } = useContext(UserContext)
+    useEffect(() => {
+        setTimeout(() => {
+            if (user.currentUser) {
+                setSrc(user.currentUser.photoURL || ProfileImg)
+            }
+        }, 250)
+    }, [])
     return (
         // USE IMAGE FROM DB IF USER HAS CUSTOM IMAGE
         <>
-            {size === 'l' ? <CustomImg src={ProfileImg} alt="Profile Picture" style={{ height: '150px' }} /> :
-                <CustomImg src={ProfileImg} alt="Profile Picture" onClick={() => setOpen(!open)} />
+            {size === 'l' ? <CustomImg src={img === 'default' ? src : img} alt="Profile Picture" style={{ height: '150px' }} /> :
+                <CustomImg src={img === 'default' ? src : img} alt="Profile Picture" onClick={() => setOpen(!open)} />
             }
         </>
     )

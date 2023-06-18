@@ -33,12 +33,12 @@ const StyledTextArea = styled('textArea')(({ theme }) => ({
 }))
 
 // CustomInput component
-function CustomInput({ placeholder, size, type = 'text', onChange }) {
+function CustomInput({ placeholder, size, type = 'text', onChange, value }) {
     return (
         <>
-            {size === 's' ? <StyledInput placeholder={placeholder} style={{ margin: '0', fontSize: '16px', padding: '10px 22px', borderRadius: '20px' }} type={type} onChange={onChange} />
+            {size === 's' ? <StyledInput placeholder={placeholder} value={value} style={{ margin: '0', fontSize: '16px', padding: '10px 22px', borderRadius: '20px' }} type={type} onChange={onChange} />
                 : size === 'm' ?
-                    <StyledInput placeholder={placeholder} type={type} onChange={onChange} />
+                    <StyledInput placeholder={placeholder} type={type} onChange={onChange} value={value} />
                     : <StyledTextArea placeholder={placeholder} />
             }
         </>

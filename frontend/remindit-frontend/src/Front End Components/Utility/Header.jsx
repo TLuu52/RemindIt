@@ -63,7 +63,7 @@ function Header() {
 
                 <BsBellFill color={theme.palette.primary.light} size="30px" />
                 <Box ref={anchorRef}>
-                    <ProfileIcon open={open} setOpen={setOpen} />
+                    <ProfileIcon open={open} setOpen={setOpen} img={'default'} />
                 </Box>
                 <Popper
                     open={open}

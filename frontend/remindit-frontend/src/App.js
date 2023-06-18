@@ -6,6 +6,8 @@ import ProfileSettings from "./Front End Components/ProfileSettings";// Importin
 import Dashboard from "./Front End Components/Dashboard";// Importing Dashboard component
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { auth } from './firebase';
+import React, { useState } from 'react';
 
 
 
@@ -55,15 +57,21 @@ const router = createBrowserRouter([
   }
 ])
 
+export const UserContext = React.createContext()
+
 //App Component
 function App() {
+  const [user, setUser] = useState(auth)
+  const value = { user, setUser };
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <ThemeProvider theme={theme}>
-        {/* REMINDER TO REDIRECT IF USER IS NOT LOGGED IN */}
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </LocalizationProvider>
+    <UserContext.Provider value={value}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <ThemeProvider theme={theme}>
+          {/* REMINDER TO REDIRECT IF USER IS NOT LOGGED IN */}
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </LocalizationProvider>
+    </UserContext.Provider>
   );
 }
 

@@ -3,9 +3,10 @@ import CustomInput from './Utility/CustomInput' // Importing the CustomInput com
 import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton component
 import Logo from "./Utility/Logo"; // Importing the Logo component
 import { Link, useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase';
+import { UserContext } from '../App';
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -63,7 +64,7 @@ const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-
+    const { user, setUser } = useContext(UserContext)
 
     const signUp = async (e) => {
         e.preventDefault();
@@ -80,6 +81,7 @@ const SignUp = () => {
     useEffect(() => {
         setTimeout(() => {
             if (auth.currentUser) {
+                setUser(auth)
                 navigate('/dashboard')
             }
         }, 200)

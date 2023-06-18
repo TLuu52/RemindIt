@@ -10,7 +10,7 @@ import { auth, firestore, storage } from "../firebase";
 import { UserContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import { updateEmail, updateProfile } from "firebase/auth";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 
@@ -78,32 +78,36 @@ const CustomLabel = styled('label')(({ theme }) => ({
     background: theme.palette.primary.main
 }))
 
-const MAX_BIO_LENGTH = 250;
+
 
 function ProfileSettings() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [picture, setPicture] = useState('default');
-    const { user, setUser } = useContext(UserContext)
+    const [picture, setPicture] = useState('');
     const [bio, setBio] = useState('');
-    const [bioCharacterCount, setBioCharacterCount] = useState(0);
     const navigate = useNavigate();
 
 
     useEffect(() => {
-        // Gather credentials
-        console.log(user)
-        setTimeout(() => {
-            if (user.currentUser) {
-                setFirstName(user.currentUser.displayName.split(' ')[0]);
-                setLastName(user.currentUser.displayName.split(' ')[1]);
-                setEmail(user.currentUser.email);
-                setPicture(user.currentUser.photoURL || 'default');
-            } else {
-                console.log(user.currentUser)
+        const fetchUserData = async () => {
+            try {
+                const userDocRef = doc(firestore, 'users', auth.currentUser.uid);
+                const userDocSnapshot = await getDoc(userDocRef);
+                if (userDocSnapshot.exists()) {
+                    const userData = userDocSnapshot.data();
+                    setFirstName(userData.firstName);
+                    setLastName(userData.lastName);
+                    setEmail(userData.email);
+                    setPicture(userData.picture || '');
+                    setBio(userData.bio);
+                }
+            } catch (error) {
+                console.log('Error fetching user data:', error);
             }
-        }, 300)
+        };
+
+        fetchUserData();
     }, []);
 
     const submit = async (e) => {
@@ -113,7 +117,7 @@ function ProfileSettings() {
             await updateProfile(auth.currentUser, {
                 displayName: `${firstName} ${lastName}`,
             });
-            await updateEmail(auth.currentUser, email)
+            await updateEmail(auth.currentUser, email);
 
             // Check if the "users" collection exists, create it if it doesn't
             const usersCollectionRef = collection(firestore, "users");
@@ -126,6 +130,7 @@ function ProfileSettings() {
 
             // Create a new document in the "users" collection with the user's ID
             const userDocRef = doc(firestore, "users", auth.currentUser.uid);
+
             await setDoc(userDocRef, {
                 firstName: firstName,
                 lastName: lastName,
@@ -139,14 +144,6 @@ function ProfileSettings() {
             console.log("Profile settings saved successfully.");
         } catch (err) {
             console.log(err);
-        }
-    };
-
-    const handleBioChange = (e) => {
-        const newBio = e.target.value;
-        if (newBio.length <= MAX_BIO_LENGTH) {
-            setBio(newBio);
-            setBioCharacterCount(newBio.length);
         }
     };
 
@@ -206,8 +203,7 @@ function ProfileSettings() {
                 <CustomHr />
                 <Row>
                     <Typography variant="h5" sx={{ alignSelf: 'start' }} >Bio </Typography>
-                    <CustomInput placeholder="Bio" size={'l'} value={bio} onChange={handleBioChange} maxLength={MAX_BIO_LENGTH} />
-                    <Typography variant="h5" > {bioCharacterCount}/{MAX_BIO_LENGTH} characters </Typography>
+                    <CustomInput placeholder="Bio" size={'s'} value={bio} onChange={(e) => setBio(e.target.value)} />
                 </Row>
                 <CustomHr />
                 <End>

@@ -8,7 +8,7 @@ import { BsUpload } from "react-icons/bs";
 import { useContext, useEffect, useState } from "react";
 import { auth, firestore, storage } from "../firebase";
 import { UserContext } from "../App";
-import { updateProfile } from "firebase/auth";
+import { updateEmail, updateProfile } from "firebase/auth";
 import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -105,68 +105,68 @@ function ProfileSettings() {
     }, []);
     const newPicture = async (e) => {
         const file = e.target.files[0];
-      
+
         try {
-          // Create a storage reference with a unique filename
-          const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}/${file.name}`);
-      
-          // Upload the file to the storage reference
-          const uploadTask = uploadBytes(storageRef, file);
-          // Listen for upload progress or completion
-          uploadTask.on('state_changed', (snapshot) => {
-            // Handle upload progress here
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log(`Upload progress: ${progress}%`);
-          }, (error) => {
-            // Handle upload error
-            console.log('Upload error:', error);
-          }, async () => {
-            // Upload completed successfully
-            // Get the download URL of the uploaded file
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            console.log('File uploaded successfully:', downloadURL);
-      
-            // Update the state with the new picture URL
-            setPicture(downloadURL);
-          });
+            // Create a storage reference with a unique filename
+            const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}/${file.name}`);
+
+            // Upload the file to the storage reference
+            const uploadTask = uploadBytes(storageRef, file);
+            // Listen for upload progress or completion
+            uploadTask.on('state_changed', (snapshot) => {
+                // Handle upload progress here
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log(`Upload progress: ${progress}%`);
+            }, (error) => {
+                // Handle upload error
+                console.log('Upload error:', error);
+            }, async () => {
+                // Upload completed successfully
+                // Get the download URL of the uploaded file
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                console.log('File uploaded successfully:', downloadURL);
+
+                // Update the state with the new picture URL
+                setPicture(downloadURL);
+            });
         } catch (error) {
-          console.log('Error uploading file:', error);
+            console.log('Error uploading file:', error);
         }
     };
 
     const submit = async (e) => {
         e.preventDefault();
         try {
-          // Update the user's display name and email
-          await updateProfile(auth.currentUser, {
-            displayName: `${firstName} ${lastName}`,
-            email: email,
-          });
-      
-          // Check if the "users" collection exists, create it if it doesn't
-          const usersCollectionRef = collection(firestore, "users");
-          const collectionSnapshot = await getDocs(usersCollectionRef);
-          if (collectionSnapshot.empty) {
-            await setDoc(doc(firestore, "metadata", "usersCollection"), {
-              exists: true,
+            // Update the user's display name and email
+            await updateProfile(auth.currentUser, {
+                displayName: `${firstName} ${lastName}`,
             });
-          }
-      
-          // Create a new document in the "users" collection with the user's ID
-          const userDocRef = doc(firestore, "users", auth.currentUser.uid);
-          await setDoc(userDocRef, {
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            picture: picture, // Assuming you have the URL of the profile picture
-            bio: bio, // Add the user's bio here
-          });
-      
-          console.log("Profile settings saved successfully.");
+            await updateEmail(auth.currentUser, email)
+
+            // Check if the "users" collection exists, create it if it doesn't
+            const usersCollectionRef = collection(firestore, "users");
+            const collectionSnapshot = await getDocs(usersCollectionRef);
+            if (collectionSnapshot.empty) {
+                await setDoc(doc(firestore, "metadata", "usersCollection"), {
+                    exists: true,
+                });
+            }
+
+            // Create a new document in the "users" collection with the user's ID
+            const userDocRef = doc(firestore, "users", auth.currentUser.uid);
+            await setDoc(userDocRef, {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                picture: picture, // Assuming you have the URL of the profile picture
+                bio: bio, // Add the user's bio here
+            });
+
+            console.log("Profile settings saved successfully.");
         } catch (err) {
-          console.log(err);
+            console.log(err);
         }
-      };
+    };
 
     const handleBioChange = (e) => {
         const newBio = e.target.value;

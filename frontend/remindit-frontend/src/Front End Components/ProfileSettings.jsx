@@ -98,11 +98,13 @@ function ProfileSettings() {
                 setLastName(user.currentUser.displayName.split(' ')[1]);
                 setEmail(user.currentUser.email);
                 setPicture(user.currentUser.photoURL || 'default');
+                setBio(user.currentUser.bio || '');
             } else {
                 console.log(user.currentUser)
             }
         }, 300)
-    }, []);
+    }, [user.currentUser]);
+
     const newPicture = async (e) => {
         const file = e.target.files[0];
 
@@ -119,16 +121,21 @@ function ProfileSettings() {
                 const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                 console.log('File uploaded successfully:', downloadURL);
 
-                const userRef = doc(db, "users", auth.currentUser.uid);
+                const userRef = doc(db, 'users', auth.currentUser.uid);
                 await updateDoc(userRef, {
                     picture: downloadURL
                 });
 
-                setPicture(downloadURL);
+                setPicture(downloadURL); // Update the state with the new picture URL
             });
         } catch (error) {
             console.log('Error uploading file:', error);
         }
+    };
+
+    const updateFirestore = async (data) => {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        await updateDoc(userRef, data);
     };
 
     const submit = async (e) => {
@@ -137,13 +144,14 @@ function ProfileSettings() {
         const userId = auth.currentUser.uid; // Get the current user's ID
         const userRef = doc(db, "users", userId); // Create a document reference for the user
 
-        await setDoc(userRef, {
+        const userData = {
             firstName: firstName,
             lastName: lastName,
             email: email,
-            picture: picture,
             bio: bio
-        });
+        };
+
+        await updateFirestore(userData);
     };
 
     const handleBioChange = (e) => {

@@ -66,13 +66,19 @@ const LoginForm = () => {
     const [password, setPassword] = useState("");
     const { user, setUser } = useContext(UserContext)
     const navigate = useNavigate();
+    const [error, setError] = useState(null);
 
     const loginForm = async (e) => {
         e.preventDefault();
-        await signInWithEmailAndPassword(auth, email, password).catch((err) => console.log(err));
-        if (auth.currentUser) {
-            setUser(auth)
-            navigate('/dashboard')
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            if (auth.currentUser) {
+                setUser(auth);
+                navigate("/dashboard");
+            }
+        } catch (err) {
+            setError("Invalid email or password"); // Set error message
+            console.log(err);
         }
     };
     useEffect(() => {
@@ -97,6 +103,7 @@ const LoginForm = () => {
                         <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
                     </Group>
                     <CustomButton text={'Log in'} color={1} type={'submit'} />
+                    {error && <p>{error}</p>} {}
                     <CustomLine text={'Or Sign in With'} />
                     <CustomGoogleButton />
                     <BottomText>Don't have an account yet? <CustomLink to='/signup'>Sign Up.</CustomLink></BottomText>

@@ -86,6 +86,7 @@ function ProfileSettings() {
     const [email, setEmail] = useState('');
     const [picture, setPicture] = useState('');
     const [bio, setBio] = useState('');
+    const { user } = useContext(UserContext)
     const navigate = useNavigate();
 
 
@@ -185,7 +186,13 @@ function ProfileSettings() {
                 <CustomHr />
                 <Row>
                     <Typography variant="h5" >Email</Typography>
-                    <CustomInput placeholder="Email" size={'s'} value={email} onChange={(e) => setEmail(e.target.value)} />
+                    {
+                        user.currentUser.providerData[0].providerId === 'password'
+                            ?
+                            <CustomInput placeholder="Email" size={'s'} value={email} onChange={(e) => setEmail(e.target.value)} />
+                            :
+                            < Typography variant="h6">{email}</Typography>
+                    }
                 </Row>
 
                 <CustomHr />
@@ -211,7 +218,7 @@ function ProfileSettings() {
                     <CustomButton type={'submit'} text={'Save'} color={1} size={'s'} />
                 </End>
             </form>
-        </Page>
+        </Page >
 
     )
 }

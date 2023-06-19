@@ -8,7 +8,8 @@ const CustomImg = styled('img')(({ theme }) => ({
     width: '45px',
     borderRadius: '50%',
     border: `solid 2px ${theme.palette.primary.border}`,
-    cursor: 'pointer'
+    cursor: 'pointer',
+    objectFit: 'contain'
 }))
 
 function ProfileIcon({ size, open, setOpen, img }) {
@@ -17,7 +18,7 @@ function ProfileIcon({ size, open, setOpen, img }) {
     useEffect(() => {
         setTimeout(() => {
             if (user.currentUser) {
-                setSrc(user.currentUser.photoURL || ProfileImg)
+                setSrc(user.currentUser.photoURL === 'default' ? ProfileImg : user.currentUser.photoURL)
             }
         }, 250)
     }, [])
@@ -25,10 +26,12 @@ function ProfileIcon({ size, open, setOpen, img }) {
         setTimeout(() => {
             console.log(user.currentUser)
             if (user.currentUser) {
-                setSrc(user.currentUser.photoURL || ProfileImg)
+                setSrc(user.currentUser.photoURL === 'default' ? ProfileImg : user.currentUser.photoURL)
             }
         }, 250)
     }, [img])
+
+    console.log(img, src)
     return (
         // USE IMAGE FROM DB IF USER HAS CUSTOM IMAGE
         <>

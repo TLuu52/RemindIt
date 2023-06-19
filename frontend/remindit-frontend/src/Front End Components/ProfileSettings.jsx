@@ -84,7 +84,7 @@ function ProfileSettings() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [picture, setPicture] = useState('');
+    const [picture, setPicture] = useState('default');
     const [bio, setBio] = useState('');
     const { user } = useContext(UserContext)
     const navigate = useNavigate();

@@ -71,7 +71,7 @@ const SignUp = () => {
         e.preventDefault();
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(auth.currentUser, { displayName: `${firstName} ${lastName}` });
+            await updateProfile(auth.currentUser, { displayName: `${firstName} ${lastName}`, photoURL: 'default' });
             const userDocRef = doc(firestore, 'users', auth.currentUser.uid);
             await setDoc(userDocRef, {
                 firstName: firstName,

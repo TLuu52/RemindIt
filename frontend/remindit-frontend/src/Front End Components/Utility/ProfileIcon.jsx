@@ -20,6 +20,14 @@ function ProfileIcon({ size, open, setOpen, img }) {
             }
         }, 250)
     }, [])
+    useEffect(() => {
+        setTimeout(() => {
+            console.log(user.currentUser)
+            if (user.currentUser) {
+                setSrc(user.currentUser.photoURL || ProfileImg)
+            }
+        }, 250)
+    }, [img])
     return (
         // USE IMAGE FROM DB IF USER HAS CUSTOM IMAGE
         <>

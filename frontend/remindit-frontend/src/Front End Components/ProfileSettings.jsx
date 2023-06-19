@@ -117,6 +117,7 @@ function ProfileSettings() {
             // Update the user's display name and email
             await updateProfile(auth.currentUser, {
                 displayName: `${firstName} ${lastName}`,
+                photoURL: picture
             });
             await updateEmail(auth.currentUser, email);
 

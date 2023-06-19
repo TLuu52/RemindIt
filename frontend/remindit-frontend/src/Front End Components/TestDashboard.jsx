@@ -108,13 +108,44 @@ const Right = styled('div')(({ theme }) => ({
     }
 }))
 
+const SearchBar = styled('div')(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center', // Center horizontally
+    marginBottom: '20px',
+    textAlign: 'center', // Center text within input
+}));
+const SearchInput = styled('input')(({ theme }) => ({
+    width: '300px',
+    padding: '8px',
+    borderRadius: '4px',
+    border: `1px solid ${theme.palette.primary.main}`,
+    marginRight: '10px',
+}));
+
+const SearchButton = styled('button')(({ theme }) => ({
+    padding: '8px 16px',
+    borderRadius: '4px',
+    background: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    border: 'none',
+    cursor: 'pointer',
+}));
+
 function TestDashboard() {
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
+    const [searchTerm, setSearchTerm] = useState('');
 
     const changeView = (e) => {
         setView({ view: e.target.value.view, day: e.target.value.day })
     }
+
+    const handleSearch = () => {
+        // Handle the search functionality here
+        console.log('Search term:', searchTerm);
+    };
+
     return (
         <Page>
             <Header />
@@ -125,6 +156,10 @@ function TestDashboard() {
                     <EventFilter />
                 </Left>
                 <Right>
+                    <SearchBar>
+                        <SearchInput type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <SearchButton onClick={handleSearch}>Search</SearchButton>
+                    </SearchBar>
                     <NewCalendar date={value} setDate={onChange} />
                 </Right>
             </Main>

@@ -1,4 +1,4 @@
-import { ButtonGroup, Button, Typography, styled } from '@mui/material';
+import { ButtonGroup, Button, Typography, styled, useTheme } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 
 const Top = styled('div')({
@@ -62,6 +62,8 @@ const Container = styled('div')({
 })
 
 function NewCalendar({ date, setDate }) {
+    const theme = useTheme();
+
     const monthNames = ["January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
@@ -141,8 +143,8 @@ function NewCalendar({ date, setDate }) {
                     </Day>
                 ))}
                 {Array.from({ length: numDays }).map((__, i) => (
-                    <Day key={i + 1}>
-                        <DuringMonth>{i + 1}</DuringMonth>
+                    <Day key={i + 1} style={{ background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent' }}>
+                        <DuringMonth >{i + 1}</DuringMonth>
                     </Day>
                 ))}
                 {Array.from({ length: afterDays === 0 ? 0 : 7 - afterDays }).map((__, i) => (

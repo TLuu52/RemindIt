@@ -1,5 +1,5 @@
 import Header from './Utility/Header'
-import { styled } from '@mui/material'
+import { Box, FormLabel, Input, Modal, OutlinedInput, Typography, styled } from '@mui/material'
 import { useState } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import CustomCalendar from './Utility/CustomCalendar';
@@ -9,6 +9,13 @@ import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
 import interactionPlugin from '@fullcalendar/interaction' // a plugin!
 import NewCalendar from './Utility/NewCalendar';
+import { FcPlus } from 'react-icons/fc';
+import { BsPlus } from 'react-icons/bs';
+import ProfileIcon from './Utility/ProfileIcon';
+import TextareaAutosize from '@mui/base/TextareaAutosize';
+import { DatePicker, TimePicker } from '@mui/x-date-pickers';
+import CustomButton from './Utility/CustomButton';
+
 
 
 
@@ -49,6 +56,7 @@ const Right = styled('div')(({ theme }) => ({
     height: '90%',
     borderRadius: '16px',
     background: theme.palette.primary.border,
+    position: 'relative',
 
 
     '& .fc.fc-media-screen.fc-direction-ltr.fc-theme-standard': {
@@ -160,6 +168,97 @@ const FilterButton = styled('button')(({ theme }) => ({
     border: 'none',
     cursor: 'pointer',
 }));
+const BottomRight = styled('div')(({ theme }) => ({
+    position: 'absolute',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    right: '5px',
+    bottom: '5px',
+    height: '60px',
+    width: '60px',
+    background: theme.palette.primary.main,
+    transition: 'all .3s ease',
+    borderRadius: '50%',
+    fontSize: '50px',
+    '&:hover': {
+        height: '80px',
+        width: '80px',
+        cursor: 'pointer',
+    }
+}))
+const CustomModal = styled(Modal)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& .MuiBox-root': {
+        minHeight: '800px',
+        minWidth: '1000px',
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '5px',
+        background: theme.palette.primary.border,
+        borderRadius: '8px',
+        padding: '30px',
+        '& .MuiInput-root': {
+            color: theme.palette.primary.contrastText,
+            width: '100%',
+            padding: '0px 10px',
+            fontSize: '30px'
+
+        },
+        '& .MuiOutlinedInput-root': {
+            width: '100%',
+            color: theme.palette.primary.contrastText,
+        },
+        '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: theme.palette.secondary.border
+        },
+        '& .MuiInput-root:before': {
+            borderColor: theme.palette.secondary.border
+        }
+    }
+}))
+
+const StyledTextarea = styled(TextareaAutosize)(({ theme }) => ({
+    width: '100%',
+    color: theme.palette.primary.contrastText,
+    minHeight: '100px !important',
+    background: 'transparent',
+    borderColor: theme.palette.secondary.border,
+    borderRadius: '8px',
+    outline: 'none',
+    padding: '10px',
+    '&:focus-visible': {
+        border: `solid 1px ${theme.palette.primary.main}`
+    }
+}))
+const ModalLeft = styled('div')(({ theme }) => ({
+    width: "75%",
+    paddingRight: '30px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '30px'
+}))
+const ModalRight = styled('div')(({ theme }) => ({
+    flexGrow: '1',
+    display: 'flex'
+}))
+const Line = styled('div')(({ theme }) => ({
+    height: "100%",
+    width: '1px',
+    background: theme.palette.secondary.border
+}))
+const Comments = styled('div')(({ theme }) => ({
+    flexGrow: '1'
+}))
+const Flex = styled('div')(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    paddingLeft: '30px',
+    gap: '20px'
+}))
+
 
 function TestDashboard() {
     const [value, onChange] = useState(new Date());
@@ -168,6 +267,9 @@ function TestDashboard() {
     const [showFilter, setShowFilter] = useState(false); // State to manage filter section visibility
     const [keyword, setKeyword] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [open, setOpen] = useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
 
     const changeView = (e) => {
@@ -214,26 +316,67 @@ function TestDashboard() {
                         <SearchInput type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                         <SearchButton onClick={handleSearch}>Search</SearchButton>
                         {showFilter && (
-          <FilterSection>
-            <FilterLabel>Keyword:</FilterLabel>
-            <FilterInput
-              type="text"
-              placeholder="Enter keyword"
-              value={keyword}
-              onChange={handleKeywordChange}
-            />
-            <FilterLabel>Category:</FilterLabel>
-            <select value={selectedCategory} onChange={handleCategoryChange}>
-              <option value="">All</option>
-              <option value="category1">Category 1</option>
-              <option value="category2">Category 2</option>
-              <option value="category3">Category 3</option>
-            </select>
-            <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
-          </FilterSection>
-        )}
+                            <FilterSection>
+                                <FilterLabel>Keyword:</FilterLabel>
+                                <FilterInput
+                                    type="text"
+                                    placeholder="Enter keyword"
+                                    value={keyword}
+                                    onChange={handleKeywordChange}
+                                />
+                                <FilterLabel>Category:</FilterLabel>
+                                <select value={selectedCategory} onChange={handleCategoryChange}>
+                                    <option value="">All</option>
+                                    <option value="category1">Category 1</option>
+                                    <option value="category2">Category 2</option>
+                                    <option value="category3">Category 3</option>
+                                </select>
+                                <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
+                            </FilterSection>
+                        )}
                     </SearchBar>
                     <NewCalendar date={value} setDate={onChange} />
+                    <BottomRight onClick={() => setOpen(true)}>
+                        <BsPlus color={'white'} />
+                    </BottomRight>
+                    <CustomModal
+                        open={open}
+                        onClose={handleClose}
+                        aria-labelledby="CustomModal-modal-title"
+                        aria-describedby="modal-modal-description" >
+                        <Box>
+                            <ModalLeft>
+                                <Input placeholder='Title' />
+                                <Typography variant='h4'>Description</Typography>
+                                <StyledTextarea placeholder='Add a more detailed description...' />
+                                <Typography variant='h4'>Activity</Typography>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                    <ProfileIcon img='default' />
+                                    <OutlinedInput placeholder='Write a comment...' />
+                                </div>
+                                <Comments />
+                            </ModalLeft>
+                            <ModalRight>
+                                <Line />
+                                <Flex>
+                                    <div>
+                                        <FormLabel>Date</FormLabel>
+                                        <DatePicker />
+                                    </div>
+                                    <div>
+                                        <FormLabel>Time</FormLabel>
+                                        <TimePicker />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
+                                        <CustomButton size={'s'} text={'Create'} color={1} />
+                                    </div>
+                                </Flex>
+                            </ModalRight>
+
+                        </Box>
+                    </CustomModal>
+
                 </Right>
             </Main>
         </Page >

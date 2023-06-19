@@ -132,10 +132,43 @@ const SearchButton = styled('button')(({ theme }) => ({
     cursor: 'pointer',
 }));
 
+const FilterSection = styled('div')(({ theme }) => ({
+    padding: '10px',
+    background: theme.palette.primary.border,
+    borderRadius: '4px',
+    color: theme.palette.primary.contrastText,
+}));
+
+const FilterLabel = styled('label')({
+    display: 'block',
+    marginBottom: '5px',
+    fontWeight: 'bold',
+});
+
+const FilterInput = styled('input')({
+    width: '100%',
+    padding: '8px',
+    borderRadius: '4px',
+    marginBottom: '10px',
+});
+
+const FilterButton = styled('button')(({ theme }) => ({
+    padding: '8px 16px',
+    borderRadius: '4px',
+    background: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    border: 'none',
+    cursor: 'pointer',
+}));
+
 function TestDashboard() {
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [searchTerm, setSearchTerm] = useState('');
+    const [showFilter, setShowFilter] = useState(false); // State to manage filter section visibility
+    const [keyword, setKeyword] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+
 
     const changeView = (e) => {
         setView({ view: e.target.value.view, day: e.target.value.day })
@@ -145,6 +178,27 @@ function TestDashboard() {
         // Handle the search functionality here
         console.log('Search term:', searchTerm);
     };
+
+    const toggleFilter = () => {
+        setShowFilter(!showFilter); // Toggle filter section visibility
+    };
+
+    const handleKeywordChange = (e) => {
+        setKeyword(e.target.value);
+    };
+
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
+    };
+
+    const handleFilterSubmit = () => {
+        // Perform filtering based on selected options
+        // You can access the keyword, selectedDate, and selectedCategory here
+        // Example:
+        console.log('Keyword:', keyword);
+        console.log('Selected Category:', selectedCategory);
+    };
+
 
     return (
         <Page>
@@ -156,9 +210,28 @@ function TestDashboard() {
                     <EventFilter />
                 </Left>
                 <Right>
-                    <SearchBar>
+                    <SearchBar onClick={toggleFilter}>
                         <SearchInput type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                         <SearchButton onClick={handleSearch}>Search</SearchButton>
+                        {showFilter && (
+          <FilterSection>
+            <FilterLabel>Keyword:</FilterLabel>
+            <FilterInput
+              type="text"
+              placeholder="Enter keyword"
+              value={keyword}
+              onChange={handleKeywordChange}
+            />
+            <FilterLabel>Category:</FilterLabel>
+            <select value={selectedCategory} onChange={handleCategoryChange}>
+              <option value="">All</option>
+              <option value="category1">Category 1</option>
+              <option value="category2">Category 2</option>
+              <option value="category3">Category 3</option>
+            </select>
+            <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
+          </FilterSection>
+        )}
                     </SearchBar>
                     <NewCalendar date={value} setDate={onChange} />
                 </Right>

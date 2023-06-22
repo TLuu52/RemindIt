@@ -266,6 +266,8 @@ function TestDashboard() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [activity, setActivity] = useState('');
+    const [time, setTime] = useState('');
+    const [date, setDate] = useState('');
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [searchTerm, setSearchTerm] = useState('');
@@ -310,13 +312,7 @@ function TestDashboard() {
         e.preventDefault();
 
         try {
-            // Add your Firestore integration logic here
-            const docRef = await addDoc(collection(firestore, 'Reminders'), {
-                title,
-                description,
-                activity,
-            });
-
+   
             // Check if the "reminders" collection exists, create it if it doesn't
             const remindersCollectionRef = collection(firestore, "reminders");
             const collectionSnapshot = await getDocs(remindersCollectionRef);
@@ -325,16 +321,15 @@ function TestDashboard() {
                     exists: true,
                 });
             }
+    
+            
+            // Create a new document in the "users" collection with the user's ID
+            const reminderDocRef = doc(firestore, "reminders", auth.currentUser.uid);
 
-            // Create a new document in the "reminders" collection with the reminder
-            const userDocRef = doc(firestore, "reminders", auth.currentUser.uid);
-
-            console.log('Document written with ID: ', docRef.id);
-
-            await setDoc(userDocRef, {
+            await setDoc(reminderDocRef, {
                 title: title,
                 description: description,
-                activity: activity
+                activity: activity,
             });
 
             // Close the modal or perform any other necessary actions
@@ -345,6 +340,7 @@ function TestDashboard() {
             console.error('Error adding document: ', error);
         }
     };
+    
     return (
         <Page>
             <Header />
@@ -404,15 +400,15 @@ function TestDashboard() {
                                     <Flex>
                                         <div>
                                             <FormLabel>Date</FormLabel>
-                                            <DatePicker />
+                                            <DatePicker value={date} />
                                         </div>
                                         <div>
                                             <FormLabel>Time</FormLabel>
-                                            <TimePicker />
+                                            <TimePicker value={time} />
                                         </div>
                                         <div style={{ display: 'flex', gap: '10px' }}>
                                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
-                                            <CustomButton size={'s'} text={'Create'} color={1} />
+                                            <CustomButton type={'submit'} size={'s'} text={'Create'} color={1} />
                                         </div>
                                     </Flex>
                                 </ModalRight>

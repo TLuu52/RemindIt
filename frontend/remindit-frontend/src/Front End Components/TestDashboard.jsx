@@ -19,8 +19,6 @@ import { auth, firestore, storage } from "../firebase";
 import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where } from "firebase/firestore";
 
 
-
-
 const TopCorner = styled('div')({
     position: 'absolute',
     top: '0',
@@ -269,6 +267,7 @@ function TestDashboard() {
     const [time, setTime] = useState('');
     const [date, setDate] = useState('');
     const [reminders, setReminders] = useState([]);
+    const [priority, setPriority] = useState('');
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [searchTerm, setSearchTerm] = useState('');
@@ -401,13 +400,13 @@ function TestDashboard() {
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>
-                    <CustomModal
-                        open={open}
-                        onClose={handleClose}
-                        aria-labelledby="CustomModal-modal-title"
-                        aria-describedby="modal-modal-description" >
-                        <Box>
-                            <form onSubmit={(e) => submit(e)}>
+                    <form onSubmit={(e) => submit(e)}>
+                        <CustomModal
+                            open={open}
+                            onClose={handleClose}
+                            aria-labelledby="CustomModal-modal-title"
+                            aria-describedby="modal-modal-description" >
+                            <Box>
                                 <ModalLeft>
                                     <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
                                     <Typography variant='h4'>Description</Typography>
@@ -424,11 +423,20 @@ function TestDashboard() {
                                     <Flex>
                                         <div>
                                             <FormLabel>Date</FormLabel>
-                                            <DatePicker value={date} />
+                                            <DatePicker value={date} onChange={setDate} />
                                         </div>
                                         <div>
                                             <FormLabel>Time</FormLabel>
-                                            <TimePicker value={time} />
+                                            <TimePicker value={time} onChange={setTime} />
+                                        </div>
+                                        <div>
+                                            <FormLabel>Priority</FormLabel>
+                                            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+                                                <option value="">Select priority</option>
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                            </select>
                                         </div>
                                         <div style={{ display: 'flex', gap: '10px' }}>
                                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
@@ -436,10 +444,9 @@ function TestDashboard() {
                                         </div>
                                     </Flex>
                                 </ModalRight>
-                            </form>
-                        </Box>
-                    </CustomModal>
-
+                            </Box>
+                        </CustomModal>
+                    </form>
                 </Right>
             </Main>
         </Page >

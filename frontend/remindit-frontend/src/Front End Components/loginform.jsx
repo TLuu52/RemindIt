@@ -85,7 +85,7 @@ const LoginForm = () => {
         setTimeout(() => {
             if (auth.currentUser) {
                 setUser(auth)
-                navigate('/dashboard')
+                navigate('/test')
             }
         }, 200)
     }, [])
@@ -103,7 +103,7 @@ const LoginForm = () => {
                         <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
                     </Group>
                     <CustomButton text={'Log in'} color={1} type={'submit'} />
-                    {error && <p>{error}</p>} {}
+                    {error && <p>{error}</p>} { }
                     <CustomLine text={'Or Sign in With'} />
                     <CustomGoogleButton />
                     <BottomText>Don't have an account yet? <CustomLink to='/signup'>Sign Up.</CustomLink></BottomText>

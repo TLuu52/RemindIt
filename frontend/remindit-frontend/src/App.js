@@ -29,6 +29,12 @@ const theme = createTheme({
       light: '#4BCFFA22',
       border: 'rgba(255,255,255,0.4)',
       contrastText: 'rgba(72, 209, 253,.2)'
+    },
+    custom: {
+      main: '#fff',
+      dark: '#fff',
+      light: '#6B8594',
+      contrastText: '#fff'
     }
   },
   typography: {

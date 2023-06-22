@@ -17,6 +17,7 @@ import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import CustomButton from './Utility/CustomButton';
 import { auth, firestore, storage } from "../firebase";
 import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where } from "firebase/firestore";
+import CreateEvent from './Utility/CreateEvent';
 
 
 const TopCorner = styled('div')({
@@ -58,61 +59,7 @@ const Right = styled('div')(({ theme }) => ({
     position: 'relative',
 
 
-    '& .fc.fc-media-screen.fc-direction-ltr.fc-theme-standard': {
-        maxHeight: '100%',
-        background: theme.palette.primary.border,
-        borderRadius: '16px',
 
-    },
-    '& .fc-theme-standard th': {
-        border: 'none'
-    },
-    '& .fc-theme-standard .fc-scrollgrid': {
-        border: 'none'
-    },
-    '& .fc-dayGridMonth-view.fc-view.fc-daygrid *': {
-        border: 'none'
-    },
-    '& .fc-dayGridMonth-view.fc-view.fc-daygrid table tbody tr td': {
-        border: 'solid 1px #7a95a2'
-    },
-    '& .fc-toolbar-title, .fc-daygrid-day-number, .fc .fc-col-header-cell-cushion': {
-        color: theme.palette.primary.contrastText
-    },
-    '& .fc-day.fc-day-today': {
-        background: theme.palette.secondary.light
-    },
-    '& .fc-timegrid-divider.fc-cell-shaded': {
-        border: 'none',
-    },
-    '& .fc-scrollgrid-section .fc-timegrid-divider ': {
-        display: 'none'
-    },
-    '& .fc-theme-standard td, .fc-theme-standard th': {
-        border: 'none'
-    },
-    '& .fc-timeGridWeek-view.fc-view.fc-timegrid .fc-scrollgrid-sync-table': {
-        display: 'none'
-    },
-    '& .fc-col-header-cell': {
-        padding: '10px 0px',
-        border: `solid 1px ${theme.palette.secondary.main}`
-    },
-    '& .fc-timeGridWeek-view.fc-view.fc-timegrid .fc-scrollgrid tbody tr.fc-scrollgrid-section, .fc-timeGridDay-view.fc-view.fc-timegrid .fc-scrollgrid tbody tr.fc-scrollgrid-section': {
-        display: 'none'
-    },
-    '& .fc-timeGridWeek-view.fc-view.fc-timegrid .fc-scrollgrid tbody tr.fc-scrollgrid-section-liquid, .fc-timeGridDay-view.fc-view.fc-timegrid .fc-scrollgrid tbody tr.fc-scrollgrid-section-liquid': {
-        display: 'table-row'
-    },
-    '& .fc-scrollgrid-section-header th': {
-        borderBottom: `solid 1px ${theme.palette.secondary.dark}`
-    },
-    '& .fc-timegrid-slot-label-cushion.fc-scrollgrid-shrink-cushion': {
-        color: theme.palette.primary.contrastText
-    },
-    '& .fc-timegrid-slot.fc-timegrid-slot-minor': {
-        borderBottom: `solid 1px ${theme.palette.secondary.dark}`
-    }
 }))
 
 const SearchBar = styled('div')(({ theme }) => ({
@@ -186,94 +133,20 @@ const BottomRight = styled('div')(({ theme }) => ({
         cursor: 'pointer',
     }
 }))
-const CustomModal = styled(Modal)(({ theme }) => ({
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    '& .MuiBox-root': {
-        minHeight: '800px',
-        minWidth: '1000px',
-        display: 'flex',
-        justifyContent: 'center',
-        gap: '5px',
-        background: theme.palette.primary.border,
-        borderRadius: '8px',
-        padding: '30px',
-        '& .MuiInput-root': {
-            color: theme.palette.primary.contrastText,
-            width: '100%',
-            padding: '0px 10px',
-            fontSize: '30px'
 
-        },
-        '& .MuiOutlinedInput-root': {
-            width: '100%',
-            color: theme.palette.primary.contrastText,
-        },
-        '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: theme.palette.secondary.border
-        },
-        '& .MuiInput-root:before': {
-            borderColor: theme.palette.secondary.border
-        }
-    }
-}))
-
-const StyledTextarea = styled(TextareaAutosize)(({ theme }) => ({
-    width: '100%',
-    color: theme.palette.primary.contrastText,
-    minHeight: '100px !important',
-    background: 'transparent',
-    borderColor: theme.palette.secondary.border,
-    borderRadius: '8px',
-    outline: 'none',
-    padding: '10px',
-    '&:focus-visible': {
-        border: `solid 1px ${theme.palette.primary.main}`
-    }
-}))
-const ModalLeft = styled('div')(({ theme }) => ({
-    width: "75%",
-    paddingRight: '30px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '30px'
-}))
-const ModalRight = styled('div')(({ theme }) => ({
-    flexGrow: '1',
-    display: 'flex'
-}))
-const Line = styled('div')(({ theme }) => ({
-    height: "100%",
-    width: '1px',
-    background: theme.palette.secondary.border
-}))
-const Comments = styled('div')(({ theme }) => ({
-    flexGrow: '1'
-}))
-const Flex = styled('div')(({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    paddingLeft: '30px',
-    gap: '20px'
-}))
 
 
 function TestDashboard() {
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [activity, setActivity] = useState('');
-    const [time, setTime] = useState('');
-    const [date, setDate] = useState('');
+
     const [reminders, setReminders] = useState([]);
-    const [priority, setPriority] = useState('');
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [searchTerm, setSearchTerm] = useState('');
     const [showFilter, setShowFilter] = useState(false); // State to manage filter section visibility
     const [keyword, setKeyword] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -282,6 +155,9 @@ function TestDashboard() {
     const changeView = (e) => {
         setView({ view: e.target.value.view, day: e.target.value.day })
     }
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
+    };
 
     const handleSearch = () => {
         // Handle the search functionality here
@@ -296,9 +172,7 @@ function TestDashboard() {
         setKeyword(e.target.value);
     };
 
-    const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value);
-    };
+
 
     const handleFilterSubmit = () => {
         // Perform filtering based on selected options
@@ -330,39 +204,6 @@ function TestDashboard() {
         fetchReminders();
     }, []);
 
-
-    const submit = async (e) => {
-        e.preventDefault();
-
-        try {
-
-            // Check if the "reminders" collection exists, create it if it doesn't
-            const remindersCollectionRef = collection(firestore, "reminders");
-            const collectionSnapshot = await getDocs(remindersCollectionRef);
-            if (collectionSnapshot.empty) {
-                await setDoc(doc(firestore, "metadata", "remindersCollection"), {
-                    exists: true,
-                });
-            }
-
-
-            // Create a new document in the "users" collection with the user's ID
-            const reminderDocRef = doc(firestore, "reminders", auth.currentUser.uid);
-
-            await setDoc(reminderDocRef, {
-                title: title,
-                description: description,
-                activity: activity,
-            });
-
-            // Close the modal or perform any other necessary actions
-            handleClose();
-            console.log("Reminder saved successfully.");
-
-        } catch (error) {
-            console.error('Error adding document: ', error);
-        }
-    };
 
     return (
         <Page>
@@ -400,53 +241,7 @@ function TestDashboard() {
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>
-                    <form onSubmit={(e) => submit(e)}>
-                        <CustomModal
-                            open={open}
-                            onClose={handleClose}
-                            aria-labelledby="CustomModal-modal-title"
-                            aria-describedby="modal-modal-description" >
-                            <Box>
-                                <ModalLeft>
-                                    <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
-                                    <Typography variant='h4'>Description</Typography>
-                                    <StyledTextarea placeholder={'Add a more detailed description...'} value={description} onChange={(e) => setDescription(e.target.value)} />
-                                    <Typography variant='h4'>Activity</Typography>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                                        <ProfileIcon img='default' />
-                                        <OutlinedInput placeholder={'Write a comment...'} value={activity} onChange={(e) => setActivity(e.target.value)} />
-                                    </div>
-                                    <Comments />
-                                </ModalLeft>
-                                <ModalRight>
-                                    <Line />
-                                    <Flex>
-                                        <div>
-                                            <FormLabel>Date</FormLabel>
-                                            <DatePicker value={date} onChange={setDate} />
-                                        </div>
-                                        <div>
-                                            <FormLabel>Time</FormLabel>
-                                            <TimePicker value={time} onChange={setTime} />
-                                        </div>
-                                        <div>
-                                            <FormLabel>Priority</FormLabel>
-                                            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-                                                <option value="">Select priority</option>
-                                                <option value="low">Low</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="high">High</option>
-                                            </select>
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
-                                            <CustomButton type={'submit'} size={'s'} text={'Create'} color={1} />
-                                        </div>
-                                    </Flex>
-                                </ModalRight>
-                            </Box>
-                        </CustomModal>
-                    </form>
+                    <CreateEvent open={open} handleClose={handleClose} />
                 </Right>
             </Main>
         </Page >

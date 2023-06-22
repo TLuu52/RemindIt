@@ -15,7 +15,8 @@ import ProfileIcon from './Utility/ProfileIcon';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import CustomButton from './Utility/CustomButton';
-
+import { auth, firestore, storage } from "../firebase";
+import { collection, doc, addDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 
 
 
@@ -261,6 +262,10 @@ const Flex = styled('div')(({ theme }) => ({
 
 
 function TestDashboard() {
+
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [activity, setActivity] = useState('');
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [searchTerm, setSearchTerm] = useState('');
@@ -301,12 +306,49 @@ function TestDashboard() {
         console.log('Selected Category:', selectedCategory);
     };
 
+    const submit = async (e) => {
+        e.preventDefault();
 
+        try {
+            // Add your Firestore integration logic here
+            const docRef = await addDoc(collection(firestore, 'Reminders'), {
+                title,
+                description,
+                activity,
+            });
+
+            // Check if the "reminders" collection exists, create it if it doesn't
+            const remindersCollectionRef = collection(firestore, "reminders");
+            const collectionSnapshot = await getDocs(remindersCollectionRef);
+            if (collectionSnapshot.empty) {
+                await setDoc(doc(firestore, "metadata", "remindersCollection"), {
+                    exists: true,
+                });
+            }
+
+            // Create a new document in the "reminders" collection with the reminder
+            const userDocRef = doc(firestore, "reminders", auth.currentUser.uid);
+
+            console.log('Document written with ID: ', docRef.id);
+
+            await setDoc(userDocRef, {
+                title: title,
+                description: description,
+                activity: activity
+            });
+
+            // Close the modal or perform any other necessary actions
+            handleClose();
+            console.log("Reminder saved successfully.");
+
+        } catch (error) {
+            console.error('Error adding document: ', error);
+        }
+    };
     return (
         <Page>
             <Header />
             <Main>
-
                 <Left>
                     <CustomCalendar onChange={onChange} value={value} />
                     <EventFilter />
@@ -345,35 +387,36 @@ function TestDashboard() {
                         aria-labelledby="CustomModal-modal-title"
                         aria-describedby="modal-modal-description" >
                         <Box>
-                            <ModalLeft>
-                                <Input placeholder='Title' />
-                                <Typography variant='h4'>Description</Typography>
-                                <StyledTextarea placeholder='Add a more detailed description...' />
-                                <Typography variant='h4'>Activity</Typography>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                                    <ProfileIcon img='default' />
-                                    <OutlinedInput placeholder='Write a comment...' />
-                                </div>
-                                <Comments />
-                            </ModalLeft>
-                            <ModalRight>
-                                <Line />
-                                <Flex>
-                                    <div>
-                                        <FormLabel>Date</FormLabel>
-                                        <DatePicker />
+                            <form onSubmit={(e) => submit(e)}>
+                                <ModalLeft>
+                                    <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
+                                    <Typography variant='h4'>Description</Typography>
+                                    <StyledTextarea placeholder={'Add a more detailed description...'} value={description} onChange={(e) => setDescription(e.target.value)} />
+                                    <Typography variant='h4'>Activity</Typography>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                                        <ProfileIcon img='default' />
+                                        <OutlinedInput placeholder={'Write a comment...'} value={activity} onChange={(e) => setActivity(e.target.value)} />
                                     </div>
-                                    <div>
-                                        <FormLabel>Time</FormLabel>
-                                        <TimePicker />
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '10px' }}>
-                                        <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
-                                        <CustomButton size={'s'} text={'Create'} color={1} />
-                                    </div>
-                                </Flex>
-                            </ModalRight>
-
+                                    <Comments />
+                                </ModalLeft>
+                                <ModalRight>
+                                    <Line />
+                                    <Flex>
+                                        <div>
+                                            <FormLabel>Date</FormLabel>
+                                            <DatePicker />
+                                        </div>
+                                        <div>
+                                            <FormLabel>Time</FormLabel>
+                                            <TimePicker />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
+                                            <CustomButton size={'s'} text={'Create'} color={1} />
+                                        </div>
+                                    </Flex>
+                                </ModalRight>
+                            </form>
                         </Box>
                     </CustomModal>
 

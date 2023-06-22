@@ -1,6 +1,6 @@
 import Header from './Utility/Header'
 import { Box, FormLabel, Input, Modal, OutlinedInput, Typography, styled } from '@mui/material'
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import CustomCalendar from './Utility/CustomCalendar';
 import EventFilter from './Utility/EventFilter';
@@ -16,7 +16,7 @@ import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import CustomButton from './Utility/CustomButton';
 import { auth, firestore, storage } from "../firebase";
-import { collection, doc, addDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where } from "firebase/firestore";
 
 
 
@@ -268,6 +268,7 @@ function TestDashboard() {
     const [activity, setActivity] = useState('');
     const [time, setTime] = useState('');
     const [date, setDate] = useState('');
+    const [reminders, setReminders] = useState([]);
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [searchTerm, setSearchTerm] = useState('');
@@ -308,11 +309,34 @@ function TestDashboard() {
         console.log('Selected Category:', selectedCategory);
     };
 
+    useEffect(() => {
+        const fetchReminders = async () => {
+            try {
+                const remindersCollectionRef = collection(firestore, 'reminders');
+                const remindersQuery = query(remindersCollectionRef, where('userId', '==', auth.currentUser.uid));
+                const querySnapshot = await getDocs(remindersQuery);
+
+                const fetchedReminders = [];
+                querySnapshot.forEach((doc) => {
+                    const reminder = doc.data();
+                    fetchedReminders.push(reminder);
+                });
+
+                setReminders(fetchedReminders);
+            } catch (error) {
+                console.error('Error fetching reminders: ', error);
+            }
+        };
+
+        fetchReminders();
+    }, []);
+
+
     const submit = async (e) => {
         e.preventDefault();
 
         try {
-   
+
             // Check if the "reminders" collection exists, create it if it doesn't
             const remindersCollectionRef = collection(firestore, "reminders");
             const collectionSnapshot = await getDocs(remindersCollectionRef);
@@ -321,8 +345,8 @@ function TestDashboard() {
                     exists: true,
                 });
             }
-    
-            
+
+
             // Create a new document in the "users" collection with the user's ID
             const reminderDocRef = doc(firestore, "reminders", auth.currentUser.uid);
 
@@ -340,7 +364,7 @@ function TestDashboard() {
             console.error('Error adding document: ', error);
         }
     };
-    
+
     return (
         <Page>
             <Header />

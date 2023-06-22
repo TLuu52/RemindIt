@@ -141,7 +141,7 @@ function ProfileSettings() {
                 bio: bio, // Add the user's bio here
             });
 
-            navigate("/test");
+            navigate("/dashboard");
 
             console.log("Profile settings saved successfully.");
         } catch (err) {

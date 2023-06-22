@@ -3,12 +3,11 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom"; // Impor
 import LoginForm from "./Front End Components/loginform"; // Importing the LoginForm component
 import SignUp from "./Front End Components/SignUp"; // Importing SignUp component
 import ProfileSettings from "./Front End Components/ProfileSettings";// Importing ProfileSettings component
-import Dashboard from "./Front End Components/Dashboard";// Importing Dashboard component
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { auth } from './firebase';
 import React, { useState } from 'react';
-import TestDashboard from './Front End Components/TestDashboard';
+import Dashboard from './Front End Components/Dashboard';
 
 
 
@@ -64,10 +63,7 @@ const router = createBrowserRouter([
     path: '/Dashboard', // Access Dashboard page manually with with this path
     element: <Dashboard />
   },
-  {
-    path: '/test', // Access Dashboard page manually with with this path
-    element: <TestDashboard />
-  }
+
 ])
 
 export const UserContext = React.createContext()

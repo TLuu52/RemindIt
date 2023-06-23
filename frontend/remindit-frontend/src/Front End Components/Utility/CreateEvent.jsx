@@ -105,7 +105,7 @@ const Circle = styled('div')({
 })
 
 
-function CreateEvent({ open, handleClose }) {
+function CreateEvent({ open, handleClose, }) {
     const theme = useTheme();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -115,11 +115,9 @@ function CreateEvent({ open, handleClose }) {
     const [priority, setPriority] = useState('');
     const [value, onChange] = useState(new Date());
 
-
-
     const submit = async (e) => {
         e.preventDefault();
-        console.log('here')
+
         try {
             // Check if the "reminders" collection exists, create it if it doesn't
             const remindersCollectionRef = collection(firestore, "reminders");
@@ -129,21 +127,18 @@ function CreateEvent({ open, handleClose }) {
                     exists: true,
                 });
             }
-            console.log('here 1')
 
-            // Create a new document in the "users" collection with the user's ID
-            const reminderDocRef = doc(firestore, "reminders", auth.currentUser.uid);
+            // Create a new document in the "reminders" collection with the user's ID
+            const remindersDocRef = doc(firestore, "reminders", auth.currentUser.uid);
 
-            await setDoc(reminderDocRef, {
+            await setDoc(remindersDocRef, {
                 title: title,
                 description: description,
                 activity: activity,
                 time: time,
                 date: date,
-                priority, priority
+                priority: priority,
             });
-            console.log('here 2')
-
 
             // Close the modal or perform any other necessary actions
             handleClose();
@@ -152,9 +147,6 @@ function CreateEvent({ open, handleClose }) {
             console.error('Error adding document: ', error);
         }
     };
-
-    console.log(auth.currentUser)
-
 
     return (
 
@@ -213,7 +205,7 @@ function CreateEvent({ open, handleClose }) {
                         </div>
                         <div style={{ display: 'flex', gap: '10px', flexDirection: 'row' }}>
                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
-                            <CustomButton onClick={e => submit(e)} size={'s'} text={'Create'} color={1} />
+                            <CustomButton onClick={submit} size={'s'} text={'Create'} color={1} />
                         </div>
                     </Flex>
                 </ModalRight>

@@ -85,7 +85,7 @@ const LoginForm = () => {
         setTimeout(() => {
             if (auth.currentUser) {
                 setUser(auth)
-                navigate('/test')
+                navigate('/dashboard')
             }
         }, 200)
     }, [])

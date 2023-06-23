@@ -5,7 +5,7 @@ import CustomButton from "./CustomButton"
 import { BsCircleFill } from "react-icons/bs"
 import { useTheme } from "@emotion/react"
 import { useState } from "react"
-import { collection, doc, getDocs, setDoc } from "firebase/firestore"
+import { collection, doc, getDocs, setDoc, Timestamp } from "firebase/firestore"
 import { auth, firestore } from "../../firebase"
 
 const CustomModal = styled(Modal)(({ theme }) => ({
@@ -119,34 +119,29 @@ function CreateEvent({ open, handleClose, }) {
         e.preventDefault();
 
         try {
-            // Check if the "reminders" collection exists, create it if it doesn't
-            const remindersCollectionRef = collection(firestore, "reminders");
-            const collectionSnapshot = await getDocs(remindersCollectionRef);
-            if (collectionSnapshot.empty) {
-                await setDoc(doc(firestore, "metadata", "remindersCollection"), {
-                    exists: true,
-                });
-            }
-
             // Create a new document in the "reminders" collection with the user's ID
-            const remindersDocRef = doc(firestore, "reminders", auth.currentUser.uid);
+            const remindersDocRef = doc(firestore, 'reminders', auth.currentUser.uid);
+
+            const timeValue = time instanceof Date ? time : new Date(time); // Check and convert time to Date object if needed
+            const dateValue = date instanceof Date ? date : new Date(date);
 
             await setDoc(remindersDocRef, {
                 title: title,
                 description: description,
                 activity: activity,
-                time: time,
-                date: date,
+                time: Timestamp.fromDate(timeValue), // Convert time to Firestore Timestamp
+                date: Timestamp.fromDate(dateValue), // Convert date to Firestore Timestamp
                 priority: priority,
             });
 
             // Close the modal or perform any other necessary actions
             handleClose();
-            console.log("Reminder saved successfully.");
+            console.log('Reminder saved successfully.');
         } catch (error) {
             console.error('Error adding document: ', error);
         }
     };
+
 
     return (
 

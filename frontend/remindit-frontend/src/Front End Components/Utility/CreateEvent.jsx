@@ -134,6 +134,15 @@ function CreateEvent({ open, handleClose, }) {
                 priority: priority,
             });
 
+
+            // Clear input fields
+            setTitle('');
+            setDescription('');
+            setActivity('');
+            setTime('');
+            setDate('');
+            setPriority('');
+
             // Close the modal or perform any other necessary actions
             handleClose();
             console.log('Reminder saved successfully.');

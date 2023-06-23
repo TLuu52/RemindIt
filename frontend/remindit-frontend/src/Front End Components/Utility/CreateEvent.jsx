@@ -5,7 +5,7 @@ import CustomButton from "./CustomButton"
 import { BsCircleFill } from "react-icons/bs"
 import { useTheme } from "@emotion/react"
 import { useState } from "react"
-import { collection, doc, getDocs, setDoc, Timestamp } from "firebase/firestore"
+import { collection, addDoc, getDocs, setDoc, Timestamp } from "firebase/firestore"
 import { auth, firestore } from "../../firebase"
 
 const CustomModal = styled(Modal)(({ theme }) => ({
@@ -119,21 +119,20 @@ function CreateEvent({ open, handleClose, }) {
         e.preventDefault();
 
         try {
-            // Create a new document in the "reminders" collection with the user's ID
-            const remindersDocRef = doc(firestore, 'reminders', auth.currentUser.uid);
 
-            const timeValue = time instanceof Date ? time : new Date(time); // Check and convert time to Date object if needed
+            const timeValue = time instanceof Date ? time : new Date(time);
             const dateValue = date instanceof Date ? date : new Date(date);
 
-            await setDoc(remindersDocRef, {
+            // Create a new document in the "reminders" collection with a generated ID
+            const remindersCollectionRef = collection(firestore, 'reminders');
+            const newReminderDocRef = await addDoc(remindersCollectionRef, {
                 title: title,
                 description: description,
                 activity: activity,
-                time: Timestamp.fromDate(timeValue), // Convert time to Firestore Timestamp
-                date: Timestamp.fromDate(dateValue), // Convert date to Firestore Timestamp
+                time: Timestamp.fromDate(timeValue),
+                date: Timestamp.fromDate(dateValue),
                 priority: priority,
             });
-
 
             // Clear input fields
             setTitle('');
@@ -143,14 +142,13 @@ function CreateEvent({ open, handleClose, }) {
             setDate('');
             setPriority('');
 
-            // Close the modal or perform any other necessary actions
+            // Close the modal
             handleClose();
-            console.log('Reminder saved successfully.');
+            console.log('Reminder saved successfully. Document ID:', newReminderDocRef.id);
         } catch (error) {
             console.error('Error adding document: ', error);
         }
     };
-
 
     return (
 

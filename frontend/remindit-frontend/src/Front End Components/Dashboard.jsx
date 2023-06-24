@@ -241,7 +241,7 @@ function Dashboard() {
                             </FilterSection>
                         )}
                     </SearchBar>
-                    <NewCalendar date={value} setDate={onChange} />
+                    <NewCalendar date={value} setDate={onChange} reminders={reminders} />
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>

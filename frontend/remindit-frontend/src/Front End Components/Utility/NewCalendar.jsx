@@ -61,7 +61,7 @@ const Container = styled('div')({
     height: '100%',
 })
 
-function NewCalendar({ date, setDate }) {
+function NewCalendar({ date, setDate, reminders }) {
     const theme = useTheme();
 
     const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -142,11 +142,24 @@ function NewCalendar({ date, setDate }) {
                         <BeforeMonth>{prevMonthlast - beforeDays + i + 1}</BeforeMonth>
                     </Day>
                 ))}
-                {Array.from({ length: numDays }).map((__, i) => (
-                    <Day key={i + 1} style={{ background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent' }}>
-                        <DuringMonth >{i + 1}</DuringMonth>
-                    </Day>
-                ))}
+                {Array.from({ length: numDays }).map((__, i) => {
+                    const reminderDay = i + 1;
+                    const remindersForDay = reminders.filter(
+                        (reminder) =>
+                            reminder.day === reminderDay &&
+                            reminder.month === monthNumber &&
+                            reminder.year === year
+                    );
+
+                    return (
+                        <Day key={i + 1} style={{ background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent' }}>
+                            <DuringMonth>{i + 1}</DuringMonth>
+                            {remindersForDay.map((reminder) => (
+                                <div key={reminder.id}>{reminder.title}</div>
+                            ))}
+                        </Day>
+                    );
+                })}
                 {Array.from({ length: afterDays === 0 ? 0 : 7 - afterDays }).map((__, i) => (
                     <Day key={i + 1}>
                         <AfterMonth>{i + 1}</AfterMonth>

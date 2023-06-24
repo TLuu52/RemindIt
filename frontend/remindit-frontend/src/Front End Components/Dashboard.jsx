@@ -183,17 +183,23 @@ function Dashboard() {
     useEffect(() => {
         const fetchReminders = async () => {
             try {
-                const remindersCollectionRef = collection(firestore, 'reminders');
-                const remindersQuery = query(remindersCollectionRef, where('userId', '==', auth.currentUser.uid));
-                const querySnapshot = await getDocs(remindersQuery);
+                // Check if a user is logged in
+                if (auth.currentUser) {
+                    const remindersCollectionRef = collection(firestore, 'reminders');
+                    const remindersQuery = query(
+                        remindersCollectionRef,
+                        where('userId', '==', auth.currentUser.uid)
+                    );
+                    const querySnapshot = await getDocs(remindersQuery);
 
-                const fetchedReminders = [];
-                querySnapshot.forEach((doc) => {
-                    const reminder = doc.data();
-                    fetchedReminders.push(reminder);
-                });
+                    const fetchedReminders = [];
+                    querySnapshot.forEach((doc) => {
+                        const reminder = doc.data();
+                        fetchedReminders.push(reminder);
+                    });
 
-                setReminders(fetchedReminders);
+                    setReminders(fetchedReminders);
+                }
             } catch (error) {
                 console.error('Error fetching reminders: ', error);
             }
@@ -208,7 +214,7 @@ function Dashboard() {
             <Header />
             <Main>
                 <Left>
-                    <CustomCalendar onChange={onChange} value={value} />
+                    <CustomCalendar onChange={onChange} value={value} reminders={reminders} /> {/* Pass reminders as prop */}
                     <EventFilter />
                 </Left>
                 <Right>

@@ -1,4 +1,4 @@
-import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { auth, firestore } from "../../firebase";
@@ -87,6 +87,8 @@ function NewCalendar({ date, setDate }) {
     const [reminders, setReminders] = useState([]);
     const [selectedReminder, setSelectedReminder] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+    const [attachments, setAttachments] = useState(null);
+    const [notes, setNotes] = useState('');
 
 
     const closePopup = () => {
@@ -256,8 +258,6 @@ function NewCalendar({ date, setDate }) {
                                 {hasReminder && (
                                     <>
                                         <div>Title: {highestPriorityReminder.title}</div>
-                                        <div>Description: {highestPriorityReminder.description}</div>
-                                        <div>Duration: {highestPriorityReminder.duration}</div>
                                         {/* Progress bar */}
                                         <LinearProgress variant="determinate" value={progress} />
                                     </>
@@ -287,6 +287,27 @@ function NewCalendar({ date, setDate }) {
                             <div>Activity: {selectedReminder.activity}</div>
                             <div>Duration: {selectedReminder.duration}</div>
                             {/* Additional details or components can be added here */}
+                            <div>
+                                <label htmlFor="attachment-upload">Upload Attachment:</label>
+                                <input
+                                    type="file"
+                                    id="attachment-upload"
+                                    accept=".pdf,.doc,.docx"
+                                    onChange={(e) => setAttachments(e.target.files[0])}
+                                />
+                            </div>
+                            <div>
+                                <TextField
+                                    label="Notes"
+                                    variant="outlined"
+                                    multiline
+                                    rows={4}
+                                    fullWidth
+                                    // Add appropriate state and onChange handler for notes
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                />
+                            </div>
                         </>
                     )}
                 </DialogContent>

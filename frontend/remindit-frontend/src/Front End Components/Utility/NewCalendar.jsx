@@ -64,7 +64,8 @@ const Container = styled('div')({
 function NewCalendar({ date, setDate, reminders }) {
     const theme = useTheme();
 
-    const monthNames = ["January", "February", "March", "April", "May", "June",
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ];
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -72,7 +73,7 @@ function NewCalendar({ date, setDate, reminders }) {
     const [month, setMonth] = useState(monthNames[date.getMonth()])
     const [monthNumber, setMonthNumber] = useState(date.getMonth())
     const [year, setYear] = useState(date.getFullYear())
-    const [day, setDay] = useState(date.getDay())
+    const [day, setDay] = useState(date.getDate())
     const [view, setView] = useState('monthly')
     const [firstDay, setFirstDay] = useState(new Date(date.getFullYear(), date.getMonth(), 1))
     const [lastDay, setLastDay] = useState(new Date(date.getFullYear(), date.getMonth() + 1, 0))
@@ -81,11 +82,10 @@ function NewCalendar({ date, setDate, reminders }) {
     const [prevMonthlast, setPrevMonthLast] = useState(new Date(date.getFullYear(), date.getMonth(), 0))
     const [afterDays, setAfterDays] = useState(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
 
-
-
     const changeView = (newView) => {
         setView(newView)
     }
+
     useEffect(() => {
         setMonth(monthNames[date.getMonth()])
         setMonthNumber(date.getMonth())
@@ -102,16 +102,19 @@ function NewCalendar({ date, setDate, reminders }) {
     const today = () => {
         setDate(new Date())
     }
+
     const prev = () => {
         const newDate = new Date(date)
         newDate.setMonth(monthNumber - 1)
         setDate(newDate)
     }
+
     const next = () => {
         const newDate = new Date(date)
         newDate.setMonth(monthNumber + 1)
         setDate(newDate)
     }
+
     return (
         <Container>
             <Top>
@@ -166,10 +169,8 @@ function NewCalendar({ date, setDate, reminders }) {
                     </Day>
                 ))}
             </Calendar>
-
-            {/* Prev,Next Today    Month    monthly,weekly,daily */}
         </Container>
-    )
+    );
 }
 
 export default NewCalendar

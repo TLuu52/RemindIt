@@ -170,8 +170,6 @@ function Dashboard() {
         setKeyword(e.target.value);
     };
 
-
-
     const handleFilterSubmit = () => {
         // Perform filtering based on selected options
         // You can access the keyword, selectedDate, and selectedCategory here
@@ -180,35 +178,7 @@ function Dashboard() {
         console.log('Selected Category:', selectedCategory);
     };
 
-    useEffect(() => {
-        const fetchReminders = async () => {
-            try {
-                // Check if a user is logged in
-                if (auth.currentUser) {
-                    const remindersCollectionRef = collection(firestore, 'reminders');
-                    const remindersQuery = query(
-                        remindersCollectionRef,
-                        where('userId', '==', auth.currentUser.uid)
-                    );
-                    const querySnapshot = await getDocs(remindersQuery);
-
-                    const fetchedReminders = [];
-                    querySnapshot.forEach((doc) => {
-                        const reminder = doc.data();
-                        fetchedReminders.push(reminder);
-                    });
-
-                    setReminders(fetchedReminders);
-                }
-            } catch (error) {
-                console.error('Error fetching reminders: ', error);
-            }
-        };
-
-        fetchReminders();
-    }, []);
-
-
+    
     return (
         <Page>
             <Header />

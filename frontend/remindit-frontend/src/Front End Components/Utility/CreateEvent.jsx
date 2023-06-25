@@ -115,6 +115,12 @@ function CreateEvent({ open, handleClose, }) {
     const [priority, setPriority] = useState('');
     const [value, onChange] = useState(new Date());
 
+    const handleDateChange = (newDate) => {
+        // Update both date and time states
+        setDate(newDate);
+        setTime(newDate);
+      };
+
     const submit = async (e) => {
         e.preventDefault();
 

@@ -1,5 +1,9 @@
-import { styled } from "@mui/material";
-import Calendar from "react-calendar";
+import { useEffect, useState } from 'react';
+import { styled } from '@mui/material';
+import Calendar from 'react-calendar';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { auth, firestore } from "../../firebase";
+
 
 const Container = styled('div')(({ theme }) => ({
     '& .react-calendar': {
@@ -54,18 +58,81 @@ const Container = styled('div')(({ theme }) => ({
         '& .react-calendar__tile--active, .react-calendar__tile--active:enabled:hover, .react-calendar__tile--active:enabled:focus': {
             backgroundColor: 'transparent',
         },
+
+        '& .react-calendar__tile--reminder-day': {
+            backgroundColor: theme.palette.error.main,
+            borderRadius: '50%',
+            color: theme.palette.error.contrastText,
+            fontWeight: 'bold',
+        },
+
         '& .react-calendar__navigation__arrow': {
             color: theme.palette.primary.light,
             fontSize: '24px',
             fontWeight: '700'
         }
     }
+
 }))
 
 function CustomCalendar({ onChange, value }) {
+    const [reminders, setReminders] = useState([]);
+
+    useEffect(() => {
+        const fetchReminders = async () => {
+            try {
+                // Check if a user is logged in
+                if (auth.currentUser) {
+                    const remindersCollectionRef = collection(firestore, 'reminders');
+                    const remindersQuery = query(
+                        remindersCollectionRef,
+                        where('userId', '==', auth.currentUser.uid)
+                    );
+                    const querySnapshot = await getDocs(remindersQuery);
+
+                    const fetchedReminders = [];
+                    querySnapshot.forEach((doc) => {
+                        const reminder = doc.data();
+                        fetchedReminders.push(reminder);
+                    });
+
+                    setReminders(fetchedReminders);
+                }
+            } catch (error) {
+                console.error('Error fetching reminders: ', error);
+            }
+        };
+
+        fetchReminders();
+    }, []);
+
+    const getRemindersForDate = (date) => {
+        const formattedDate = date.toDateString();
+        const remindersForDate = reminders.filter((reminder) => {
+            const reminderDate = new Date(reminder.date.toDate()).toDateString();
+            return reminderDate === formattedDate;
+        });
+
+        return remindersForDate;
+    };
+
+    const tileContent = ({ date }) => {
+        const remindersForDate = getRemindersForDate(date);
+
+        return (
+            <div>
+                {remindersForDate.map((reminder, index) => (
+                    <p key={index}>{reminder.title}</p>
+                ))}
+            </div>
+        );
+    };
+
     return (
-        <Container><Calendar onChange={onChange} value={value} /></Container>
-    )
+        <Container>
+            <Calendar onChange={onChange} value={value} tileContent={tileContent} />
+        </Container>
+    );
 }
 
-export default CustomCalendar
+export default CustomCalendar;

@@ -226,6 +226,9 @@ function CreateEvent({ open, handleClose, }) {
                                     // Update the state with the formatted duration
                                     setDuration(formattedDuration);
                                 }}
+                                inputProps={{
+                                    style: { textAlign: 'center' }
+                                }}
                             />
                         </div>
                         <div>
@@ -248,6 +251,7 @@ function CreateEvent({ open, handleClose, }) {
                         <div>
                             <FormLabel>Make this a Recurring Reminder?</FormLabel>
                             <StyledSelect value={recurringOption} onChange={(e) => setRecurringOption(e.target.value)}>
+                                <MenuItem value="No">No</MenuItem>
                                 <MenuItem value="1 week">1 week</MenuItem>
                                 <MenuItem value="1 month">1 month</MenuItem>
                                 <MenuItem value="1 year">1 year</MenuItem>

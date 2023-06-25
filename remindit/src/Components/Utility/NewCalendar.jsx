@@ -1,7 +1,8 @@
-import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress } from '@mui/material';
+import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { auth, firestore } from "../../firebase";
+
 
 const Top = styled('div')({
     display: 'flex',
@@ -84,7 +85,13 @@ function NewCalendar({ date, setDate }) {
     const [prevMonthlast, setPrevMonthLast] = useState(new Date(date.getFullYear(), date.getMonth(), 0))
     const [afterDays, setAfterDays] = useState(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
     const [reminders, setReminders] = useState([]);
+    const [selectedReminder, setSelectedReminder] = useState(null);
+    const [showPopup, setShowPopup] = useState(false);
 
+
+    const closePopup = () => {
+        setShowPopup(false);
+    };
 
 
     const changeView = (newView) => {
@@ -225,26 +232,32 @@ function NewCalendar({ date, setDate }) {
                         <Day
                             key={i + 1}
                             style={{
-                                background: i + 1 === day ? theme.palette.secondary.contrastText : "transparent",
+                                background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent',
                             }}
                         >
                             <button
-                                onClick={() => { }}
+                                onClick={() => {
+                                    if (hasReminder) {
+                                        setSelectedReminder(highestPriorityReminder);
+                                        setShowPopup(true);
+                                    }
+                                }}
                                 style={{
-                                    background: "transparent",
-                                    border: "none",
-                                    width: "100%",
-                                    height: "100%",
+                                    background: 'transparent',
+                                    border: 'none',
+                                    width: '100%',
+                                    height: '100%',
                                     padding: 0,
                                     margin: 0,
-                                    cursor: "pointer",
+                                    cursor: hasReminder ? 'pointer' : 'default',
                                 }}
                             >
                                 <DuringMonth>{i + 1}</DuringMonth>
                                 {hasReminder && (
                                     <>
-                                        <div>{highestPriorityReminder.title}</div>
-                                        <div>{highestPriorityReminder.description}</div>
+                                        <div>Title: {highestPriorityReminder.title}</div>
+                                        <div>Description: {highestPriorityReminder.description}</div>
+                                        <div>Duration: {highestPriorityReminder.duration}</div>
                                         {/* Progress bar */}
                                         <LinearProgress variant="determinate" value={progress} />
                                     </>
@@ -253,6 +266,7 @@ function NewCalendar({ date, setDate }) {
                         </Day>
                     );
                 })}
+
                 {/* Days from the next month */}
                 {Array.from({ length: afterDays === 0 ? 0 : 7 - afterDays }).map((__, i) => (
                     <Day key={i + 1}>
@@ -260,7 +274,28 @@ function NewCalendar({ date, setDate }) {
                     </Day>
                 ))}
             </Calendar>
+
+            <Dialog open={showPopup} onClose={closePopup}>
+                <DialogTitle>
+                    <Typography sx={{ fontWeight: 'lighter' }}>{selectedReminder && selectedReminder.title}</Typography>
+                </DialogTitle>
+                <DialogContent>
+                    {selectedReminder && (
+                        <>
+                            <div>Priority: {selectedReminder.priority}</div>
+                            <div>Description: {selectedReminder.description}</div>
+                            <div>Activity: {selectedReminder.activity}</div>
+                            <div>Duration: {selectedReminder.duration}</div>
+                            {/* Additional details or components can be added here */}
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closePopup}>Close</Button>
+                </DialogActions>
+            </Dialog>
         </Container>
+
     );
 }
 

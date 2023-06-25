@@ -7,6 +7,7 @@ import { useTheme } from "@emotion/react"
 import { useState } from "react"
 import { collection, addDoc, getDocs, setDoc, Timestamp } from "firebase/firestore"
 import { auth, firestore } from "../../firebase"
+import { red } from "@mui/material/colors"
 
 const CustomModal = styled(Modal)(({ theme }) => ({
     display: 'flex',
@@ -220,6 +221,7 @@ function CreateEvent({ open, handleClose, }) {
                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
                             <CustomButton onClick={submit} size={'s'} text={'Create'} color={1} />
                         </div>
+                        <CustomButton onClick={undefined} size="s" text="Make this a Recurring Reminder?" color={1} />
                     </Flex>
                 </ModalRight>
             </Box>

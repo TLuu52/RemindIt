@@ -119,7 +119,7 @@ function CreateEvent({ open, handleClose, }) {
         // Update both date and time states
         setDate(newDate);
         setTime(newDate);
-      };
+    };
 
     const submit = async (e) => {
         e.preventDefault();
@@ -128,6 +128,10 @@ function CreateEvent({ open, handleClose, }) {
 
             const timeValue = time instanceof Date ? time : new Date(time);
             const dateValue = date instanceof Date ? date : new Date(date);
+
+            // Get the current user ID
+            const user = auth.currentUser;
+            const userId = user.uid;
 
             // Create a new document in the "reminders" collection with a generated ID
             const remindersCollectionRef = collection(firestore, 'reminders');
@@ -138,6 +142,7 @@ function CreateEvent({ open, handleClose, }) {
                 time: Timestamp.fromDate(timeValue),
                 date: Timestamp.fromDate(dateValue),
                 priority: priority,
+                userId: userId, // Include the user ID in the reminder document
             });
 
             // Clear input fields

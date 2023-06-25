@@ -1,5 +1,7 @@
 import { ButtonGroup, Button, Typography, styled, useTheme } from '@mui/material';
 import React, { useEffect, useState } from 'react'
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { auth, firestore } from "../../firebase";
 
 const Top = styled('div')({
     display: 'flex',
@@ -61,7 +63,7 @@ const Container = styled('div')({
     height: '100%',
 })
 
-function NewCalendar({ date, setDate, reminders }) {
+function NewCalendar({ date, setDate }) {
     const theme = useTheme();
 
     const monthNames = [
@@ -81,6 +83,9 @@ function NewCalendar({ date, setDate, reminders }) {
     const [beforeDays, setBeforeDays] = useState(firstDay.getDay())
     const [prevMonthlast, setPrevMonthLast] = useState(new Date(date.getFullYear(), date.getMonth(), 0))
     const [afterDays, setAfterDays] = useState(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
+    const [reminders, setReminders] = useState([]);
+    const [selectedReminderId, setSelectedReminderId] = useState(null);
+
 
     const changeView = (newView) => {
         setView(newView)
@@ -98,6 +103,39 @@ function NewCalendar({ date, setDate, reminders }) {
         setPrevMonthLast(new Date(date.getFullYear(), date.getMonth(), 0).getDate())
         setAfterDays(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
     }, [date, monthNumber])
+
+    useEffect(() => {
+        // This effect fetches reminders from Firestore and updates the reminders state
+        const fetchReminders = async () => {
+            try {
+                // Create a reference to the "reminders" collection
+                const remindersCollectionRef = collection(firestore, 'reminders');
+
+                // Get the current date
+                const currentDate = new Date();
+
+                // Build the query to fetch reminders for any date
+                const remindersQuery = query(
+                    remindersCollectionRef,
+                    where('date', '>=', Timestamp.fromDate(currentDate))
+                );
+
+                // Execute the query and get the query snapshot
+                const querySnapshot = await getDocs(remindersQuery);
+
+                // Map the query snapshot to an array of reminder objects
+                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+
+                setReminders(fetchedReminders);
+
+                console.log('Fetched reminders:', fetchedReminders); // Log fetched reminders
+            } catch (error) {
+                console.error('Error fetching reminders:', error);
+            }
+        };
+
+        fetchReminders();
+    }, [date]);
 
     const today = () => {
         setDate(new Date())
@@ -140,29 +178,45 @@ function NewCalendar({ date, setDate, reminders }) {
                 ))}
             </Row>
             <Calendar>
+                {/* Days from the previous month */}
                 {Array.from({ length: beforeDays }).map((__, i) => (
                     <Day key={i + 1}>
                         <BeforeMonth>{prevMonthlast - beforeDays + i + 1}</BeforeMonth>
                     </Day>
                 ))}
+                {/* Days of the current month */}
                 {Array.from({ length: numDays }).map((__, i) => {
                     const reminderDay = i + 1;
                     const remindersForDay = reminders.filter(
-                        (reminder) =>
-                            reminder.day === reminderDay &&
-                            reminder.month === monthNumber &&
-                            reminder.year === year
+                        (reminder) => {
+                            const reminderDate = new Date(reminder.year, reminder.month, reminder.day);
+                            const isSameDay =
+                                reminderDate.getUTCFullYear() === year &&
+                                reminderDate.getUTCMonth() === monthNumber &&
+                                reminderDate.getUTCDate() === reminderDay;
+
+                            return isSameDay;
+                        }
                     );
 
                     return (
-                        <Day key={i + 1} style={{ background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent' }}>
+                        <Day
+                            key={i + 1}
+                            style={{
+                                background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent',
+                            }}
+                        >
                             <DuringMonth>{i + 1}</DuringMonth>
                             {remindersForDay.map((reminder) => (
-                                <div key={reminder.id}>{reminder.title}</div>
+                                <div key={reminder.id}>
+                                    <div>{reminder.title}</div>
+                                    <div>{reminder.description}</div> {/* Added line to display the description */}
+                                </div>
                             ))}
                         </Day>
                     );
                 })}
+                {/* Days from the next month */}
                 {Array.from({ length: afterDays === 0 ? 0 : 7 - afterDays }).map((__, i) => (
                     <Day key={i + 1}>
                         <AfterMonth>{i + 1}</AfterMonth>

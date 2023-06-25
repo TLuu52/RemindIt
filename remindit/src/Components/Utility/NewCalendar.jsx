@@ -286,16 +286,6 @@ function NewCalendar({ date, setDate }) {
                             <div>Description: {selectedReminder.description}</div>
                             <div>Activity: {selectedReminder.activity}</div>
                             <div>Duration: {selectedReminder.duration}</div>
-                            {/* Additional details or components can be added here */}
-                            <div>
-                                <label htmlFor="attachment-upload">Upload Attachment:</label>
-                                <input
-                                    type="file"
-                                    id="attachment-upload"
-                                    accept=".pdf,.doc,.docx"
-                                    onChange={(e) => setAttachments(e.target.files[0])}
-                                />
-                            </div>
                             <div>
                                 <TextField
                                     label="Notes"
@@ -308,10 +298,22 @@ function NewCalendar({ date, setDate }) {
                                     onChange={(e) => setNotes(e.target.value)}
                                 />
                             </div>
+                            <div>
+                                <label htmlFor="attachment-upload">Upload Attachment:</label>
+                            </div>
+                            <div>
+                                <input
+                                    type="file"
+                                    id="attachment-upload"
+                                    accept=".pdf,.doc,.docx"
+                                    onChange={(e) => setAttachments(e.target.files[0])}
+                                />
+                            </div>
                         </>
                     )}
                 </DialogContent>
                 <DialogActions>
+                    <Button onClick={''}>Submit</Button>
                     <Button onClick={closePopup}>Close</Button>
                 </DialogActions>
             </Dialog>

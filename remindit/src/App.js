@@ -1,13 +1,13 @@
 import { createTheme, ThemeProvider } from '@mui/material/styles'; // Importing the createTheme and ThemeProvider functions from MUI
 import { createBrowserRouter, RouterProvider } from "react-router-dom"; // Importing Routing from react-routere-dom
-import LoginForm from "./Front End Components/loginform"; // Importing the LoginForm component
-import SignUp from "./Front End Components/SignUp"; // Importing SignUp component
-import ProfileSettings from "./Front End Components/ProfileSettings";// Importing ProfileSettings component
+import LoginForm from "./Components/loginform"; // Importing the LoginForm component
+import SignUp from "./Components/SignUp"; // Importing SignUp component
+import ProfileSettings from "./Components/ProfileSettings";// Importing ProfileSettings component
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { auth } from './firebase';
 import React, { useState } from 'react';
-import Dashboard from './Front End Components/Dashboard';
+import Dashboard from './Components/Dashboard';
 
 
 

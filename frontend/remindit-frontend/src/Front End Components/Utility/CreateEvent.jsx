@@ -114,8 +114,8 @@ function CreateEvent({ open, handleClose, }) {
     const [time, setTime] = useState('');
     const [date, setDate] = useState('');
     const [priority, setPriority] = useState('');
-    const [value, onChange] = useState(new Date());
     const [recurringOption, setRecurringOption] = useState('');
+    const [duration, setDuration] = useState('');
 
 
     const handleDateChange = (newDate) => {
@@ -146,7 +146,8 @@ function CreateEvent({ open, handleClose, }) {
                 date: Timestamp.fromDate(dateValue),
                 priority: priority,
                 userId: userId, // Include the user ID in the reminder document
-                 recurringOption: recurringOption, // Include the selected recurring option
+                recurringOption: recurringOption, // Include the selected recurring option
+                duration: duration, // Include the duration of the reminder
             });
 
             // Clear input fields
@@ -156,6 +157,7 @@ function CreateEvent({ open, handleClose, }) {
             setTime('');
             setDate('');
             setPriority('');
+            setDuration('');
 
             // Close the modal
             handleClose();
@@ -202,6 +204,29 @@ function CreateEvent({ open, handleClose, }) {
                                     padding: '0px 20px'
                                 }
                             }} />
+                        </div>
+                        <div>
+                            <FormLabel>Duration</FormLabel>
+                            <OutlinedInput
+                                placeholder={'Enter Duration (e.g., 00:00)'}
+                                value={duration}
+                                onChange={(e) => {
+                                    const input = e.target.value;
+                                    // Remove non-time characters except ':'
+                                    const formattedInput = input.replace(/[^0-9:]/g, '');
+                                    // Limit the input to 4 to 5 numbers
+                                    const limitedInput = formattedInput.slice(0, 5);
+                                    // Split the limited input into hours and minutes
+                                    const [hours, minutes] = limitedInput.split(':');
+                                    // Format the hours and minutes as '00' if they exist
+                                    const formattedHours = hours ? hours.padStart(2, '0') : '';
+                                    const formattedMinutes = minutes ? minutes.padStart(2, '0') : '';
+                                    // Combine the hours and minutes with a colon separator
+                                    const formattedDuration = `${formattedHours}:${formattedMinutes}`;
+                                    // Update the state with the formatted duration
+                                    setDuration(formattedDuration);
+                                }}
+                            />
                         </div>
                         <div>
                             <FormLabel>Priority</FormLabel>

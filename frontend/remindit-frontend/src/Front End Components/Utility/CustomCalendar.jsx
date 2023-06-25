@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { styled } from '@mui/material';
 import Calendar from 'react-calendar';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { auth, firestore } from "../../firebase";
 
 
@@ -81,30 +81,35 @@ function CustomCalendar({ onChange, value }) {
     useEffect(() => {
         const fetchReminders = async () => {
             try {
-                // Check if a user is logged in
-                if (auth.currentUser) {
-                    const remindersCollectionRef = collection(firestore, 'reminders');
-                    const remindersQuery = query(
-                        remindersCollectionRef,
-                        where('userId', '==', auth.currentUser.uid)
-                    );
-                    const querySnapshot = await getDocs(remindersQuery);
+                // Create a reference to the "reminders" collection
+                const remindersCollectionRef = collection(firestore, 'reminders');
 
-                    const fetchedReminders = [];
-                    querySnapshot.forEach((doc) => {
-                        const reminder = doc.data();
-                        fetchedReminders.push(reminder);
-                    });
+                // Get the current date
+                const currentDate = new Date();
 
-                    setReminders(fetchedReminders);
-                }
+                // Build the query to fetch reminders for any date
+                const remindersQuery = query(
+                    remindersCollectionRef,
+                    where('date', '>=', Timestamp.fromDate(currentDate))
+                );
+
+                // Execute the query and get the query snapshot
+                const querySnapshot = await getDocs(remindersQuery);
+
+                // Map the query snapshot to an array of reminder objects
+                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+
+                setReminders(fetchedReminders);
+
+                console.log('Fetched reminders:', fetchedReminders); // Log fetched reminders
             } catch (error) {
-                console.error('Error fetching reminders: ', error);
+                console.error('Error fetching reminders:', error);
             }
         };
 
         fetchReminders();
     }, []);
+
 
     const getRemindersForDate = (date) => {
         const formattedDate = date.toDateString();
@@ -120,17 +125,31 @@ function CustomCalendar({ onChange, value }) {
         const remindersForDate = getRemindersForDate(date);
 
         return (
-            <div>
-                {remindersForDate.map((reminder, index) => (
-                    <p key={index}>{reminder.title}</p>
-                ))}
+            <div style={{ position: 'relative' }}>
+                {remindersForDate.length > 0 && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            background: 'red',
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                        }}
+                    />
+                )}
             </div>
         );
     };
-
     return (
         <Container>
-            <Calendar onChange={onChange} value={value} tileContent={tileContent} />
+            <Calendar
+                onChange={onChange}
+                value={value}
+                tileContent={tileContent} // Add the tileContent prop
+            />
         </Container>
     );
 }

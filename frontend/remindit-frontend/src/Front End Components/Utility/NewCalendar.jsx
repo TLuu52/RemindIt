@@ -195,17 +195,15 @@ function NewCalendar({ date, setDate }) {
                 {/* Days of the current month */}
                 {Array.from({ length: numDays }).map((__, i) => {
                     const reminderDay = i + 1;
-                    const remindersForDay = reminders.filter(
-                        (reminder) => {
-                            const reminderDate = new Date(reminder.year, reminder.month, reminder.day);
-                            const isSameDay =
-                                reminderDate.getUTCFullYear() === year &&
-                                reminderDate.getUTCMonth() === monthNumber &&
-                                reminderDate.getUTCDate() === reminderDay;
+                    const remindersForDay = reminders.filter((reminder) => {
+                        const reminderTime = new Date(reminder.time.toDate());
+                        const isSameDay =
+                            reminderTime.getUTCFullYear() === year &&
+                            reminderTime.getUTCMonth() === monthNumber &&
+                            reminderTime.getUTCDate() === reminderDay;
 
-                            return isSameDay;
-                        }
-                    );
+                        return isSameDay;
+                    });
 
                     return (
                         <Day

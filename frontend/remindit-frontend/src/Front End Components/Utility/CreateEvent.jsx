@@ -185,7 +185,7 @@ function CreateEvent({ open, handleClose, }) {
                     <Flex>
                         <div>
                             <FormLabel>Date</FormLabel>
-                            <DatePicker value={date} onChange={setDate} sx={{
+                            <DatePicker value={date} onChange={handleDateChange} sx={{
                                 '& .MuiInputBase-root': {
                                     padding: '0px 20px'
                                 }

@@ -133,7 +133,6 @@ const BottomRight = styled('div')(({ theme }) => ({
 }))
 
 
-
 function Dashboard() {
 
 
@@ -177,6 +176,8 @@ function Dashboard() {
         console.log('Keyword:', keyword);
         console.log('Selected Category:', selectedCategory);
     };
+
+    
 
     
     return (

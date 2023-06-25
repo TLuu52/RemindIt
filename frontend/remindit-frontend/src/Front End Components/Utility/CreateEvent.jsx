@@ -146,6 +146,7 @@ function CreateEvent({ open, handleClose, }) {
                 date: Timestamp.fromDate(dateValue),
                 priority: priority,
                 userId: userId, // Include the user ID in the reminder document
+                 recurringOption: recurringOption, // Include the selected recurring option
             });
 
             // Clear input fields

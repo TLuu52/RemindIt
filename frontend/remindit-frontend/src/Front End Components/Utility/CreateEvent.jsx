@@ -115,6 +115,8 @@ function CreateEvent({ open, handleClose, }) {
     const [date, setDate] = useState('');
     const [priority, setPriority] = useState('');
     const [value, onChange] = useState(new Date());
+    const [recurringOption, setRecurringOption] = useState('');
+
 
     const handleDateChange = (newDate) => {
         // Update both date and time states
@@ -217,11 +219,18 @@ function CreateEvent({ open, handleClose, }) {
                                 </MenuItem>
                             </StyledSelect>
                         </div>
+                        <div>
+                            <FormLabel>Make this a Recurring Reminder?</FormLabel>
+                            <StyledSelect value={recurringOption} onChange={(e) => setRecurringOption(e.target.value)}>
+                                <MenuItem value="1 week">1 week</MenuItem>
+                                <MenuItem value="1 month">1 month</MenuItem>
+                                <MenuItem value="1 year">1 year</MenuItem>
+                            </StyledSelect>
+                        </div>
                         <div style={{ display: 'flex', gap: '10px', flexDirection: 'row' }}>
                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
                             <CustomButton onClick={submit} size={'s'} text={'Create'} color={1} />
                         </div>
-                        <CustomButton onClick={undefined} size="s" text="Make this a Recurring Reminder?" color={1} />
                     </Flex>
                 </ModalRight>
             </Box>

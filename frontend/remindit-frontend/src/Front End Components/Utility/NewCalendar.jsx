@@ -212,13 +212,26 @@ function NewCalendar({ date, setDate }) {
                                 background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent',
                             }}
                         >
-                            <DuringMonth>{i + 1}</DuringMonth>
-                            {remindersForDay.map((reminder) => (
-                                <div key={reminder.id}>
-                                    <div>{reminder.title}</div>
-                                    <div>{reminder.description}</div> {/* Added line to display the description */}
-                                </div>
-                            ))}
+                            <button
+                                onClick={() => { }}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    width: '100%',
+                                    height: '100%',
+                                    padding: 0,
+                                    margin: 0,
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                <DuringMonth>{i + 1}</DuringMonth>
+                                {remindersForDay.map((reminder) => (
+                                    <div key={reminder.id}>
+                                        <div>{reminder.title}</div>
+                                        <div>{reminder.description}</div>
+                                    </div>
+                                ))}
+                            </button>
                         </Day>
                     );
                 })}

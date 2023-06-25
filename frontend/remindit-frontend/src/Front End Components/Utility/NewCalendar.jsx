@@ -1,4 +1,4 @@
-import { ButtonGroup, Button, Typography, styled, useTheme } from '@mui/material';
+import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { auth, firestore } from "../../firebase";
@@ -84,7 +84,7 @@ function NewCalendar({ date, setDate }) {
     const [prevMonthlast, setPrevMonthLast] = useState(new Date(date.getFullYear(), date.getMonth(), 0))
     const [afterDays, setAfterDays] = useState(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
     const [reminders, setReminders] = useState([]);
-    const [selectedReminderId, setSelectedReminderId] = useState(null);
+
 
 
     const changeView = (newView) => {
@@ -185,6 +185,7 @@ function NewCalendar({ date, setDate }) {
                     <Typography variant='h6' key={i}>{weekday}</Typography>
                 ))}
             </Row>
+
             <Calendar>
                 {/* Days from the previous month */}
                 {Array.from({ length: beforeDays }).map((__, i) => (
@@ -205,23 +206,34 @@ function NewCalendar({ date, setDate }) {
                         return isSameDay;
                     });
 
+                    const hasReminder = remindersForDay.length > 0;
+                    let progress = 0;
+
+                    if (hasReminder) {
+                        const currentDate = new Date();
+                        const reminderDate = new Date(remindersForDay[0].time.toDate());
+                        const timeDiff = reminderDate.getTime() - currentDate.getTime();
+                        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                        progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
+                    }
+
                     return (
                         <Day
                             key={i + 1}
                             style={{
-                                background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent',
+                                background: i + 1 === day ? theme.palette.secondary.contrastText : "transparent",
                             }}
                         >
                             <button
                                 onClick={() => { }}
                                 style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    width: '100%',
-                                    height: '100%',
+                                    background: "transparent",
+                                    border: "none",
+                                    width: "100%",
+                                    height: "100%",
                                     padding: 0,
                                     margin: 0,
-                                    cursor: 'pointer',
+                                    cursor: "pointer",
                                 }}
                             >
                                 <DuringMonth>{i + 1}</DuringMonth>
@@ -231,6 +243,10 @@ function NewCalendar({ date, setDate }) {
                                         <div>{reminder.description}</div>
                                     </div>
                                 ))}
+                                {hasReminder && (
+                                    /* Progress bar */
+                                    <LinearProgress variant="determinate" value={progress} />
+                                )}
                             </button>
                         </Day>
                     );

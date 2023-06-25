@@ -196,22 +196,26 @@ function NewCalendar({ date, setDate }) {
                 {/* Days of the current month */}
                 {Array.from({ length: numDays }).map((__, i) => {
                     const reminderDay = i + 1;
-                    const remindersForDay = reminders.filter((reminder) => {
-                        const reminderTime = new Date(reminder.time.toDate());
-                        const isSameDay =
-                            reminderTime.getUTCFullYear() === year &&
-                            reminderTime.getUTCMonth() === monthNumber &&
-                            reminderTime.getUTCDate() === reminderDay;
+                    const remindersForDay = reminders
+                        .filter((reminder) => {
+                            const reminderTime = new Date(reminder.time.toDate());
+                            const isSameDay =
+                                reminderTime.getUTCFullYear() === year &&
+                                reminderTime.getUTCMonth() === monthNumber &&
+                                reminderTime.getUTCDate() === reminderDay;
 
-                        return isSameDay;
-                    });
+                            return isSameDay;
+                        })
+                        .sort((a, b) => b.priority - a.priority);
 
-                    const hasReminder = remindersForDay.length > 0;
+                    const highestPriorityReminder = remindersForDay.length > 0 ? remindersForDay[0] : null;
+
+                    const hasReminder = highestPriorityReminder !== null;
                     let progress = 0;
 
                     if (hasReminder) {
                         const currentDate = new Date();
-                        const reminderDate = new Date(remindersForDay[0].time.toDate());
+                        const reminderDate = new Date(highestPriorityReminder.time.toDate());
                         const timeDiff = reminderDate.getTime() - currentDate.getTime();
                         const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
                         progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
@@ -237,15 +241,13 @@ function NewCalendar({ date, setDate }) {
                                 }}
                             >
                                 <DuringMonth>{i + 1}</DuringMonth>
-                                {remindersForDay.map((reminder) => (
-                                    <div key={reminder.id}>
-                                        <div>{reminder.title}</div>
-                                        <div>{reminder.description}</div>
-                                    </div>
-                                ))}
                                 {hasReminder && (
-                                    /* Progress bar */
-                                    <LinearProgress variant="determinate" value={progress} />
+                                    <>
+                                        <div>{highestPriorityReminder.title}</div>
+                                        <div>{highestPriorityReminder.description}</div>
+                                        {/* Progress bar */}
+                                        <LinearProgress variant="determinate" value={progress} />
+                                    </>
                                 )}
                             </button>
                         </Day>

@@ -114,9 +114,17 @@ function NewCalendar({ date, setDate }) {
                 // Get the current date
                 const currentDate = new Date();
 
-                // Build the query to fetch reminders for any date
+                // Get the currently authenticated user
+                const user = auth.currentUser;
+                if (!user) {
+                    // User is not signed in, handle accordingly
+                    return;
+                }
+
+                // Build the query to fetch reminders for the specific user and current date
                 const remindersQuery = query(
                     remindersCollectionRef,
+                    where('userId', '==', user.uid),
                     where('date', '>=', Timestamp.fromDate(currentDate))
                 );
 

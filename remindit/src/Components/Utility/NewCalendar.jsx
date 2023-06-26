@@ -1,6 +1,7 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc} from 'firebase/firestore';
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 
 
@@ -89,6 +90,7 @@ function NewCalendar({ date, setDate }) {
     const [showPopup, setShowPopup] = useState(false);
     const [uploadedAttachment, setUploadedAttachment] = useState(null);
     const [notes, setNotes] = useState('');
+    const [notesAttachments, setNotesAttachments] = useState([]);
 
 
     const closePopup = () => {
@@ -153,6 +155,77 @@ function NewCalendar({ date, setDate }) {
 
         fetchReminders();
     }, [date]);
+
+    // Fetch the data from the "NotesAttachments" collection
+    useEffect(() => {
+        const fetchNotesAttachments = async () => {
+            try {
+                const notesattachmentsCollectionRef = collection(firestore, 'NotesAttachments');
+                const notesattachmentsSnapshot = await getDocs(notesattachmentsCollectionRef);
+                const notesattachmentsData = notesattachmentsSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setNotesAttachments(notesattachmentsData);
+            } catch (error) {
+                console.error('Error fetching notes and attachments: ', error);
+            }
+        };
+
+        fetchNotesAttachments();
+    }, [notes]);
+
+
+    const storage = getStorage(); // Initialize Firebase Storage
+
+    const submit = async (e) => {
+        e.preventDefault();
+
+        try {
+            // Get the current user ID
+            const user = auth.currentUser;
+            const userId = user.uid;
+
+            // Upload the attachment file to Firebase Storage
+            const storageRef = ref(storage, `attachments/${uploadedAttachment.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, uploadedAttachment);
+
+            // Get the download URL of the uploaded file
+            const downloadURL = await new Promise((resolve, reject) => {
+                uploadTask.on('state_changed', null, reject, () => {
+                    getDownloadURL(uploadTask.snapshot.ref)
+                        .then(resolve)
+                        .catch(reject);
+                });
+            });
+
+            // Create a new document in the "NotesAttachments" collection
+            const notesattachmentsCollectionRef = collection(firestore, 'NotesAttachments');
+            const newNotesAttachmentsDocRef = await addDoc(notesattachmentsCollectionRef, {
+                notes: notes,
+                attachmentUrl: downloadURL,
+                userId: userId,
+            });
+
+            closePopup();
+            console.log('Notes and Attachments saved successfully. Document ID:', newNotesAttachmentsDocRef.id);
+        } catch (error) {
+            console.error('Error adding document: ', error);
+        }
+    };
+
+    const deleteNotesAttachment = async (id) => {
+        try {
+            // Delete the document from the "NotesAttachments" collection
+            const notesattachmentsDocRef = doc(firestore, 'NotesAttachments', id);
+            await deleteDoc(notesattachmentsDocRef);
+
+            // Update the notesAttachments state by filtering out the deleted item
+            setNotesAttachments((prevNotesAttachments) => prevNotesAttachments.filter((item) => item.id !== id));
+        } catch (error) {
+            console.error('Error deleting notes and attachment: ', error);
+        }
+    };
 
     const today = () => {
         setDate(new Date())
@@ -318,24 +391,30 @@ function NewCalendar({ date, setDate }) {
                                     </Typography>
                                 </div>
                             )}
+
+                            {/* Display notes and attachments */}
+                            {notesAttachments.map((item) => (
+                                <div key={item.id}>
+                                    <Typography variant="subtitle1">Notes:</Typography>
+                                    <Typography>{item.notes}</Typography>
+                                    {item.attachmentUrl && (
+                                        <div>
+                                            <Typography variant="subtitle1">Attachment:</Typography>
+                                            <Typography>
+                                                <a href={item.attachmentUrl} target="_blank" rel="noopener noreferrer">
+                                                    {item.attachmentUrl}
+                                                </a>
+                                            </Typography>
+                                        </div>
+                                    )}
+                                    <Button onClick={() => deleteNotesAttachment(item.id)}>Delete</Button>
+                                </div>
+                            ))}
                         </>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button
-                        onClick={() => {
-                            // Save the uploaded attachment and perform any necessary actions
-                            if (uploadedAttachment) {
-                                // Save the attachment and handle further actions (e.g., displaying download/view options)
-                                console.log('Attachment:', uploadedAttachment);
-                            }
-                            // Save the notes
-                            console.log('Notes:', notes);
-                            closePopup();
-                        }}
-                    >
-                        Submit
-                    </Button>
+                    <Button onClick={submit}>Submit</Button>
                     <Button onClick={closePopup}>Close</Button>
                 </DialogActions>
             </Dialog>

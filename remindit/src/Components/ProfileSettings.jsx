@@ -107,9 +107,12 @@ function ProfileSettings() {
                 console.log('Error fetching user data:', error);
             }
         };
-
-        fetchUserData();
-    }, []);
+        if (user.currentUser) {
+            setTimeout(() => {
+                fetchUserData();
+            }, 400);
+        }
+    }, [user.currentUser, auth]);
 
     const submit = async (e) => {
         e.preventDefault();

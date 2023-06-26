@@ -4,10 +4,10 @@ import { DatePicker, TimePicker } from "@mui/x-date-pickers"
 import CustomButton from "./CustomButton"
 import { BsCircleFill } from "react-icons/bs"
 import { useTheme } from "@emotion/react"
-import { useState } from "react"
-import { collection, addDoc, getDocs, setDoc, Timestamp } from "firebase/firestore"
+import { useContext, useEffect, useState } from "react"
+import { collection, addDoc, getDocs, setDoc, Timestamp, doc, getDoc } from "firebase/firestore"
 import { auth, firestore } from "../../firebase"
-import { red } from "@mui/material/colors"
+import { UserContext } from "../../App"
 
 const CustomModal = styled(Modal)(({ theme }) => ({
     display: 'flex',
@@ -65,6 +65,7 @@ const ModalLeft = styled('div')(({ theme }) => ({
 const ModalRight = styled('div')(({ theme }) => ({
     flexGrow: '1',
     display: 'flex',
+    minHeight: '100%'
 }))
 const Line = styled('div')(({ theme }) => ({
     height: "100%",
@@ -97,12 +98,17 @@ const StyledSelect = styled(Select)(({ theme }) => ({
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: '20px'
-    }
+    },
 }))
-const Circle = styled('div')({
-    height: '50px',
-    width: '50px',
-    zIndex: '99'
+const CustomSelect = styled(Select)({
+    '& .MuiSelect-select.MuiSelect-outlined.MuiInputBase-input.MuiOutlinedInput-input': {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+    }
+})
+const CustomMenuItem = styled(MenuItem)({
+    display: 'flex', alignItems: 'center', gap: '10px',
 })
 
 
@@ -116,6 +122,9 @@ function CreateEvent({ open, handleClose, }) {
     const [priority, setPriority] = useState('');
     const [recurringOption, setRecurringOption] = useState('');
     const [duration, setDuration] = useState('');
+    const [category, setCategory] = useState('');
+    const [categories, setCategories] = useState(null);
+    const { user } = useContext(UserContext)
 
 
     const handleDateChange = (newDate) => {
@@ -136,6 +145,11 @@ function CreateEvent({ open, handleClose, }) {
             const user = auth.currentUser;
             const userId = user.uid;
 
+            const NewCategory = categories.filter((e) => {
+                return e.name === category
+            })[0]
+
+
             // Create a new document in the "reminders" collection with a generated ID
             const remindersCollectionRef = collection(firestore, 'reminders');
             const newReminderDocRef = await addDoc(remindersCollectionRef, {
@@ -147,7 +161,8 @@ function CreateEvent({ open, handleClose, }) {
                 priority: priority,
                 userId: userId, // Include the user ID in the reminder document
                 recurringOption: recurringOption, // Include the selected recurring option
-                duration: duration, // Include the duration of the reminder
+                duration: duration, // Include the duration of the reminder,
+                category: NewCategory
             });
 
             // Clear input fields
@@ -167,6 +182,29 @@ function CreateEvent({ open, handleClose, }) {
         }
     };
 
+    const getCategories = async () => {
+        const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
+        const docSnap = await getDoc(categoryDocRef)
+
+        if (docSnap.exists()) {
+            setCategories(docSnap.data().categories)
+        } else {
+            console.log('NOT FOUND')
+        }
+    }
+
+    useEffect(() => {
+        if (user.currentUser && categories === null) {
+            setTimeout(() => {
+                getCategories();
+            }, 400);
+        }
+    }, [user.currentUser])
+
+    const changeCategory = (e) => {
+        setCategory(e.target.value);
+    }
+
     return (
 
         <CustomModal
@@ -179,6 +217,16 @@ function CreateEvent({ open, handleClose, }) {
                     <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
                     <Typography variant='h4'>Description</Typography>
                     <StyledTextarea placeholder={'Add a more detailed description...'} value={description} onChange={(e) => setDescription(e.target.value)} />
+                    <div>
+                        <Typography variant='h6'>Category</Typography>
+                        <CustomSelect value={category} onChange={(e) => changeCategory(e)}>
+                            {categories && categories.map((c, idx) => (
+                                <CustomMenuItem key={idx} value={c.name} sx={{ display: 'flex', alignItems: 'center', gap: '10px', }}>
+                                    <Typography sx={{ display: 'inline-block' }}>{c.name}</Typography><BsCircleFill color={c.color} />
+                                </CustomMenuItem>
+                            ))}
+                        </CustomSelect>
+                    </div>
                     <Typography variant='h4'>Activity</Typography>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                         <ProfileIcon img='default' />
@@ -234,18 +282,18 @@ function CreateEvent({ open, handleClose, }) {
                         <div>
                             <FormLabel>Priority</FormLabel>
                             <StyledSelect value={priority} onChange={(e) => setPriority(e.target.value)}>
-                                <MenuItem value={'low'}>
+                                <CustomMenuItem value={'low'} sx={{}}>
                                     <Typography variant='subtitle1'>Low</Typography>
                                     <BsCircleFill color={theme.palette.success.light} />
-                                </MenuItem>
-                                <MenuItem value={'medium'}>
+                                </CustomMenuItem>
+                                <CustomMenuItem value={'medium'}>
                                     <Typography variant='subtitle1'>Medium</Typography>
                                     <BsCircleFill color={theme.palette.warning.light} />
-                                </MenuItem>
-                                <MenuItem value={'high'}>
+                                </CustomMenuItem>
+                                <CustomMenuItem value={'high'}>
                                     <Typography variant='subtitle1'>High</Typography>
                                     <BsCircleFill color={theme.palette.error.light} />
-                                </MenuItem>
+                                </CustomMenuItem>
                             </StyledSelect>
                         </div>
                         <div>
@@ -257,7 +305,7 @@ function CreateEvent({ open, handleClose, }) {
                                 <MenuItem value="1 year">1 year</MenuItem>
                             </StyledSelect>
                         </div>
-                        <div style={{ display: 'flex', gap: '10px', flexDirection: 'row' }}>
+                        <div style={{ display: 'flex', gap: '10px', flexDirection: 'row', }}>
                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
                             <CustomButton onClick={submit} size={'s'} text={'Create'} color={1} />
                         </div>

@@ -59,9 +59,11 @@ function Header() {
     }
 
     useEffect(() => {
-        if (user.currentUser === null) {
-            setUser(auth)
-        }
+        setTimeout(() => {
+            if (user.currentUser === null) {
+                setUser(auth)
+            }
+        }, 300)
     })
 
     return (

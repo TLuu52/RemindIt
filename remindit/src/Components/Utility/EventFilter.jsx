@@ -78,8 +78,8 @@ function EventFilter() {
             </Top>
             <hr />
             <List>
-                {categories && categories.map(category => (
-                    <ListItem key={category.id}>
+                {categories && categories.map((category, idx) => (
+                    <ListItem key={idx}>
                         <ItemTitle>
                             <BsCircleFill size={14} color={category.color} />
                             <Typography variant="h6">{category.name}</Typography>

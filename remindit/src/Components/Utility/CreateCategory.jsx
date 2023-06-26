@@ -8,6 +8,7 @@ import { useTheme } from '@emotion/react';
 import { FieldValue, collection, doc, getDoc, query, updateDoc, where, setDoc } from 'firebase/firestore';
 import { auth, firestore } from '../../firebase';
 import { UserContext } from '../../App';
+import { BsCircle, BsCircleFill } from 'react-icons/bs';
 
 const CustomModal = styled(Modal)(({ }) => ({
     display: 'grid',
@@ -43,8 +44,13 @@ const CategoryItem = styled('div')(({ theme }) => ({
     alignItems: 'center',
     padding: '8px',
     borderRadius: '4px',
-    background: theme.palette.grey[200],
-    marginBottom: '4px'
+    background: theme.palette.primary.dark,
+    marginBottom: '4px',
+    '& div': {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+    }
 }))
 
 function CreateCategory({ open, handleClose }) {
@@ -134,7 +140,9 @@ function CreateCategory({ open, handleClose }) {
                 {categories &&
                     categories.map((category) => (
                         <CategoryItem key={category.name}>
-                            <span>{category.name}</span>
+                            <div>
+                                <Typography variant='body1'>{category.name}</Typography> <BsCircleFill color={category.color} />
+                            </div>
                             <CustomButton
                                 color={2}
                                 text="Delete"
@@ -144,7 +152,7 @@ function CreateCategory({ open, handleClose }) {
                         </CategoryItem>
                     ))}
             </Box>
-        </CustomModal>
+        </CustomModal >
     )
 }
 

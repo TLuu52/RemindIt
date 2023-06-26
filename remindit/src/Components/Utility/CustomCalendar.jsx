@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { styled } from '@mui/material';
 import Calendar from 'react-calendar';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { auth, firestore } from "../../firebase";
+import { UserContext } from '../../App';
 
 const Container = styled('div')(({ theme }) => ({
     '& .react-calendar': {
@@ -77,6 +78,7 @@ const Container = styled('div')(({ theme }) => ({
 function CustomCalendar({ onChange, value }) {
     const [reminders, setReminders] = useState([]);
     const [userId, setUserId] = useState('');
+    const { user } = useContext(UserContext)
     const [recurringReminders, setRecurringReminders] = useState([]);
 
     useEffect(() => {
@@ -114,9 +116,12 @@ function CustomCalendar({ onChange, value }) {
                 console.error('Error fetching reminders:', error);
             }
         };
-
-        fetchReminders();
-    }, []);
+        if (user.currentUser) {
+            setTimeout(() => {
+                fetchReminders();
+            }, 400);
+        }
+    }, [user.currentUser, auth]);
 
     const getRecurringReminders = (recurringReminders, currentDate) => {
         const updatedReminders = [];

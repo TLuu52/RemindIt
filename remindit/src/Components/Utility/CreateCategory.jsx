@@ -5,7 +5,7 @@ import CustomButton from './CustomButton';
 import styled from '@emotion/styled';
 import CustomInput from './CustomInput';
 import { useTheme } from '@emotion/react';
-import { FieldValue, collection, doc, getDoc, query, updateDoc, where } from 'firebase/firestore';
+import { FieldValue, collection, doc, getDoc, query, updateDoc, where, setDoc } from 'firebase/firestore';
 import { auth, firestore } from '../../firebase';
 import { UserContext } from '../../App';
 
@@ -36,6 +36,17 @@ const End = styled('div')({
     width: '100%',
     gap: '10px'
 })
+
+const CategoryItem = styled('div')(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '8px',
+    borderRadius: '4px',
+    background: theme.palette.grey[200],
+    marginBottom: '4px'
+}))
+
 function CreateCategory({ open, handleClose }) {
     const theme = useTheme();
 
@@ -58,21 +69,44 @@ function CreateCategory({ open, handleClose }) {
     useEffect(() => {
         if (user.currentUser && categories === null) {
             setTimeout(() => {
-                getCategories()
-            }, 400)
+                getCategories();
+            }, 400);
         }
-    })
+    }, [user.currentUser, categories]);
 
     const onSubmit = async () => {
-        setCategories([...categories, { name: categoryName, color: color }])
+        const newCategory = { name: categoryName, color: color };
+        const updatedCategories = categories ? [...categories, newCategory] : [newCategory];
+        setCategories(updatedCategories);
+
+        const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
+        const docSnap = await getDoc(categoryDocRef);
+
+        if (docSnap.exists()) {
+            await updateDoc(categoryDocRef, {
+                categories: updatedCategories
+            });
+        } else {
+            await setDoc(categoryDocRef, {
+                categories: updatedCategories
+            });
+        }
+
+        getCategories();
+        handleClose();
+    };
+
+    const onDeleteCategory = async (category) => {
+        const updatedCategories = categories.filter((cat) => cat !== category);
+        setCategories(updatedCategories);
 
         const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
         await updateDoc(categoryDocRef, {
-            categories: [...categories, { name: categoryName, color: color }]
-        })
-        getCategories()
-    }
+            categories: updatedCategories
+        });
 
+        getCategories();
+    };
 
     return (
         <CustomModal
@@ -96,6 +130,19 @@ function CreateCategory({ open, handleClose }) {
                     <CustomButton color={0} text="Cancel" size='s' onClick={handleClose} />
                     <CustomButton color={1} text="Save" size='s' onClick={onSubmit} />
                 </End>
+                <Typography variant='h4'>Categories</Typography>
+                {categories &&
+                    categories.map((category) => (
+                        <CategoryItem key={category.name}>
+                            <span>{category.name}</span>
+                            <CustomButton
+                                color={2}
+                                text="Delete"
+                                size="s"
+                                onClick={() => onDeleteCategory(category)}
+                            />
+                        </CategoryItem>
+                    ))}
             </Box>
         </CustomModal>
     )

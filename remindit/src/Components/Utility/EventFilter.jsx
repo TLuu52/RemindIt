@@ -78,12 +78,9 @@ function EventFilter() {
             </Top>
             <hr />
             <List>
-                {categories.map(category =>
-
-                (
-                    <ListItem>
+                {categories && categories.map(category => (
+                    <ListItem key={category.id}>
                         <ItemTitle>
-                            {/* COLOR MUST BE CHANGED TO FIT WHAT USER STORES FOR THIS CATEGORY */}
                             <BsCircleFill size={14} color={category.color} />
                             <Typography variant="h6">{category.name}</Typography>
                         </ItemTitle>

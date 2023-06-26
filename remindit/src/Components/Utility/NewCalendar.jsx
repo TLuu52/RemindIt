@@ -1,6 +1,6 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc} from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 
@@ -141,6 +141,7 @@ function NewCalendar({ date, setDate }) {
 
                 // Execute the query and get the query snapshot
                 const querySnapshot = await getDocs(remindersQuery);
+                console.log(querySnapshot, user.uid)
 
                 // Map the query snapshot to an array of reminder objects
                 const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
@@ -301,6 +302,7 @@ function NewCalendar({ date, setDate }) {
                         const timeDiff = reminderDate.getTime() - currentDate.getTime();
                         const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
                         progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
+                        console.log(reminders)
                     }
 
                     return (

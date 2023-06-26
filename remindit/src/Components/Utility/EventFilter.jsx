@@ -1,5 +1,7 @@
 import { Button, Container, Switch, Typography, styled } from "@mui/material"
+import { useState } from "react"
 import { BsCircleFill, BsPlus } from "react-icons/bs"
+import CreateCategory from "./CreateCategory"
 
 const CustomContainer = styled(Container)(({ theme }) => ({
     background: theme.palette.primary.border,
@@ -36,11 +38,15 @@ const ItemTitle = styled('div')({
 })
 
 function EventFilter() {
+    const [open, setOpen] = useState(false)
+
+    const handleClose = () => setOpen(false)
+
     return (
         <CustomContainer>
             <Top>
                 <Typography variant="h6">Events</Typography>
-                <Button sx={{ borderRadius: '50%', height: 'fit-content', width: 'fit-content', padding: '0', minWidth: 'auto' }}>
+                <Button sx={{ borderRadius: '50%', height: 'fit-content', width: 'fit-content', padding: '0', minWidth: 'auto' }} onClick={() => setOpen(true)}>
                     <BsPlus size={28} />
                 </Button>
             </Top>
@@ -87,6 +93,7 @@ function EventFilter() {
                     <Switch />
                 </ListItem>
             </List>
+            <CreateCategory open={open} handleClose={handleClose} />
         </CustomContainer>
     )
 }

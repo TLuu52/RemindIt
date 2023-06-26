@@ -1,11 +1,12 @@
 import { Box, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper, styled, useTheme } from '@mui/material';
 import { BsBellFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
-import { useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import Logo from './Logo';
+import { UserContext } from '../../App';
 
 
 const End = styled('div')({
@@ -32,6 +33,7 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
 function Header() {
     const theme = useTheme();
     const [open, setOpen] = useState(false)
+    const { setUser, user } = useContext(UserContext)
     const anchorRef = useRef(null);
     const navigate = useNavigate();
 
@@ -55,6 +57,12 @@ function Header() {
         console.log(auth)
         navigate('/')
     }
+
+    useEffect(() => {
+        if (user.currentUser === null) {
+            setUser(auth)
+        }
+    })
 
     return (
         <End>

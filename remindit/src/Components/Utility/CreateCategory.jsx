@@ -1,12 +1,13 @@
-import { Box, FormLabel, Input, InputLabel, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography } from '@mui/material';
-import React, { useState } from 'react'
-import ProfileIcon from './ProfileIcon';
-import { DatePicker, TimePicker } from '@mui/x-date-pickers';
-import { BsCircleFill } from 'react-icons/bs';
+import { Box, InputLabel, Modal, Typography } from '@mui/material';
+import { useContext, useEffect, useState } from 'react'
+
 import CustomButton from './CustomButton';
 import styled from '@emotion/styled';
 import CustomInput from './CustomInput';
 import { useTheme } from '@emotion/react';
+import { FieldValue, collection, doc, getDoc, query, updateDoc, where } from 'firebase/firestore';
+import { auth, firestore } from '../../firebase';
+import { UserContext } from '../../App';
 
 const CustomModal = styled(Modal)(({ }) => ({
     display: 'grid',
@@ -27,7 +28,7 @@ const Flex = styled('div')(({ }) => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '60%',
-    minWidth: '600px'
+    minWidth: '700px'
 }))
 const End = styled('div')({
     display: 'flex',
@@ -40,6 +41,37 @@ function CreateCategory({ open, handleClose }) {
 
     const [color, setColor] = useState(theme.palette.primary.main);
     const [categoryName, setCategoryName] = useState('');
+    const [categories, setCategories] = useState(null)
+    const { user } = useContext(UserContext)
+
+    const getCategories = async () => {
+        const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
+        const docSnap = await getDoc(categoryDocRef)
+
+        if (docSnap.exists()) {
+            setCategories(docSnap.data().categories)
+        } else {
+            console.log('NOT FOUND')
+        }
+    }
+
+    useEffect(() => {
+        if (user.currentUser && categories === null) {
+            setTimeout(() => {
+                getCategories()
+            }, 400)
+        }
+    })
+
+    const onSubmit = async () => {
+        setCategories([...categories, { name: categoryName, color: color }])
+
+        const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
+        await updateDoc(categoryDocRef, {
+            categories: [...categories, { name: categoryName, color: color }]
+        })
+        getCategories()
+    }
 
 
     return (
@@ -62,7 +94,7 @@ function CreateCategory({ open, handleClose }) {
                 <hr />
                 <End>
                     <CustomButton color={0} text="Cancel" size='s' onClick={handleClose} />
-                    <CustomButton color={1} text="Save" size='s' />
+                    <CustomButton color={1} text="Save" size='s' onClick={onSubmit} />
                 </End>
             </Box>
         </CustomModal>

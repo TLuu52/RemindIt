@@ -118,44 +118,47 @@ function NewCalendar({ date, setDate }) {
     useEffect(() => {
         // This effect fetches reminders from Firestore and updates the reminders state
         const fetchReminders = async () => {
-            try {
-                // Create a reference to the "reminders" collection
-                const remindersCollectionRef = collection(firestore, 'reminders');
+            setTimeout(async () => {
 
-                // Get the current date
-                const currentDate = new Date();
+                try {
+                    // Create a reference to the "reminders" collection
+                    const remindersCollectionRef = collection(firestore, 'reminders');
 
-                // Get the currently authenticated user
-                const user = auth.currentUser;
-                if (!user) {
-                    // User is not signed in, handle accordingly
-                    return;
+                    // Get the current date
+                    const currentDate = new Date();
+
+                    // Get the currently authenticated user
+                    const user = auth.currentUser;
+                    if (!user) {
+                        // User is not signed in, handle accordingly
+                        return;
+                    }
+
+                    // Build the query to fetch reminders for the specific user and current date
+                    const remindersQuery = query(
+                        remindersCollectionRef,
+                        where('userId', '==', user.uid),
+                        where('date', '>=', Timestamp.fromDate(currentDate))
+                    );
+
+                    // Execute the query and get the query snapshot
+                    const querySnapshot = await getDocs(remindersQuery);
+                    console.log(querySnapshot, user.uid)
+
+                    // Map the query snapshot to an array of reminder objects
+                    const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+
+                    setReminders(fetchedReminders);
+
+                    console.log('Fetched reminders:', fetchedReminders); // Log fetched reminders
+                } catch (error) {
+                    console.error('Error fetching reminders:', error);
                 }
-
-                // Build the query to fetch reminders for the specific user and current date
-                const remindersQuery = query(
-                    remindersCollectionRef,
-                    where('userId', '==', user.uid),
-                    where('date', '>=', Timestamp.fromDate(currentDate))
-                );
-
-                // Execute the query and get the query snapshot
-                const querySnapshot = await getDocs(remindersQuery);
-                console.log(querySnapshot, user.uid)
-
-                // Map the query snapshot to an array of reminder objects
-                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
-
-                setReminders(fetchedReminders);
-
-                console.log('Fetched reminders:', fetchedReminders); // Log fetched reminders
-            } catch (error) {
-                console.error('Error fetching reminders:', error);
-            }
+            }, 400)
         };
 
         fetchReminders();
-    }, [date]);
+    }, [date, auth]);
 
     // Fetch the data from the "NotesAttachments" collection
     useEffect(() => {

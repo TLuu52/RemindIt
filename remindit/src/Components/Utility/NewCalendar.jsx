@@ -87,7 +87,7 @@ function NewCalendar({ date, setDate }) {
     const [reminders, setReminders] = useState([]);
     const [selectedReminder, setSelectedReminder] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
-    const [attachments, setAttachments] = useState(null);
+    const [uploadedAttachment, setUploadedAttachment] = useState(null);
     const [notes, setNotes] = useState('');
 
 
@@ -293,7 +293,6 @@ function NewCalendar({ date, setDate }) {
                                     multiline
                                     rows={4}
                                     fullWidth
-                                    // Add appropriate state and onChange handler for notes
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                 />
@@ -306,14 +305,37 @@ function NewCalendar({ date, setDate }) {
                                     type="file"
                                     id="attachment-upload"
                                     accept=".pdf,.doc,.docx"
-                                    onChange={(e) => setAttachments(e.target.files[0])}
+                                    onChange={(e) => setUploadedAttachment(e.target.files[0])}
                                 />
                             </div>
+                            {uploadedAttachment && (
+                                <div>
+                                    <Typography variant="subtitle1">Saved Attachment:</Typography>
+                                    <Typography>
+                                        <a href={URL.createObjectURL(uploadedAttachment)} download={uploadedAttachment.name}>
+                                            {uploadedAttachment.name}
+                                        </a>
+                                    </Typography>
+                                </div>
+                            )}
                         </>
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={''}>Submit</Button>
+                    <Button
+                        onClick={() => {
+                            // Save the uploaded attachment and perform any necessary actions
+                            if (uploadedAttachment) {
+                                // Save the attachment and handle further actions (e.g., displaying download/view options)
+                                console.log('Attachment:', uploadedAttachment);
+                            }
+                            // Save the notes
+                            console.log('Notes:', notes);
+                            closePopup();
+                        }}
+                    >
+                        Submit
+                    </Button>
                     <Button onClick={closePopup}>Close</Button>
                 </DialogActions>
             </Dialog>

@@ -80,21 +80,30 @@ const ContactForm = () => {
                     onChange={(e) => setFirstName(e.target.value)}
                     fullWidth
                     margin="normal"
+                    inputProps={{ style: { color: 'white' } }}
+                    InputLabelProps={{ style: { color: 'white' } }}
                 />
+
                 <TextField
                     label="Last Name"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     fullWidth
                     margin="normal"
+                    inputProps={{ style: { color: 'white' } }}
+                    InputLabelProps={{ style: { color: 'white' } }}
                 />
+
                 <TextField
                     label="Issue Title"
                     value={issueTitle}
                     onChange={(e) => setIssueTitle(e.target.value)}
                     fullWidth
                     margin="normal"
+                    inputProps={{ style: { color: 'white' } }}
+                    InputLabelProps={{ style: { color: 'white' } }}
                 />
+
                 <TextField
                     label="Description"
                     value={description}
@@ -103,6 +112,8 @@ const ContactForm = () => {
                     multiline
                     rows={4}
                     margin="normal"
+                    inputProps={{ style: { color: 'white' } }}
+                    InputLabelProps={{ style: { color: 'white' } }}
                 />
                 <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                     <Button variant="contained" type="submit" sx={{ marginRight: '10px' }}>

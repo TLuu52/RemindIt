@@ -118,6 +118,10 @@ const ContactForm = () => {
                 autoHideDuration={3000}
                 onClose={handleCloseNotification}
                 message="Form submitted successfully!"
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                }}
             />
         </Box>
     );

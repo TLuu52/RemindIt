@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Box, Button, TextField, Typography, styled, Snackbar } from '@mui/material';
 import Header from './Utility/Header';
 import { Link } from 'react-router-dom';
+import { collection, addDoc, getDocs, setDoc, Timestamp, doc, getDoc } from "firebase/firestore"
+import { auth, firestore } from "../firebase"
 
 const Page = styled('div')({
     padding: '20px',
@@ -25,20 +27,35 @@ const ContactForm = () => {
     const [description, setDescription] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Logic for handling form submission goes here
-        console.log('Form submitted!');
-        console.log('First Name:', firstName);
-        console.log('Last Name:', lastName);
-        console.log('Issue Title:', issueTitle);
-        console.log('Description:', description);
-        // Clear form fields
-        setFirstName('');
-        setLastName('');
-        setIssueTitle('');
-        setDescription('');
-        setIsSubmitted(true);
+        try {
+            // Create a new document in the "issues" collection
+            const issuesCollectionRef = collection(firestore, 'issues');
+            const newIssueDocRef = await addDoc(issuesCollectionRef, {
+                firstName: firstName,
+                lastName: lastName,
+                issueTitle: issueTitle,
+                description: description,
+            });
+
+            console.log('Form submitted!');
+            console.log('First Name:', firstName);
+            console.log('Last Name:', lastName);
+            console.log('Issue Title:', issueTitle);
+            console.log('Description:', description);
+
+            // Clear form fields
+            setFirstName('');
+            setLastName('');
+            setIssueTitle('');
+            setDescription('');
+            setIsSubmitted(true);
+
+            console.log('Issue saved successfully. Document ID:', newIssueDocRef.id);
+        } catch (error) {
+            console.error('Error adding document: ', error);
+        }
     };
 
     const handleCancel = () => {

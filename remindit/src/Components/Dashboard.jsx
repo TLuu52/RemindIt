@@ -137,7 +137,7 @@ function Dashboard() {
                         Email: <a href="mailto:reminditsup@gmail.com">reminditsup@gmail.com</a>
                     </Typography>
                     <Typography variant="h5">
-                        <Link to="/about">About Us</Link>
+                        <Link to="/About">About Us</Link>
                     </Typography>
                     <Typography variant="h5" sx={{ marginTop: '2px' }}>
                         <Link to="/contact">Contact Us</Link>

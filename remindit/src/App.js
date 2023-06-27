@@ -3,6 +3,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom"; // Impor
 import LoginForm from "./Components/loginform"; // Importing the LoginForm component
 import SignUp from "./Components/SignUp"; // Importing SignUp component
 import ProfileSettings from "./Components/ProfileSettings";// Importing ProfileSettings component
+import AboutUs from './Components/AboutUs';
+import ContactUs from './Components/ContactUs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { auth } from './firebase';
@@ -58,6 +60,14 @@ const router = createBrowserRouter([
   {
     path: '/profile', // Access Profile page manually with with this path
     element: <ProfileSettings />
+  },
+  {
+    path: '/About', // Access Dashboard page manually with with this path
+    element: <AboutUs />
+  },
+  {
+    path: '/Contact', // Access Dashboard page manually with with this path
+    element: <ContactUs />
   },
   {
     path: '/Dashboard', // Access Dashboard page manually with with this path

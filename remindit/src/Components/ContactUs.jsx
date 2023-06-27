@@ -137,9 +137,6 @@ const ContactUs = () => {
                 <Typography variant="body1" sx={{ marginBottom: '10px' }}>
                     Email: <a href="mailto:reminditsup@gmail.com">reminditsup@gmail.com</a>
                 </Typography>
-                <Typography variant="body1" sx={{ marginBottom: '10px' }}>
-                    Phone: <a href="tel:+11234567890">+1 123 456 7890</a>
-                </Typography>
                 <Typography variant="body1">
                     You can also visit our <Link to="/about">About Us</Link> page to learn more about our team and mission.
                 </Typography>

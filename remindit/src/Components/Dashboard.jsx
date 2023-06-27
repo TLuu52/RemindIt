@@ -132,6 +132,31 @@ const BottomRight = styled('div')(({ theme }) => ({
     }
 }))
 
+// Create a new component for the filter section
+function FilterSectionComponent({ keyword, selectedCategory, handleKeywordChange, handleCategoryChange, handleFilterSubmit }) {
+    return (
+        <div>
+            <FilterLabel>Keyword:</FilterLabel>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <FilterInput
+                    type="text"
+                    placeholder="Enter keyword"
+                    value={keyword}
+                    onChange={handleKeywordChange}
+                    style={{ flex: 1, marginRight: '8px' }}
+                />
+                <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
+            </div>
+            <FilterLabel>Category:</FilterLabel>
+            <select value={selectedCategory} onChange={handleCategoryChange}>
+                <option value="">All</option>
+                <option value="category1">Category 1</option>
+                <option value="category2">Category 2</option>
+                <option value="category3">Category 3</option>
+            </select>
+        </div>
+    );
+}
 
 function Dashboard() {
 
@@ -140,9 +165,12 @@ function Dashboard() {
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [searchTerm, setSearchTerm] = useState('');
-    const [showFilter, setShowFilter] = useState(false); // State to manage filter section visibility
     const [keyword, setKeyword] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [filteredReminders, setFilteredReminders] = useState([]); // Initialize an empty array for filtered reminders
+    const [showFilter, setShowFilter] = useState(false); // State to manage filter section visibility
+
+
 
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
@@ -157,8 +185,14 @@ function Dashboard() {
     };
 
     const handleSearch = () => {
-        // Handle the search functionality here
-        console.log('Search term:', searchTerm);
+        // Perform the search functionality here
+        const filteredReminders = reminders.filter(reminder =>
+            reminder.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredReminders(filteredReminders);
+
+        // Hide the filter section after search
+        setShowFilter(false);
     };
 
     const toggleFilter = () => {
@@ -177,41 +211,58 @@ function Dashboard() {
         console.log('Selected Category:', selectedCategory);
     };
 
-    
+    useEffect(() => {
+        const fetchReminders = async () => {
+            // Fetch the reminders from the database
+            const remindersCollection = collection(firestore, 'reminders');
+            const remindersQuery = query(remindersCollection, where('userId', '==', auth.currentUser.uid));
+            const snapshot = await getDocs(remindersQuery);
 
-    
+            // Convert the snapshot data into an array of reminders
+            const remindersData = snapshot.docs.map(doc => doc.data());
+
+            // Update the state with the fetched reminders
+            setReminders(remindersData);
+        };
+
+        // Call the fetchReminders function when the component mounts
+        fetchReminders();
+    }, []);
+
+
     return (
         <Page>
             <Header />
             <Main>
                 <Left>
-                    <CustomCalendar onChange={onChange} value={value} reminders={reminders} /> {/* Pass reminders as prop */}
+                    <CustomCalendar onChange={onChange} value={value} reminders={reminders} />
                     <EventFilter />
                 </Left>
                 <Right>
                     <SearchBar onClick={toggleFilter}>
-                        <SearchInput type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                        <SearchInput
+                            type="text"
+                            placeholder="Search..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            list="suggestions"
+                        />
                         <SearchButton onClick={handleSearch}>Search</SearchButton>
-                        {showFilter && (
-                            <FilterSection>
-                                <FilterLabel>Keyword:</FilterLabel>
-                                <FilterInput
-                                    type="text"
-                                    placeholder="Enter keyword"
-                                    value={keyword}
-                                    onChange={handleKeywordChange}
-                                />
-                                <FilterLabel>Category:</FilterLabel>
-                                <select value={selectedCategory} onChange={handleCategoryChange}>
-                                    <option value="">All</option>
-                                    <option value="category1">Category 1</option>
-                                    <option value="category2">Category 2</option>
-                                    <option value="category3">Category 3</option>
-                                </select>
-                                <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
-                            </FilterSection>
-                        )}
                     </SearchBar>
+                    {showFilter && (
+                        <FilterSectionComponent
+                            keyword={keyword}
+                            selectedCategory={selectedCategory}
+                            handleKeywordChange={handleKeywordChange}
+                            handleCategoryChange={handleCategoryChange}
+                            handleFilterSubmit={handleFilterSubmit}
+                        />
+                    )}
+                    <datalist id="suggestions">
+                        {reminders.map((reminder) => (
+                            <option key={reminder.id} value={reminder.title} />
+                        ))}
+                    </datalist>
                     <NewCalendar date={value} setDate={onChange} reminders={reminders} />
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
@@ -219,8 +270,8 @@ function Dashboard() {
                     <CreateEvent open={open} handleClose={handleClose} />
                 </Right>
             </Main>
-        </Page >
-    )
+        </Page>
+    );
 }
 
 export default Dashboard

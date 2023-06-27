@@ -182,14 +182,11 @@ function NewCalendar({ date, setDate }) {
     };
 
     const handleSearch = () => {
-        // Perform the search functionality here
-        const filteredReminders = reminders.filter(reminder =>
-            reminder.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredReminders(filteredReminders);
-
-        // Hide the filter section after search
-        setShowFilter(false);
+        const foundReminder = reminders.find((reminder) => reminder.title === searchTerm);
+        if (foundReminder) {
+            setSelectedReminder(foundReminder);
+            setShowPopup(true);
+        }
     };
 
     const toggleFilter = () => {

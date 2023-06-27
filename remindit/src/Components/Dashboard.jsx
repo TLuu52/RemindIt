@@ -1,6 +1,6 @@
 import Header from './Utility/Header'
 import { Box, FormLabel, Input, Modal, OutlinedInput, Typography, styled } from '@mui/material'
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import CustomCalendar from './Utility/CustomCalendar';
 import EventFilter from './Utility/EventFilter';
@@ -18,6 +18,7 @@ import CustomButton from './Utility/CustomButton';
 import { auth, firestore, storage } from "../firebase";
 import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where } from "firebase/firestore";
 import CreateEvent from './Utility/CreateEvent';
+import { Link } from 'react-router-dom';
 
 
 const TopCorner = styled('div')({
@@ -30,8 +31,10 @@ const TopCorner = styled('div')({
 const Page = styled('div')({
     padding: '20px',
     width: '100%',
-    height: '100%'
-})
+    height: '100%',
+    overflow: 'auto', // Enable scrolling
+});
+
 const Main = styled('div')({
     display: 'flex',
     height: '100%',
@@ -80,6 +83,18 @@ const BottomRight = styled('div')(({ theme }) => ({
     }
 }))
 
+const BottomSection = styled('div')(({ theme }) => ({
+    marginTop: '40px',
+    padding: '20px',
+    background: theme.palette.primary.border,
+    borderRadius: '16px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+}));
+
+
 function Dashboard() {
 
 
@@ -116,6 +131,20 @@ function Dashboard() {
                     <CreateEvent open={open} handleClose={handleClose} />
                 </Right>
             </Main>
+            <BottomSection>
+                <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <Typography variant="body1">
+                        Email: <a href="mailto:reminditsup@gmail.com">reminditsup@gmail.com</a>
+                    </Typography>
+                    <Typography variant="h5">
+                        <Link to="/about">About Us</Link>
+                    </Typography>
+                    <Typography variant="h5" sx={{ marginTop: '2px' }}>
+                        <Link to="/contact">Contact Us</Link>
+                    </Typography>
+                </Box>
+                <Typography variant="body1">@remindit 2023</Typography>
+            </BottomSection>
         </Page>
     );
 }

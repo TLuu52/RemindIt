@@ -133,9 +133,6 @@ function Dashboard() {
             </Main>
             <BottomSection>
                 <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <Typography variant="body1">
-                        Email: <a href="mailto:reminditsup@gmail.com">reminditsup@gmail.com</a>
-                    </Typography>
                     <Typography variant="h5">
                         <Link to="/About">About Us</Link>
                     </Typography>

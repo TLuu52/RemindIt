@@ -492,15 +492,15 @@ function NewCalendar({ date, setDate }) {
 
             <Dialog open={showPopup} onClose={closePopup}>
                 <DialogTitle>
-                    <Typography sx={{ fontWeight: 'lighter' }}>{selectedReminder && selectedReminder.title}</Typography>
+                    <Typography sx={{ fontWeight: 'lighter', color: 'white' }}>{selectedReminder && selectedReminder.title}</Typography>
                 </DialogTitle>
                 <DialogContent>
                     {selectedReminder && (
                         <>
-                            <div>Priority: {selectedReminder.priority}</div>
-                            <div>Description: {selectedReminder.description}</div>
-                            <div>Activity: {selectedReminder.activity}</div>
-                            <div>Duration: {selectedReminder.duration}</div>
+                            <div style={{ color: 'white' }}>Priority: {selectedReminder.priority}</div>
+                            <div style={{ color: 'white' }}>Description: {selectedReminder.description}</div>
+                            <div style={{ color: 'white' }}>Activity: {selectedReminder.activity}</div>
+                            <div style={{ color: 'white' }}>Duration: {selectedReminder.duration}</div>
                             <div>
                                 <TextField
                                     label="Notes"
@@ -510,9 +510,10 @@ function NewCalendar({ date, setDate }) {
                                     fullWidth
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
+                                    InputLabelProps={{ style: { color: 'white' } }}
                                 />
                             </div>
-                            <div>
+                            <div style={{ color: 'white' }}>
                                 <label htmlFor="attachment-upload">Upload Attachment:</label>
                             </div>
                             <div>
@@ -525,8 +526,8 @@ function NewCalendar({ date, setDate }) {
                             </div>
                             {uploadedAttachment && (
                                 <div>
-                                    <Typography variant="subtitle1">Saved Attachment:</Typography>
-                                    <Typography>
+                                    <Typography variant="subtitle1" style={{ color: 'white' }}>Saved Attachment:</Typography>
+                                    <Typography style={{ color: 'white' }}>
                                         <a href={URL.createObjectURL(uploadedAttachment)} download={uploadedAttachment.name}>
                                             {uploadedAttachment.name}
                                         </a>
@@ -537,12 +538,12 @@ function NewCalendar({ date, setDate }) {
                             {/* Display notes and attachments */}
                             {notesAttachments.map((item) => (
                                 <div key={item.id}>
-                                    <Typography variant="subtitle1">Notes:</Typography>
-                                    <Typography>{item.notes}</Typography>
+                                    <Typography variant="subtitle1" style={{ color: 'white' }}>Notes:</Typography>
+                                    <Typography style={{ color: 'white' }}>{item.notes}</Typography>
                                     {item.attachmentUrl && (
                                         <div>
-                                            <Typography variant="subtitle1">Attachment:</Typography>
-                                            <Typography>
+                                            <Typography variant="subtitle1" style={{ color: 'white' }}>Attachment:</Typography>
+                                            <Typography style={{ color: 'white' }}>
                                                 <a href={item.attachmentUrl} target="_blank" rel="noopener noreferrer">
                                                     {item.attachmentUrl}
                                                 </a>

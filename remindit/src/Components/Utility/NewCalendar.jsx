@@ -124,27 +124,31 @@ const FilterButton = styled('button')(({ theme }) => ({
 }));
 
 // Create a new component for the filter section
-function FilterSectionComponent({ keyword, selectedCategory, handleKeywordChange, handleCategoryChange, handleFilterSubmit }) {
+function FilterSectionComponent({ selectedCategory, selectedSortBy, handleCategoryChange, handleSortByChange, handleFilterSubmit }) {
     return (
-        <div>
-            <FilterLabel>Keyword:</FilterLabel>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <FilterInput
-                    type="text"
-                    placeholder="Enter keyword"
-                    value={keyword}
-                    onChange={handleKeywordChange}
-                    style={{ flex: 1, marginRight: '8px' }}
-                />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ display: 'flex' }}>
+                <div style={{ marginRight: '16px' }}>
+                    <FilterLabel>Priority:</FilterLabel>
+                    <select value={selectedCategory} onChange={handleCategoryChange}>
+                        <option value="">All</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div>
+                    <FilterLabel>Sort By:</FilterLabel>
+                    <select value={selectedSortBy} onChange={handleSortByChange}>
+                        <option value="created">Created</option>
+                        <option value="priority">Priority</option>
+                        <option value="title">Title</option>
+                    </select>
+                </div>
+            </div>
+            <div>
                 <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
             </div>
-            <FilterLabel>Category:</FilterLabel>
-            <select value={selectedCategory} onChange={handleCategoryChange}>
-                <option value="">All</option>
-                <option value="category1">Category 1</option>
-                <option value="category2">Category 2</option>
-                <option value="category3">Category 3</option>
-            </select>
         </div>
     );
 }
@@ -296,10 +300,8 @@ function NewCalendar({ date, setDate }) {
     const [attachments, setAttachments] = useState([])
     const [attachmentName, setAttachmentName] = useState('')
     const [attachmentURL, setAttachmentURL] = useState('')
-    const [discussionTitle, setDiscussionTitle] = useState('');
     const [discussionDescription, setDiscussionDescription] = useState('');
     const [discussionThreads, setDiscussionThreads] = useState([]);
-    const [filteredReminders, setFilteredReminders] = useState([]); // Initialize an empty array for filtered reminders
 
 
     const handleCategoryChange = (e) => {
@@ -316,10 +318,6 @@ function NewCalendar({ date, setDate }) {
 
     const toggleFilter = () => {
         setShowFilter(!showFilter); // Toggle filter section visibility
-    };
-
-    const handleKeywordChange = (e) => {
-        setKeyword(e.target.value);
     };
 
     const handleFilterSubmit = () => {
@@ -355,46 +353,46 @@ function NewCalendar({ date, setDate }) {
 
     const fetchReminders = async () => {
         setTimeout(async () => {
-          try {
-            // Create a reference to the "reminders" collection
-            const remindersCollectionRef = collection(firestore, 'reminders');
-      
-            // Get the current date
-            const currentDate = new Date();
-      
-            // Get the currently authenticated user
-            const user = auth.currentUser;
-            if (!user) {
-              // User is not signed in, handle accordingly
-              return;
+            try {
+                // Create a reference to the "reminders" collection
+                const remindersCollectionRef = collection(firestore, 'reminders');
+
+                // Get the current date
+                const currentDate = new Date();
+
+                // Get the currently authenticated user
+                const user = auth.currentUser;
+                if (!user) {
+                    // User is not signed in, handle accordingly
+                    return;
+                }
+
+                // Build the query to fetch reminders for the specific user and current date
+                const remindersQuery = query(
+                    remindersCollectionRef,
+                    where('userId', '==', user.uid),
+                    where('date', '>=', Timestamp.fromDate(currentDate))
+                );
+
+                // Execute the query and get the query snapshot
+                const querySnapshot = await getDocs(remindersQuery);
+
+                // Map the query snapshot to an array of reminder objects
+                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+
+                setReminders(fetchedReminders);
+
+                // Load the saved discussion threads from localStorage
+                const savedThreads = localStorage.getItem('discussionThreads');
+                if (savedThreads) {
+                    const parsedThreads = JSON.parse(savedThreads);
+                    setDiscussionThreads(parsedThreads);
+                }
+            } catch (error) {
+                console.error('Error fetching reminders:', error);
             }
-      
-            // Build the query to fetch reminders for the specific user and current date
-            const remindersQuery = query(
-              remindersCollectionRef,
-              where('userId', '==', user.uid),
-              where('date', '>=', Timestamp.fromDate(currentDate))
-            );
-      
-            // Execute the query and get the query snapshot
-            const querySnapshot = await getDocs(remindersQuery);
-      
-            // Map the query snapshot to an array of reminder objects
-            const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
-      
-            setReminders(fetchedReminders);
-      
-            // Load the saved discussion threads from localStorage
-            const savedThreads = localStorage.getItem('discussionThreads');
-            if (savedThreads) {
-              const parsedThreads = JSON.parse(savedThreads);
-              setDiscussionThreads(parsedThreads);
-            }
-          } catch (error) {
-            console.error('Error fetching reminders:', error);
-          }
         }, 400);
-      };
+    };
 
     useEffect(() => {
         // This effect fetches reminders from Firestore and updates the reminders state
@@ -595,19 +593,19 @@ function NewCalendar({ date, setDate }) {
 
     const handleSaveDiscussion = () => {
         const newDiscussionThread = {
-          activity: activity,
-          description: discussionDescription,
+            activity: activity,
+            description: discussionDescription,
         };
-      
+
         const updatedThreads = [...discussionThreads, newDiscussionThread];
-      
+
         // Save the updated threads in localStorage
         localStorage.setItem('discussionThreads', JSON.stringify(updatedThreads));
-      
+
         // Clear the input fields
         setActivity('');
         setDiscussionDescription('');
-      };
+    };
 
 
     return (
@@ -615,7 +613,7 @@ function NewCalendar({ date, setDate }) {
             <SearchBar onClick={toggleFilter}>
                 <SearchInput
                     type="text"
-                    placeholder="Search..."
+                    placeholder="Search by Title..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     list="suggestions"
@@ -624,9 +622,7 @@ function NewCalendar({ date, setDate }) {
             </SearchBar>
             {showFilter && (
                 <FilterSectionComponent
-                    keyword={keyword}
-                    selectedCategory={priority}
-                    handleKeywordChange={handleKeywordChange}
+                    selectedCategory={selectedCategory}
                     handleCategoryChange={handleCategoryChange}
                     handleFilterSubmit={handleFilterSubmit}
                 />

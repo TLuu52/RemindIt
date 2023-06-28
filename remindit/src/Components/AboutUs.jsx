@@ -1,7 +1,7 @@
 import Header from './Utility/Header';
 import { Box, Typography, styled } from '@mui/material';
+import reminderImage from '../Icons/reminder.png';
 import { Link } from 'react-router-dom';
-import ContactUs from './ContactUs';
 
 
 const Page = styled('div')({
@@ -14,30 +14,13 @@ const Page = styled('div')({
 const Main = styled('div')({
   display: 'flex',
   height: '100%',
-  gap: '20px',
+  justifyContent: 'center',
+  alignItems: 'center',
 });
 
-const Left = styled('div')(({ theme }) => ({
-  width: '25%',
-  maxWidth: '500px',
-  minWidth: '350px',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'top',
-  gap: '50px',
-  alignItems: 'center',
-  paddingTop: '40px',
-}));
-
-const Right = styled('div')(({ theme }) => ({
-  marginTop: '40px',
-  padding: '20px',
-  flexGrow: '1',
-  height: '90%',
-  borderRadius: '16px',
-  background: theme.palette.primary.border,
-  position: 'relative',
+const Content = styled('div')(({ theme }) => ({
+  maxWidth: '800px',
+  textAlign: 'center',
 }));
 
 const BottomSection = styled('div')(({ theme }) => ({
@@ -51,17 +34,27 @@ const BottomSection = styled('div')(({ theme }) => ({
   alignItems: 'center',
 }));
 
+
 const AboutUs = () => {
   return (
     <Page>
       <Header />
       <Main>
-        <Left>
-          {/* Content for the About Us page */}
-        </Left>
-        <Right>
-          {/* Content for the About Us page */}
-        </Right>
+        <Content>
+          <img src={reminderImage} alt="Reminder" style={{ width: '100%', marginTop: '20px' }} />
+          <Typography variant="h4" sx={{ marginBottom: '20px' }}>
+            About Us
+          </Typography>
+          <Typography variant="body1">
+            We are a reminder website dedicated to helping you stay organized and never miss an important task or event again. Our mission is to provide a simple and efficient platform that allows you to set reminders for various aspects of your life, such as appointments, deadlines, birthdays, and more.
+          </Typography>
+          <Typography variant="body1">
+            With our intuitive interface and customizable reminder settings, you can easily create and manage reminders that suit your specific needs. Whether you prefer email notifications, push notifications on your mobile device, or both, our website has you covered.
+          </Typography>
+          <Typography variant="body1">
+            We understand the value of time and the importance of staying on top of your commitments. That's why we built this website—to empower you with the tools you need to stay organized, reduce stress, and make the most out of every day.
+          </Typography>
+        </Content>
       </Main>
       <BottomSection>
         <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>

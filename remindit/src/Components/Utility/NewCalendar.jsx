@@ -1,10 +1,10 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc, updateDoc, FieldValue } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
-import { BsClipboard, BsClipboard2, BsLink, BsPencil, BsPencilFill, BsPencilSquare, BsUpload } from 'react-icons/bs';
+import { BsClipboard, BsClipboard2, BsLink, BsPencil, BsPencilFill, BsPencilSquare, BsUpload, BsTrashFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import { FcEditImage } from 'react-icons/fc';
 
@@ -498,18 +498,44 @@ function NewCalendar({ date, setDate }) {
         }
     };
 
-    const deleteNotesAttachment = async (id) => {
+    const editAttachment = async (id, newName, newAttachmentURL) => {
         try {
-            // Delete the document from the "NotesAttachments" collection
-            const notesattachmentsDocRef = doc(firestore, 'NotesAttachments', id);
-            await deleteDoc(notesattachmentsDocRef);
+            // Update the document in the "reminders" collection
+            const reminderDocRef = doc(firestore, 'reminders', id);
+            await updateDoc(reminderDocRef, {
+                attachments: FieldValue.arrayUnion({
+                    name: newName, // Update the name of the attachment
+                    attachmentURL: newAttachmentURL // Update the attachment URL if needed
+                })
+            });
 
-            // Update the notesAttachments state by filtering out the deleted item
-            setNotesAttachments((prevNotesAttachments) => prevNotesAttachments.filter((item) => item.id !== id));
+            // Update the attachments state with the modified attachment
+            setAttachments(prevAttachments =>
+                prevAttachments.map(item => {
+                    if (item.id === id) {
+                        return { ...item, name: newName, attachmentURL: newAttachmentURL };
+                    }
+                    return item;
+                })
+            );
         } catch (error) {
-            console.error('Error deleting notes and attachment: ', error);
+            console.error('Error editing attachment: ', error);
         }
     };
+
+    const deleteAttachment = async (id) => {
+        try {
+            // Delete the attachment document from the "reminders" collection
+            const attachmentDocRef = doc(firestore, 'reminders', id);
+            await deleteDoc(attachmentDocRef);
+
+            // Update the attachments state by filtering out the deleted item
+            setAttachments(prevAttachments => prevAttachments.filter(item => item.id !== id));
+        } catch (error) {
+            console.error('Error deleting attachment: ', error);
+        }
+    };
+
 
     const today = () => {
         setDate(new Date())
@@ -806,10 +832,11 @@ function NewCalendar({ date, setDate }) {
                                 </div>
                                 {/* <Attachment > */}
                                 {attachments && attachments.map(attachment => (
-                                    <Attachment>
+                                    <Attachment key={attachment.id}>
                                         <Typography variant='body1'>{attachment.name}</Typography>
                                         <div style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <BsPencilFill />
+                                            <BsPencilFill onClick={() => editAttachment(attachment.attachmentName)}/>
+                                            <BsTrashFill onClick={() => deleteAttachment(attachment.attachmentDocRef)} />
                                             <a style={{ cursor: 'pointer', color: 'inherit', display: 'grid', placeItems: 'center' }} onClick={() => navigator.clipboard.writeText(attachment.attachmentURL)}>
                                                 <BsClipboard2 />
                                             </a>

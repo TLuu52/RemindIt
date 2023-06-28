@@ -296,6 +296,9 @@ function NewCalendar({ date, setDate }) {
     const [attachments, setAttachments] = useState([])
     const [attachmentName, setAttachmentName] = useState('')
     const [attachmentURL, setAttachmentURL] = useState('')
+    const [discussionTitle, setDiscussionTitle] = useState('');
+    const [discussionDescription, setDiscussionDescription] = useState('');
+    const [discussionThreads, setDiscussionThreads] = useState([]);
     const [filteredReminders, setFilteredReminders] = useState([]); // Initialize an empty array for filtered reminders
 
 
@@ -352,7 +355,6 @@ function NewCalendar({ date, setDate }) {
 
     const fetchReminders = async () => {
         setTimeout(async () => {
-
             try {
                 // Create a reference to the "reminders" collection
                 const remindersCollectionRef = collection(firestore, 'reminders');
@@ -382,10 +384,16 @@ function NewCalendar({ date, setDate }) {
 
                 setReminders(fetchedReminders);
 
+                // Load the saved discussion threads from localStorage
+                const savedThreads = localStorage.getItem('discussionThreads');
+                if (savedThreads) {
+                    const parsedThreads = JSON.parse(savedThreads);
+                    setDiscussionThreads(parsedThreads);
+                }
             } catch (error) {
                 console.error('Error fetching reminders:', error);
             }
-        }, 400)
+        }, 400);
     };
 
     useEffect(() => {
@@ -585,6 +593,23 @@ function NewCalendar({ date, setDate }) {
         }
     };
 
+    const handleSaveDiscussion = () => {
+        const newDiscussionThread = {
+            activity: activity,
+            description: discussionDescription,
+        };
+
+        const updatedThreads = [...discussionThreads, newDiscussionThread];
+
+        // Save the updated threads in localStorage
+        localStorage.setItem('discussionThreads', JSON.stringify(updatedThreads));
+
+        // Clear the input fields
+        setActivity('');
+        setDiscussionDescription('');
+    };
+
+
     return (
         <Container>
             <SearchBar onClick={toggleFilter}>
@@ -715,7 +740,7 @@ function NewCalendar({ date, setDate }) {
             </Calendar>
 
             <CustomModal open={showPopup} onClose={closePopup}>
-                <Box>
+                <Box style={{ maxHeight: '80vh', overflow: 'auto' }}>
                     {selectedReminder && (
                         <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
                             <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -835,7 +860,7 @@ function NewCalendar({ date, setDate }) {
                                     <Attachment key={attachment.id}>
                                         <Typography variant='body1'>{attachment.name}</Typography>
                                         <div style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <BsPencilFill onClick={() => editAttachment(attachment.attachmentName)}/>
+                                            <BsPencilFill onClick={() => editAttachment(attachment.attachmentName)} />
                                             <BsTrashFill onClick={() => deleteAttachment(attachment.attachmentDocRef)} />
                                             <a style={{ cursor: 'pointer', color: 'inherit', display: 'grid', placeItems: 'center' }} onClick={() => navigator.clipboard.writeText(attachment.attachmentURL)}>
                                                 <BsClipboard2 />
@@ -854,10 +879,57 @@ function NewCalendar({ date, setDate }) {
                             <Title>Activity:</Title>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
                                 <ProfileIcon img='default' />
-                                <OutlinedInput sx={{ color: '#fff', }} placeholder={'Write a comment...'} value={activity} onChange={(e) => setActivity(e.target.value)} />
+                                <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={activity} onChange={(e) => setActivity(e.target.value)} />
                             </div>
-                            <Comments />
+                            {activity && (
+                                <div>
+                                    <Title>Discussions:</Title>
+                                    <div>
+                                        <Title variant="h6">Description:</Title>
+                                        <TextField
+                                            sx={{ color: '#fff' }}
+                                            multiline
+                                            rows={4}
+                                            placeholder="Enter a description..."
+                                            value={discussionDescription}
+                                            onChange={(e) => setDiscussionDescription(e.target.value)}
+                                            variant="outlined"
+                                            fullWidth
+                                        />
+                                    </div>
+                                    <Button variant="contained" color="primary" onClick={handleSaveDiscussion}>Save</Button>
+                                    <Comments activity={activity} />
+                                </div>
+                            )}
+                            <div>
+                                <Title>Discussion Threads:</Title>
+                                {discussionThreads.map((thread, index) => (
+                                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <ProfileIcon img='default' />
+                                        <div>
+                                            <Typography variant="h6">Activity: {thread.activity}</Typography>
+                                            <Typography variant="body1">Description: {thread.description}</Typography>
+                                            <div>
+                                                <OutlinedInput sx={{ color: '#fff' }} placeholder="Reply..." value={reply} onChange={(e) => setReply(e.target.value)} />
+                                                <Button variant="contained" color="primary" onClick={() => handleReply(thread.id)}>Reply</Button>
+                                            </div>
+                                            {thread.replies && (
+                                                <div>
+                                                    <Typography variant="body1">Replies:</Typography>
+                                                    {thread.replies.map((reply, index) => (
+                                                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <ProfileIcon img='default' />
+                                                            <Typography variant="body1">{reply}</Typography>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
+
                     )}
                     <CustomButton onClick={closePopup} text={'Close'} color={0} size={'s'} />
                     <CustomButton onClick={submit} text={'Submit'} color={1} size={'s'} />

@@ -355,46 +355,46 @@ function NewCalendar({ date, setDate }) {
 
     const fetchReminders = async () => {
         setTimeout(async () => {
-            try {
-                // Create a reference to the "reminders" collection
-                const remindersCollectionRef = collection(firestore, 'reminders');
-
-                // Get the current date
-                const currentDate = new Date();
-
-                // Get the currently authenticated user
-                const user = auth.currentUser;
-                if (!user) {
-                    // User is not signed in, handle accordingly
-                    return;
-                }
-
-                // Build the query to fetch reminders for the specific user and current date
-                const remindersQuery = query(
-                    remindersCollectionRef,
-                    where('userId', '==', user.uid),
-                    where('date', '>=', Timestamp.fromDate(currentDate))
-                );
-
-                // Execute the query and get the query snapshot
-                const querySnapshot = await getDocs(remindersQuery);
-
-                // Map the query snapshot to an array of reminder objects
-                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
-
-                setReminders(fetchedReminders);
-
-                // Load the saved discussion threads from localStorage
-                const savedThreads = localStorage.getItem('discussionThreads');
-                if (savedThreads) {
-                    const parsedThreads = JSON.parse(savedThreads);
-                    setDiscussionThreads(parsedThreads);
-                }
-            } catch (error) {
-                console.error('Error fetching reminders:', error);
+          try {
+            // Create a reference to the "reminders" collection
+            const remindersCollectionRef = collection(firestore, 'reminders');
+      
+            // Get the current date
+            const currentDate = new Date();
+      
+            // Get the currently authenticated user
+            const user = auth.currentUser;
+            if (!user) {
+              // User is not signed in, handle accordingly
+              return;
             }
+      
+            // Build the query to fetch reminders for the specific user and current date
+            const remindersQuery = query(
+              remindersCollectionRef,
+              where('userId', '==', user.uid),
+              where('date', '>=', Timestamp.fromDate(currentDate))
+            );
+      
+            // Execute the query and get the query snapshot
+            const querySnapshot = await getDocs(remindersQuery);
+      
+            // Map the query snapshot to an array of reminder objects
+            const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+      
+            setReminders(fetchedReminders);
+      
+            // Load the saved discussion threads from localStorage
+            const savedThreads = localStorage.getItem('discussionThreads');
+            if (savedThreads) {
+              const parsedThreads = JSON.parse(savedThreads);
+              setDiscussionThreads(parsedThreads);
+            }
+          } catch (error) {
+            console.error('Error fetching reminders:', error);
+          }
         }, 400);
-    };
+      };
 
     useEffect(() => {
         // This effect fetches reminders from Firestore and updates the reminders state
@@ -595,19 +595,19 @@ function NewCalendar({ date, setDate }) {
 
     const handleSaveDiscussion = () => {
         const newDiscussionThread = {
-            activity: activity,
-            description: discussionDescription,
+          activity: activity,
+          description: discussionDescription,
         };
-
+      
         const updatedThreads = [...discussionThreads, newDiscussionThread];
-
+      
         // Save the updated threads in localStorage
         localStorage.setItem('discussionThreads', JSON.stringify(updatedThreads));
-
+      
         // Clear the input fields
         setActivity('');
         setDiscussionDescription('');
-    };
+      };
 
 
     return (
@@ -883,7 +883,6 @@ function NewCalendar({ date, setDate }) {
                             </div>
                             {activity && (
                                 <div>
-                                    <Title>Discussions:</Title>
                                     <div>
                                         <Title variant="h6">Description:</Title>
                                         <TextField
@@ -909,21 +908,6 @@ function NewCalendar({ date, setDate }) {
                                         <div>
                                             <Typography variant="h6">Activity: {thread.activity}</Typography>
                                             <Typography variant="body1">Description: {thread.description}</Typography>
-                                            <div>
-                                                <OutlinedInput sx={{ color: '#fff' }} placeholder="Reply..." value={reply} onChange={(e) => setReply(e.target.value)} />
-                                                <Button variant="contained" color="primary" onClick={() => handleReply(thread.id)}>Reply</Button>
-                                            </div>
-                                            {thread.replies && (
-                                                <div>
-                                                    <Typography variant="body1">Replies:</Typography>
-                                                    {thread.replies.map((reply, index) => (
-                                                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                            <ProfileIcon img='default' />
-                                                            <Typography variant="body1">{reply}</Typography>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                 ))}

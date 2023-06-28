@@ -36,7 +36,6 @@ const CustomGoogleButton = () => {
     signInWithPopup(auth, provider)
       .then(async (result) => {
         // Handle successful sign-in
-        console.log(result.user);
         const userDocRef = doc(firestore, 'users', result.user.uid);
         const userDocSnapshot = await getDoc(userDocRef);
         if (!userDocSnapshot.exists()) {

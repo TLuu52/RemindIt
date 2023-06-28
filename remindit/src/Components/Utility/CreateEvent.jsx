@@ -152,18 +152,34 @@ function CreateEvent({ open, handleClose, }) {
 
             // Create a new document in the "reminders" collection with a generated ID
             const remindersCollectionRef = collection(firestore, 'reminders');
-            const newReminderDocRef = await addDoc(remindersCollectionRef, {
-                title: title,
-                description: description,
-                activity: activity,
-                time: Timestamp.fromDate(timeValue),
-                date: Timestamp.fromDate(dateValue),
-                priority: priority,
-                userId: userId, // Include the user ID in the reminder document
-                recurringOption: recurringOption, // Include the selected recurring option
-                duration: duration, // Include the duration of the reminder,
-                category: NewCategory
-            });
+            // const newReminderDocRef = await addDoc(remindersCollectionRef, {
+            //     title: title,
+            //     description: description,
+            //     activity: activity,
+            //     time: Timestamp.fromDate(timeValue),
+            //     date: Timestamp.fromDate(dateValue),
+            //     priority: priority,
+            //     userId: userId, // Include the user ID in the reminder document
+            //     recurringOption: recurringOption, // Include the selected recurring option
+            //     duration: duration, // Include the duration of the reminder,
+            //     category: NewCategory,
+            //     docId: remindersCollectionRef.id
+            // });
+            const newReminderDocRef = doc(collection(firestore, 'reminders'));
+            await setDoc(newReminderDocRef
+                , {
+                    title: title,
+                    description: description,
+                    activity: activity,
+                    time: Timestamp.fromDate(timeValue),
+                    date: Timestamp.fromDate(dateValue),
+                    priority: priority,
+                    userId: userId, // Include the user ID in the reminder document
+                    recurringOption: recurringOption, // Include the selected recurring option
+                    duration: duration, // Include the duration of the reminder,
+                    category: NewCategory,
+                    docId: newReminderDocRef.id
+                })
 
             // Clear input fields
             setTitle('');
@@ -306,7 +322,7 @@ function CreateEvent({ open, handleClose, }) {
                             </StyledSelect>
                         </div>
                         <div style={{ display: 'flex', gap: '10px', flexDirection: 'row', }}>
-                            <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} />
+                            <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} color={0} />
                             <CustomButton onClick={submit} size={'s'} text={'Create'} color={1} />
                         </div>
                     </Flex>

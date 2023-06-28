@@ -53,12 +53,11 @@ const CategoryItem = styled('div')(({ theme }) => ({
     }
 }))
 
-function CreateCategory({ open, handleClose }) {
+function CreateCategory({ open, handleClose, categories, setCategories }) {
     const theme = useTheme();
 
     const [color, setColor] = useState(theme.palette.primary.main);
     const [categoryName, setCategoryName] = useState('');
-    const [categories, setCategories] = useState(null)
     const { user } = useContext(UserContext)
 
     const getCategories = async () => {
@@ -120,7 +119,7 @@ function CreateCategory({ open, handleClose }) {
             onClose={handleClose}
             aria-labelledby="CustomModal-modal-title"
             aria-describedby="modal-modal-description" >
-            <Box sx={{ display: 'flex', flexDirection: 'column', background: theme.palette.secondary.main, padding: '20px', borderRadius: '8px', width: '50%', gap: '20px' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', background: theme.palette.primary.border, padding: '20px', borderRadius: '8px', width: '50%', gap: '20px' }}>
                 <Typography variant='h3'>Create Category</Typography>
                 <hr />
                 <Flex>

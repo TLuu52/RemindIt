@@ -1,8 +1,12 @@
-import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
+import CustomButton from './CustomButton';
+import { BsClipboard, BsClipboard2, BsLink, BsPencil, BsPencilFill, BsPencilSquare, BsUpload } from 'react-icons/bs';
+import ProfileIcon from './ProfileIcon';
+import { FcEditImage } from 'react-icons/fc';
 
 
 const Top = styled('div')({
@@ -49,6 +53,7 @@ const BeforeMonth = styled('p')(({ theme }) => ({
 const DuringMonth = styled('p')(({ theme }) => ({
     position: 'absolute',
     right: 0,
+    top: 0,
     padding: '5px',
     fontWeight: '600'
 }))
@@ -144,6 +149,114 @@ function FilterSectionComponent({ keyword, selectedCategory, handleKeywordChange
     );
 }
 
+const CustomModal = styled(Modal)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& .MuiBox-root': {
+        background: theme.palette.primary.border,
+        minWidth: '800px ',
+        width: '1000px ',
+        padding: '20px',
+        borderRadius: '12px'
+    },
+    '& *': {
+        fontFamily: 'Montserrat'
+    },
+    '& .MuiInput-root': {
+        color: theme.palette.primary.contrastText,
+        width: '100%',
+        padding: '0px 10px',
+        fontSize: '30px'
+
+    },
+    '& .MuiOutlinedInput-root': {
+        width: '100%',
+        color: theme.palette.primary.contrastText,
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: theme.palette.secondary.border
+    },
+    '& .MuiInput-root:before': {
+        borderColor: theme.palette.secondary.border
+    },
+}))
+const StyledTextarea = styled(TextareaAutosize)(({ theme }) => ({
+    width: '100%',
+    color: theme.palette.primary.contrastText,
+    minHeight: '100px !important',
+    background: 'transparent',
+    borderColor: theme.palette.secondary.border,
+    borderRadius: '8px',
+    outline: 'none',
+    padding: '10px',
+    '&:focus-visible': {
+        border: `solid 1px ${theme.palette.primary.main}`
+    }
+}))
+
+const PrioritySelect = styled(Select)(({ theme }) => ({
+    color: '#fff',
+    width: '120px',
+    height: '40px',
+    border: 'none',
+    outline: 'none',
+    fontWeight: '600',
+    '& .MuiOutlinedInput-notchedOutline': {
+        border: 'none'
+    }
+}))
+
+const DurationSelect = styled(Select)(({ theme }) => ({
+    color: '#fff',
+    width: '70px',
+    height: '30px',
+    border: 'none',
+    outline: 'none',
+    fontWeight: '400',
+    '& .MuiOutlinedInput-notchedOutline': {
+        border: 'none'
+    },
+    background: theme.palette.primary.light
+}))
+
+const Title = styled(Typography)({
+    textTransform: 'uppercase'
+})
+const Comments = styled('div')(({ theme }) => ({
+    flexGrow: '1'
+}))
+const CustomLabel = styled('label')(({ theme }) => ({
+    color: theme.palette.primary.contrastText,
+    '& input[type="file"]': {
+        display: 'none'
+    },
+    '&:hover': {
+        textDecoration: 'underline',
+        cursor: 'pointer',
+        opacity: .6,
+        transition: 'all .3s ease'
+    },
+    display: 'flex',
+    alignItems: 'center',
+    border: `1px solid ${theme.palette.primary.light}`,
+    gap: '10px',
+    padding: '20px 20px',
+    borderRadius: '8px',
+    border: `none`,
+}))
+
+const Attachment = styled('div')(({ }) => ({
+    background: '#333',
+    padding: '8px',
+    borderRadius: '6px',
+    maxWidth: '400px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '5px'
+}))
+
 function NewCalendar({ date, setDate }) {
     const theme = useTheme();
 
@@ -174,6 +287,15 @@ function NewCalendar({ date, setDate }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [keyword, setKeyword] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [priority, setPriority] = useState('low');
+    const [durationHours, setDurationHours] = useState('00')
+    const [durationMin, setDurationMin] = useState('00')
+    const [description, setDescription] = useState('')
+    const [activity, setActivity] = useState('')
+    const [title, setTitle] = useState('')
+    const [attachments, setAttachments] = useState([])
+    const [attachmentName, setAttachmentName] = useState('')
+    const [attachmentURL, setAttachmentURL] = useState('')
     const [filteredReminders, setFilteredReminders] = useState([]); // Initialize an empty array for filtered reminders
 
 
@@ -228,47 +350,46 @@ function NewCalendar({ date, setDate }) {
         setAfterDays(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
     }, [date, monthNumber])
 
+    const fetchReminders = async () => {
+        setTimeout(async () => {
+
+            try {
+                // Create a reference to the "reminders" collection
+                const remindersCollectionRef = collection(firestore, 'reminders');
+
+                // Get the current date
+                const currentDate = new Date();
+
+                // Get the currently authenticated user
+                const user = auth.currentUser;
+                if (!user) {
+                    // User is not signed in, handle accordingly
+                    return;
+                }
+
+                // Build the query to fetch reminders for the specific user and current date
+                const remindersQuery = query(
+                    remindersCollectionRef,
+                    where('userId', '==', user.uid),
+                    where('date', '>=', Timestamp.fromDate(currentDate))
+                );
+
+                // Execute the query and get the query snapshot
+                const querySnapshot = await getDocs(remindersQuery);
+
+                // Map the query snapshot to an array of reminder objects
+                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+
+                setReminders(fetchedReminders);
+
+            } catch (error) {
+                console.error('Error fetching reminders:', error);
+            }
+        }, 400)
+    };
+
     useEffect(() => {
         // This effect fetches reminders from Firestore and updates the reminders state
-        const fetchReminders = async () => {
-            setTimeout(async () => {
-
-                try {
-                    // Create a reference to the "reminders" collection
-                    const remindersCollectionRef = collection(firestore, 'reminders');
-
-                    // Get the current date
-                    const currentDate = new Date();
-
-                    // Get the currently authenticated user
-                    const user = auth.currentUser;
-                    if (!user) {
-                        // User is not signed in, handle accordingly
-                        return;
-                    }
-
-                    // Build the query to fetch reminders for the specific user and current date
-                    const remindersQuery = query(
-                        remindersCollectionRef,
-                        where('userId', '==', user.uid),
-                        where('date', '>=', Timestamp.fromDate(currentDate))
-                    );
-
-                    // Execute the query and get the query snapshot
-                    const querySnapshot = await getDocs(remindersQuery);
-                    console.log(querySnapshot, user.uid)
-
-                    // Map the query snapshot to an array of reminder objects
-                    const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
-
-                    setReminders(fetchedReminders);
-
-                    console.log('Fetched reminders:', fetchedReminders); // Log fetched reminders
-                } catch (error) {
-                    console.error('Error fetching reminders:', error);
-                }
-            }, 400)
-        };
 
         fetchReminders();
     }, [date, auth]);
@@ -280,10 +401,9 @@ function NewCalendar({ date, setDate }) {
                 const notesattachmentsCollectionRef = collection(firestore, 'NotesAttachments');
                 const notesattachmentsSnapshot = await getDocs(notesattachmentsCollectionRef);
                 const notesattachmentsData = notesattachmentsSnapshot.docs.map((doc) => ({
-                    id: doc.id,
                     ...doc.data(),
                 }));
-                setNotesAttachments(notesattachmentsData);
+                setNotesAttachments(notesattachmentsData.filter(notes => notes.userId === auth.currentUser.uid));
             } catch (error) {
                 console.error('Error fetching notes and attachments: ', error);
             }
@@ -291,6 +411,21 @@ function NewCalendar({ date, setDate }) {
 
         fetchNotesAttachments();
     }, [notes]);
+
+    useEffect(() => {
+        console.log(selectedReminder?.priority)
+        setTimeout(() => {
+            if (selectedReminder?.priority) {
+                setPriority(selectedReminder.priority)
+                setDurationHours(selectedReminder.duration.split(':')[0])
+                setDurationMin(selectedReminder.duration.split(':')[1])
+                setDescription(selectedReminder.description)
+                setNotes(selectedReminder.notes)
+                setAttachments(selectedReminder.attachments)
+                setTitle(selectedReminder.title)
+            }
+        }, 400)
+    }, [selectedReminder])
 
 
     const storage = getStorage(); // Initialize Firebase Storage
@@ -304,28 +439,60 @@ function NewCalendar({ date, setDate }) {
             const userId = user.uid;
 
             // Upload the attachment file to Firebase Storage
-            const storageRef = ref(storage, `attachments/${uploadedAttachment.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, uploadedAttachment);
+            if (uploadedAttachment) {
+                const storageRef = ref(storage, `attachments/${uploadedAttachment.name}`);
+                const uploadTask = uploadBytesResumable(storageRef, uploadedAttachment);
 
-            // Get the download URL of the uploaded file
-            const downloadURL = await new Promise((resolve, reject) => {
-                uploadTask.on('state_changed', null, reject, () => {
-                    getDownloadURL(uploadTask.snapshot.ref)
-                        .then(resolve)
-                        .catch(reject);
+                // Get the download URL of the uploaded file
+                const downloadURL = await new Promise((resolve, reject) => {
+                    uploadTask.on('state_changed', null, reject, () => {
+                        getDownloadURL(uploadTask.snapshot.ref)
+                            .then(resolve)
+                            .catch(reject);
+                    });
                 });
-            });
+            }
 
-            // Create a new document in the "NotesAttachments" collection
-            const notesattachmentsCollectionRef = collection(firestore, 'NotesAttachments');
-            const newNotesAttachmentsDocRef = await addDoc(notesattachmentsCollectionRef, {
-                notes: notes,
-                attachmentUrl: downloadURL,
-                userId: userId,
-            });
+            // // Create a new document in the "NotesAttachments" collection
+            // const notesattachmentsCollectionRef = collection(firestore, 'NotesAttachments');
+            // const newNotesAttachmentsDocRef = await addDoc(notesattachmentsCollectionRef, {
+            //     notes: notes,
+            //     attachmentUrl: downloadURL,
+            //     userId: userId,
+            // });
+            const totalDuration = `${durationHours}:${durationMin}`
+            console.log(`
+            ${priority}\n
+            ${description}\n
+            ${totalDuration}\n
+            ${notes}\n
+            ${activity}\n
+            ${selectedReminder.docId}\n
+            `)
+            // const newCategory = { name: categoryName, color: color };
+            // const updatedCategories = categories ? [...categories, newCategory] : [newCategory];
+            // setCategories(updatedCategories);
+            console.log(attachments)
+            const newAttachment = { name: attachmentName, attachmentURL }
+            const updatedAttachments = attachments ? [...attachments, newAttachment] : [newAttachment]
 
+
+            const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
+            await updateDoc(reminderRef, {
+                priority: priority,
+                description: description || '',
+                duration: totalDuration,
+                notes: notes || '',
+                activity: activity || '',
+                title: title,
+                attachments: updatedAttachments
+                // NEED CATEGORY
+            }).then(() => {
+                fetchReminders()
+            })
             closePopup();
-            console.log('Notes and Attachments saved successfully. Document ID:', newNotesAttachmentsDocRef.id);
+
+            // console.log('Notes and Attachments saved successfully. Document ID:', newNotesAttachmentsDocRef.id);
         } catch (error) {
             console.error('Error adding document: ', error);
         }
@@ -360,6 +527,38 @@ function NewCalendar({ date, setDate }) {
         setDate(newDate)
     }
 
+    const getSelectBG = () => {
+        switch (priority) {
+            case 'low':
+                return theme.palette.success.light
+            case 'medium':
+                return theme.palette.warning.light
+            case 'high':
+                return theme.palette.error.main
+        }
+    }
+
+    const newAttachment = async (e) => {
+        const file = e.target.files[0];
+
+        try {
+            // Create a storage reference with a unique filename
+            const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}/${file.name}`);
+
+            // Upload the file to the storage reference using the put method
+            const snapshot = await uploadBytesResumable(storageRef, file);
+
+            // Get the download URL of the uploaded file
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            console.log('File uploaded successfully:', downloadURL);
+
+            // Update the state with the new picture URL
+            setAttachmentURL(downloadURL);
+        } catch (error) {
+            console.log('Error uploading file:', error);
+        }
+    };
+
     return (
         <Container>
             <SearchBar onClick={toggleFilter}>
@@ -375,7 +574,7 @@ function NewCalendar({ date, setDate }) {
             {showFilter && (
                 <FilterSectionComponent
                     keyword={keyword}
-                    selectedCategory={selectedCategory}
+                    selectedCategory={priority}
                     handleKeywordChange={handleKeywordChange}
                     handleCategoryChange={handleCategoryChange}
                     handleFilterSubmit={handleFilterSubmit}
@@ -442,7 +641,6 @@ function NewCalendar({ date, setDate }) {
                         const timeDiff = reminderDate.getTime() - currentDate.getTime();
                         const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
                         progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
-                        console.log(reminders)
                     }
 
                     return (
@@ -490,17 +688,54 @@ function NewCalendar({ date, setDate }) {
                 ))}
             </Calendar>
 
-            <Dialog open={showPopup} onClose={closePopup}>
-                <DialogTitle>
-                    <Typography sx={{ fontWeight: 'lighter', color: 'white' }}>{selectedReminder && selectedReminder.title}</Typography>
-                </DialogTitle>
-                <DialogContent>
+            <CustomModal open={showPopup} onClose={closePopup}>
+                <Box>
                     {selectedReminder && (
-                        <>
-                            <div style={{ color: 'white' }}>Priority: {selectedReminder.priority}</div>
-                            <div style={{ color: 'white' }}>Description: {selectedReminder.description}</div>
-                            <div style={{ color: 'white' }}>Activity: {selectedReminder.activity}</div>
-                            <div style={{ color: 'white' }}>Duration: {selectedReminder.duration}</div>
+                        <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                            <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                <div style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <Title variant='h6' sx={{ fontSize: '16px' }}>Priority:</Title>
+                                    <PrioritySelect value={priority} sx={{ background: getSelectBG() }} onChange={(e) => setPriority(e.target.value)}>
+                                        <MenuItem value={'high'}>HIGH</MenuItem>
+                                        <MenuItem value={'medium'}>MEDIUM</MenuItem>
+                                        <MenuItem value={'low'}>LOW</MenuItem>
+                                    </PrioritySelect>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Title variant='h6' sx={{ fontSize: '16px' }}>Duration:</Title>
+                                    <DurationSelect value={durationHours} onChange={(e) => setDurationHours(e.target.value)}>
+                                        <MenuItem value={'00'}>00</MenuItem>
+                                        <MenuItem value={'01'}>01</MenuItem>
+                                        <MenuItem value={'02'}>02</MenuItem>
+                                        <MenuItem value={'03'}>03</MenuItem>
+                                        <MenuItem value={'04'}>04</MenuItem>
+                                        <MenuItem value={'05'}>05</MenuItem>
+                                        <MenuItem value={'06'}>06</MenuItem>
+                                        <MenuItem value={'07'}>07</MenuItem>
+                                        <MenuItem value={'08'}>08</MenuItem>
+                                        <MenuItem value={'09'}>09</MenuItem>
+                                        <MenuItem value={'10'}>10</MenuItem>
+                                        <MenuItem value={'11'}>11</MenuItem>
+                                        <MenuItem value={'12'}>12</MenuItem>
+                                    </DurationSelect>
+                                    <Typography variant='body1'>Hour(s)</Typography>
+                                    <DurationSelect value={durationMin} onChange={(e) => setDurationMin(e.target.value)}>
+                                        <MenuItem value={'00'}>00</MenuItem>
+                                        <MenuItem value={'15'}>15</MenuItem>
+                                        <MenuItem value={'30'}>30</MenuItem>
+                                        <MenuItem value={'45'}>45</MenuItem>
+                                    </DurationSelect>
+                                    <Typography variant='body1'>Minutes</Typography>
+                                </div>
+                            </div>
+                            <div>
+                                <Title>Description:</Title>
+                                <StyledTextarea value={description} onChange={(e) => setDescription(e.target.value)} />
+                            </div>
+
+
+                            {/* <div style={{ color: 'white' }}>Activity: {selectedReminder.activity}</div>
                             <div>
                                 <TextField
                                     label="Notes"
@@ -520,7 +755,7 @@ function NewCalendar({ date, setDate }) {
                                 <input
                                     type="file"
                                     id="attachment-upload"
-                                    accept=".pdf,.doc,.docx"
+                                    accept=".pdf,.doc,.docx,.png,.jpg"
                                     onChange={(e) => setUploadedAttachment(e.target.files[0])}
                                 />
                             </div>
@@ -533,10 +768,11 @@ function NewCalendar({ date, setDate }) {
                                         </a>
                                     </Typography>
                                 </div>
-                            )}
+                            )} */}
+
 
                             {/* Display notes and attachments */}
-                            {notesAttachments.map((item) => (
+                            {/* {notesAttachments.map((item) => (
                                 <div key={item.id}>
                                     <Typography variant="subtitle1" style={{ color: 'white' }}>Notes:</Typography>
                                     <Typography style={{ color: 'white' }}>{item.notes}</Typography>
@@ -550,17 +786,56 @@ function NewCalendar({ date, setDate }) {
                                             </Typography>
                                         </div>
                                     )}
-                                    <Button onClick={() => deleteNotesAttachment(item.id)}>Delete</Button>
+                                    <CustomButton onClick={() => deleteNotesAttachment(item.id)} text={'Delete'} size={'s'} color={2} />
+
                                 </div>
                             ))}
-                        </>
+                            <div>
+                            </div> */}
+
+
+                            {/* ***********CHANGE NOTES METHOD, ADD NOTES AND ATTACHMENTS TO REMINDERS COLLECTION********** */}
+                            <div>
+                                <Title>Attachments : &nbsp; <BsUpload /></Title>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '10px' }}>
+                                    <Input placeholder='Attachment Name' sx={{ fontSize: '16px !important', width: 'auto !important' }} value={attachmentName} onChange={(e) => setAttachmentName(e.target.value)} />
+                                    <CustomLabel>
+                                        <input type="file" accept=".pdf,.doc,.docx, .png, .jpg, .jpeg, image/png, image/jpeg" onChange={newAttachment} />
+                                        <BsUpload size={"20px"} />
+                                    </CustomLabel>
+                                </div>
+                                {/* <Attachment > */}
+                                {attachments && attachments.map(attachment => (
+                                    <Attachment>
+                                        <Typography variant='body1'>{attachment.name}</Typography>
+                                        <div style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <BsPencilFill />
+                                            <a style={{ cursor: 'pointer', color: 'inherit', display: 'grid', placeItems: 'center' }} onClick={() => navigator.clipboard.writeText(attachment.attachmentURL)}>
+                                                <BsClipboard2 />
+                                            </a>
+                                            <a style={{ color: 'inherit', display: 'grid', placeItems: 'center' }} href={attachment.attachmentURL} target='_blank'>
+                                                <BsLink />
+                                            </a>
+                                        </div>
+                                    </Attachment>
+                                ))}
+                            </div>
+
+                            <Title>Notes:</Title>
+                            <StyledTextarea value={notes} onChange={e => setNotes(e.target.value)} />
+
+                            <Title>Activity:</Title>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
+                                <ProfileIcon img='default' />
+                                <OutlinedInput sx={{ color: '#fff', }} placeholder={'Write a comment...'} value={activity} onChange={(e) => setActivity(e.target.value)} />
+                            </div>
+                            <Comments />
+                        </div>
                     )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={submit}>Submit</Button>
-                    <Button onClick={closePopup}>Close</Button>
-                </DialogActions>
-            </Dialog>
+                    <CustomButton onClick={closePopup} text={'Close'} color={0} size={'s'} />
+                    <CustomButton onClick={submit} text={'Submit'} color={1} size={'s'} />
+                </Box>
+            </CustomModal>
         </Container>
 
     );

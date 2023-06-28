@@ -26,10 +26,10 @@ function CustomButton({ text, color, size, link, type, onClick }) {
     return (
         <>
             {size === 's' ?
-                <StyledButton type={type} style={{ background: color === 1 ? theme.palette.primary.main : theme.palette.primary.light, fontSize: '14px', width: '120px', padding: '12px 0px', borderRadiu: '3px' }}
+                <StyledButton type={type} style={{ background: color === 1 ? theme.palette.primary.main : color === 0 ? theme.palette.primary.light : theme.palette.error.main, fontSize: '14px', width: '120px', padding: '12px 0px', borderRadiu: '3px' }}
                     onClick={link ? () => navigate(link) : onClick}>{text}</StyledButton>
                 :
-                <StyledButton style={{ background: color === 1 ? theme.palette.primary.main : theme.palette.primary.light, margin: 'auto' }} onClick={link ? () => navigate(link) : onClick}>{text}</StyledButton>
+                <StyledButton style={{ background: color === 1 ? theme.palette.primary.main : color === 0 ? theme.palette.primary.light : theme.palette.error.main, margin: 'auto' }} onClick={link ? () => navigate(link) : onClick}>{text}</StyledButton>
             }
         </>
     )

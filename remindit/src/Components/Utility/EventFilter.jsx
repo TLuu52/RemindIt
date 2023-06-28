@@ -65,13 +65,12 @@ function EventFilter() {
                 getCategories()
             }
         }, 400)
-    })
-    console.log(categories)
+    }, [user])
 
     return (
         <CustomContainer>
             <Top>
-                <Typography variant="h6">Events</Typography>
+                <Typography variant="h6">Categories</Typography>
                 <Button sx={{ borderRadius: '50%', height: 'fit-content', width: 'fit-content', padding: '0', minWidth: 'auto' }} onClick={() => setOpen(true)}>
                     <BsPlus size={28} />
                 </Button>
@@ -88,7 +87,7 @@ function EventFilter() {
                     </ListItem>
                 ))}
             </List>
-            <CreateCategory open={open} handleClose={handleClose} />
+            <CreateCategory open={open} handleClose={handleClose} categories={categories} setCategories={setCategories} />
         </CustomContainer>
     )
 }

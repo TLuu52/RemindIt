@@ -54,7 +54,6 @@ function Header() {
     }
     const logout = async () => {
         await auth.signOut()
-        console.log(auth)
         navigate('/')
     }
 
@@ -63,7 +62,7 @@ function Header() {
             if (user.currentUser === null) {
                 setUser(auth)
             }
-        }, 300)
+        }, 400)
     })
 
     return (

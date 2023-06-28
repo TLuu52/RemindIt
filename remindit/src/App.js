@@ -39,6 +39,9 @@ const theme = createTheme({
     }
   },
   typography: {
+    fontFamily: [
+      'Montserrat'
+    ],
     allVariants: {
       color: '#fff'
     },

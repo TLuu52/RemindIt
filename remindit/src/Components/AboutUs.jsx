@@ -41,7 +41,7 @@ const AboutUs = () => {
       <Header />
       <Main>
         <Content>
-          <img src={reminderImage} alt="Reminder" style={{ width: '100%', marginTop: '20px' }} />
+        <img src={reminderImage} alt="Reminder" style={{ width: '50%', marginTop: '20px' }} />
           <Typography variant="h4" sx={{ marginBottom: '20px' }}>
             About Us
           </Typography>

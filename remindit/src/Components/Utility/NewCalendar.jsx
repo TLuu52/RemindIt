@@ -1,10 +1,10 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc, updateDoc, FieldValue } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
-import { BsClipboard, BsClipboard2, BsLink, BsPencil, BsPencilFill, BsPencilSquare, BsUpload } from 'react-icons/bs';
+import { BsClipboard, BsClipboard2, BsLink, BsPencil, BsPencilFill, BsPencilSquare, BsUpload, BsTrashFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import { FcEditImage } from 'react-icons/fc';
 
@@ -122,32 +122,6 @@ const FilterButton = styled('button')(({ theme }) => ({
     border: 'none',
     cursor: 'pointer',
 }));
-
-// Create a new component for the filter section
-function FilterSectionComponent({ keyword, selectedCategory, handleKeywordChange, handleCategoryChange, handleFilterSubmit }) {
-    return (
-        <div>
-            <FilterLabel>Keyword:</FilterLabel>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <FilterInput
-                    type="text"
-                    placeholder="Enter keyword"
-                    value={keyword}
-                    onChange={handleKeywordChange}
-                    style={{ flex: 1, marginRight: '8px' }}
-                />
-                <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
-            </div>
-            <FilterLabel>Category:</FilterLabel>
-            <select value={selectedCategory} onChange={handleCategoryChange}>
-                <option value="">All</option>
-                <option value="category1">Category 1</option>
-                <option value="category2">Category 2</option>
-                <option value="category3">Category 3</option>
-            </select>
-        </div>
-    );
-}
 
 const CustomModal = styled(Modal)(({ theme }) => ({
     display: 'flex',
@@ -295,35 +269,23 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
     const [attachments, setAttachments] = useState([])
     const [attachmentName, setAttachmentName] = useState('')
     const [attachmentURL, setAttachmentURL] = useState('')
-    const [filteredReminders, setFilteredReminders] = useState([]); // Initialize an empty array for filtered reminders
+    const [discussionDescription, setDiscussionDescription] = useState('');
+    const [discussionThreads, setDiscussionThreads] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [filterBy, setFilterBy] = useState('');
+    const [sortBy, setSortBy] = useState('title');
+    const [searchResults, setSearchResults] = useState([]);
+    const [selectedPriority, setSelectedPriority] = useState("");
+    const [selectedDuration, setSelectedDuration] = useState("");
+
 
 
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
     };
 
-    const handleSearch = () => {
-        const foundReminder = reminders.find((reminder) => reminder.title === searchTerm);
-        if (foundReminder) {
-            setSelectedReminder(foundReminder);
-            setShowPopup(true);
-        }
-    };
-
     const toggleFilter = () => {
         setShowFilter(!showFilter); // Toggle filter section visibility
-    };
-
-    const handleKeywordChange = (e) => {
-        setKeyword(e.target.value);
-    };
-
-    const handleFilterSubmit = () => {
-        // Perform filtering based on selected options
-        // You can access the keyword, selectedDate, and selectedCategory here
-        // Example:
-        console.log('Keyword:', keyword);
-        console.log('Selected Category:', selectedCategory);
     };
 
 
@@ -348,7 +310,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         setPrevMonthLast(new Date(date.getFullYear(), date.getMonth(), 0).getDate())
         setAfterDays(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
     }, [date, monthNumber])
-
 
 
     useEffect(() => {
@@ -464,18 +425,44 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         }
     };
 
-    const deleteNotesAttachment = async (id) => {
+    const editAttachment = async (id, newName, newAttachmentURL) => {
         try {
-            // Delete the document from the "NotesAttachments" collection
-            const notesattachmentsDocRef = doc(firestore, 'NotesAttachments', id);
-            await deleteDoc(notesattachmentsDocRef);
+            // Update the document in the "reminders" collection
+            const reminderDocRef = doc(firestore, 'reminders', id);
+            await updateDoc(reminderDocRef, {
+                attachments: FieldValue.arrayUnion({
+                    name: newName, // Update the name of the attachment
+                    attachmentURL: newAttachmentURL // Update the attachment URL if needed
+                })
+            });
 
-            // Update the notesAttachments state by filtering out the deleted item
-            setNotesAttachments((prevNotesAttachments) => prevNotesAttachments.filter((item) => item.id !== id));
+            // Update the attachments state with the modified attachment
+            setAttachments(prevAttachments =>
+                prevAttachments.map(item => {
+                    if (item.id === id) {
+                        return { ...item, name: newName, attachmentURL: newAttachmentURL };
+                    }
+                    return item;
+                })
+            );
         } catch (error) {
-            console.error('Error deleting notes and attachment: ', error);
+            console.error('Error editing attachment: ', error);
         }
     };
+
+    const deleteAttachment = async (id) => {
+        try {
+            // Delete the attachment document from the "reminders" collection
+            const attachmentDocRef = doc(firestore, 'reminders', id);
+            await deleteDoc(attachmentDocRef);
+
+            // Update the attachments state by filtering out the deleted item
+            setAttachments(prevAttachments => prevAttachments.filter(item => item.id !== id));
+        } catch (error) {
+            console.error('Error deleting attachment: ', error);
+        }
+    };
+
 
     const today = () => {
         setDate(new Date())
@@ -525,32 +512,156 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         }
     };
 
+    const handleSaveDiscussion = () => {
+        const newDiscussionThread = {
+            activity: activity,
+            description: discussionDescription,
+        };
+
+        const updatedThreads = [...discussionThreads, newDiscussionThread];
+
+        // Save the updated threads in localStorage
+        localStorage.setItem('discussionThreads', JSON.stringify(updatedThreads));
+
+        // Clear the input fields
+        setActivity('');
+        setDiscussionDescription('');
+    };
+
+    const openModal = () => {
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+    };
+
+    const handleSearch = () => {
+        if (searchTerm.trim() !== "") {
+            const foundReminders = reminders.filter(
+                (reminder) => reminder.title.includes(searchTerm)
+            );
+            setSearchResults(foundReminders);
+            setShowModal(true); // Open the modal when search term is not empty
+        }
+    };
+
+    // Event handler for filter selection change
+    const handleFilterChange = (e) => {
+        const selectedFilterBy = e.target.value;
+        setFilterBy(selectedFilterBy);
+
+        let filteredReminders = [];
+
+        if (selectedFilterBy === "priority") {
+            // Filter by priority
+            filteredReminders = reminders.filter((reminder) => reminder.priority === selectedPriority);
+        } else if (selectedFilterBy === "duration") {
+            // Filter by duration
+            filteredReminders = reminders.filter((reminder) => reminder.duration === selectedDuration);
+        } else {
+            // No specific filter, show all reminders
+            filteredReminders = reminders;
+        }
+
+        setSearchResults(filteredReminders);
+    };
+
+    // Event handler for sort selection change
+    const handleSortChange = (e) => {
+        const selectedSortBy = e.target.value;
+        setSortBy(selectedSortBy);
+
+        // Create a copy of the searchResults array to avoid directly modifying the state
+        const sortedResults = [...searchResults];
+
+        if (selectedSortBy === "title") {
+            // Sort by title
+            sortedResults.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (selectedSortBy === "priority") {
+            // Sort by priority
+            sortedResults.sort((a, b) => a.priority - b.priority);
+        } else if (selectedSortBy === "duration") {
+            // Sort by duration
+            sortedResults.sort((a, b) => {
+                const durationA = a.duration.split(":");
+                const durationB = b.duration.split(":");
+                return durationA[0] - durationB[0] || durationA[1] - durationB[1];
+            });
+        }
+
+        setSearchResults(sortedResults);
+    };
+
     return (
         <Container>
-            <SearchBar onClick={toggleFilter}>
-                <SearchInput
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    list="suggestions"
-                />
-                <SearchButton onClick={handleSearch}>Search</SearchButton>
-            </SearchBar>
-            {showFilter && (
-                <FilterSectionComponent
-                    keyword={keyword}
-                    selectedCategory={priority}
-                    handleKeywordChange={handleKeywordChange}
-                    handleCategoryChange={handleCategoryChange}
-                    handleFilterSubmit={handleFilterSubmit}
-                />
-            )}
-            <datalist id="suggestions">
-                {reminders.map((reminder) => (
-                    <option key={reminder.id} value={reminder.title} />
-                ))}
-            </datalist>
+            <div>
+                {/* Search bar and input */}
+                <SearchBar onClick={toggleFilter}>
+                    <SearchInput
+                        type="text"
+                        placeholder="Search by Title..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        list="suggestions"
+                    />
+                    <SearchButton onClick={handleSearch}>Search</SearchButton>
+                </SearchBar>
+
+                {/* Suggestions list */}
+                <datalist id="suggestions">
+                    {reminders.map((reminder) => (
+                        <option key={reminder.id} value={reminder.title} />
+                    ))}
+                </datalist>
+
+                {/* Modal */}
+                {showModal && (
+                    <CustomModal open={showModal} onClose={closeModal}>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%' }}>
+                            <div className="modal-content" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
+                                <h2 style={{ marginTop: 0, fontSize: '45px' }}>Search Results</h2>
+                                {/* Filter By */}
+                                <div className="filter-by">
+                                    <label htmlFor="filter-select">Filter By:</label>
+                                    <select id="filter-select" value={filterBy} onChange={handleFilterChange}>
+                                        <option value="">All</option>
+                                        <option value="priority">Priority</option>
+                                        <option value="duration">Duration</option>
+                                    </select>
+                                </div>
+
+                                {/* Sort By */}
+                                <div className="sort-by">
+                                    <label htmlFor="sort-select">Sort By:</label>
+                                    <select id="sort-select" value={sortBy} onChange={handleSortChange}>
+                                        <option value="title">Title</option>
+                                        <option value="priority">Priority</option>
+                                        <option value="duration">Duration</option>
+                                    </select>
+                                </div>
+
+                                {/* Search Results */}
+                                <div className="result-box">
+                                    {searchResults.length > 0 ? (
+                                        <ul>
+                                            {searchResults.map((reminder) => (
+                                                <li key={reminder.id}>
+                                                    <a href={`${reminder.id}`}>
+                                                        {reminder.title}
+                                                    </a>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p>No reminders found.</p>
+                                    )}
+                                </div>
+                            </div>
+                        </Box>
+                    </CustomModal>
+                )}
+            </div>
             <Top>
                 <Left>
                     <ButtonGroup variant="contained" aria-label="outlined primary button group">
@@ -655,7 +766,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
             </Calendar>
 
             <CustomModal open={showPopup} onClose={closePopup}>
-                <Box>
+                <Box style={{ maxHeight: '80vh', overflow: 'auto' }}>
                     {selectedReminder && (
                         <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
                             <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -772,10 +883,11 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                                 </div>
                                 {/* <Attachment > */}
                                 {attachments && attachments.map(attachment => (
-                                    <Attachment>
+                                    <Attachment key={attachment.id}>
                                         <Typography variant='body1'>{attachment.name}</Typography>
                                         <div style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <BsPencilFill />
+                                            <BsPencilFill onClick={() => editAttachment(attachment.attachmentName)} />
+                                            <BsTrashFill onClick={() => deleteAttachment(attachment.attachmentDocRef)} />
                                             <a style={{ cursor: 'pointer', color: 'inherit', display: 'grid', placeItems: 'center' }} onClick={() => navigator.clipboard.writeText(attachment.attachmentURL)}>
                                                 <BsClipboard2 />
                                             </a>
@@ -793,10 +905,41 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                             <Title>Activity:</Title>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
                                 <ProfileIcon img='default' />
-                                <OutlinedInput sx={{ color: '#fff', }} placeholder={'Write a comment...'} value={activity} onChange={(e) => setActivity(e.target.value)} />
+                                <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={activity} onChange={(e) => setActivity(e.target.value)} />
                             </div>
-                            <Comments />
+                            {activity && (
+                                <div>
+                                    <div>
+                                        <Title variant="h6">Description:</Title>
+                                        <TextField
+                                            sx={{ color: '#fff' }}
+                                            multiline
+                                            rows={4}
+                                            placeholder="Enter a description..."
+                                            value={discussionDescription}
+                                            onChange={(e) => setDiscussionDescription(e.target.value)}
+                                            variant="outlined"
+                                            fullWidth
+                                        />
+                                    </div>
+                                    <Button variant="contained" color="primary" onClick={handleSaveDiscussion}>Save</Button>
+                                    <Comments activity={activity} />
+                                </div>
+                            )}
+                            <div>
+                                <Title>Discussion Threads:</Title>
+                                {discussionThreads.map((thread, index) => (
+                                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <ProfileIcon img='default' />
+                                        <div>
+                                            <Typography variant="h6">Activity: {thread.activity}</Typography>
+                                            <Typography variant="body1">Description: {thread.description}</Typography>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
+
                     )}
                     <CustomButton onClick={closePopup} text={'Close'} color={0} size={'s'} />
                     <CustomButton onClick={submit} text={'Submit'} color={1} size={'s'} />

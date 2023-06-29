@@ -123,36 +123,6 @@ const FilterButton = styled('button')(({ theme }) => ({
     cursor: 'pointer',
 }));
 
-// Create a new component for the filter section
-function FilterSectionComponent({ selectedCategory, selectedSortBy, handleCategoryChange, handleSortByChange, handleFilterSubmit }) {
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ display: 'flex' }}>
-                <div style={{ marginRight: '16px' }}>
-                    <FilterLabel>Priority:</FilterLabel>
-                    <select value={selectedCategory} onChange={handleCategoryChange}>
-                        <option value="">All</option>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                    </select>
-                </div>
-                <div>
-                    <FilterLabel>Sort By:</FilterLabel>
-                    <select value={selectedSortBy} onChange={handleSortByChange}>
-                        <option value="created">Created</option>
-                        <option value="priority">Priority</option>
-                        <option value="title">Title</option>
-                    </select>
-                </div>
-            </div>
-            <div>
-                <FilterButton onClick={handleFilterSubmit}>Apply Filter</FilterButton>
-            </div>
-        </div>
-    );
-}
-
 const CustomModal = styled(Modal)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'center',
@@ -302,30 +272,19 @@ function NewCalendar({ date, setDate }) {
     const [attachmentURL, setAttachmentURL] = useState('')
     const [discussionDescription, setDiscussionDescription] = useState('');
     const [discussionThreads, setDiscussionThreads] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [filterBy, setFilterBy] = useState('');
+    const [sortBy, setSortBy] = useState('title');
+    const [searchResults, setSearchResults] = useState([]);
+
 
 
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
     };
 
-    const handleSearch = () => {
-        const foundReminder = reminders.find((reminder) => reminder.title === searchTerm);
-        if (foundReminder) {
-            setSelectedReminder(foundReminder);
-            setShowPopup(true);
-        }
-    };
-
     const toggleFilter = () => {
         setShowFilter(!showFilter); // Toggle filter section visibility
-    };
-
-    const handleFilterSubmit = () => {
-        // Perform filtering based on selected options
-        // You can access the keyword, selectedDate, and selectedCategory here
-        // Example:
-        console.log('Keyword:', keyword);
-        console.log('Selected Category:', selectedCategory);
     };
 
 
@@ -607,31 +566,100 @@ function NewCalendar({ date, setDate }) {
         setDiscussionDescription('');
     };
 
+    const openModal = () => {
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+    };
+
+    const handleSearch = () => {
+        const foundReminders = reminders.filter(
+            (reminder) => reminder.title.includes(searchTerm)
+        );
+        setSearchResults(foundReminders);
+        setShowModal(true); // Open the modal
+    };
+
+    // Event handler for filter selection change
+    const handleFilterChange = (e) => {
+        setFilterBy(e.target.value);
+        // Implement logic to filter the search results based on the selected filter
+        // Update the searchResults state accordingly
+    };
+
+    // Event handler for sort selection change
+    const handleSortChange = (e) => {
+        setSortBy(e.target.value);
+        // Implement logic to sort the search results based on the selected sort option
+        // Update the searchResults state accordingly
+    };
 
     return (
         <Container>
-            <SearchBar onClick={toggleFilter}>
-                <SearchInput
-                    type="text"
-                    placeholder="Search by Title..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    list="suggestions"
-                />
-                <SearchButton onClick={handleSearch}>Search</SearchButton>
-            </SearchBar>
-            {showFilter && (
-                <FilterSectionComponent
-                    selectedCategory={selectedCategory}
-                    handleCategoryChange={handleCategoryChange}
-                    handleFilterSubmit={handleFilterSubmit}
-                />
-            )}
-            <datalist id="suggestions">
-                {reminders.map((reminder) => (
-                    <option key={reminder.id} value={reminder.title} />
-                ))}
-            </datalist>
+            <div>
+                {/* Search bar and input */}
+                <SearchBar onClick={toggleFilter}>
+                    <SearchInput
+                        type="text"
+                        placeholder="Search by Title..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        list="suggestions"
+                    />
+                    <SearchButton onClick={handleSearch}>Search</SearchButton>
+                </SearchBar>
+
+                {/* Suggestions list */}
+                <datalist id="suggestions">
+                    {reminders.map((reminder) => (
+                        <option key={reminder.id} value={reminder.title} />
+                    ))}
+                </datalist>
+
+                {/* Modal */}
+                {showModal && (
+                    <CustomModal open={showModal} onClose={closeModal}>
+                        <div className="modal-content">
+                            <h2>Search Results</h2>
+
+                            {/* Filter By */}
+                            <div className="filter-by">
+                                <label htmlFor="filter-select">Filter By:</label>
+                                <select id="filter-select" value={filterBy} onChange={handleFilterChange}>
+                                    <option value="">All</option>
+                                    <option value="priority">Priority</option>
+                                    <option value="duration">Duration</option>
+                                </select>
+                            </div>
+
+                            {/* Sort By */}
+                            <div className="sort-by">
+                                <label htmlFor="sort-select">Sort By:</label>
+                                <select id="sort-select" value={sortBy} onChange={handleSortChange}>
+                                    <option value="title">Title</option>
+                                    <option value="priority">Priority</option>
+                                    <option value="duration">Duration</option>
+                                </select>
+                            </div>
+
+                            {/* Search Results */}
+                            <div className="result-box">
+                                {searchResults.length > 0 ? (
+                                    <ul>
+                                        {searchResults.map((reminder) => (
+                                            <li key={reminder.id}>{reminder.title}</li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>No reminders found.</p>
+                                )}
+                            </div>
+                        </div>
+                    </CustomModal>
+                )}
+            </div>
             <Top>
                 <Left>
                     <ButtonGroup variant="contained" aria-label="outlined primary button group">

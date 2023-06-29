@@ -112,7 +112,7 @@ const CustomMenuItem = styled(MenuItem)({
 })
 
 
-function CreateEvent({ open, handleClose, }) {
+function CreateEvent({ open, handleClose, fetchReminders }) {
     const theme = useTheme();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -179,6 +179,8 @@ function CreateEvent({ open, handleClose, }) {
                     duration: duration, // Include the duration of the reminder,
                     category: NewCategory,
                     docId: newReminderDocRef.id
+                }).then(() => {
+                    fetchReminders()
                 })
 
             // Clear input fields

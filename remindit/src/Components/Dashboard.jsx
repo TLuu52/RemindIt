@@ -16,7 +16,7 @@ import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import CustomButton from './Utility/CustomButton';
 import { auth, firestore, storage } from "../firebase";
-import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where, Timestamp } from "firebase/firestore";
 import CreateEvent from './Utility/CreateEvent';
 import { Link } from 'react-router-dom';
 
@@ -98,15 +98,52 @@ const BottomSection = styled('div')(({ theme }) => ({
 function Dashboard() {
 
 
-    const [reminders, setReminders] = useState([]);
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [reminders, setReminders] = useState([]);
+
 
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const fetchReminders = async () => {
+        setTimeout(async () => {
 
+            try {
+                // Create a reference to the "reminders" collection
+                const remindersCollectionRef = collection(firestore, 'reminders');
+
+                // Get the current date
+                const currentDate = new Date();
+
+                // Get the currently authenticated user
+                const user = auth.currentUser;
+                if (!user) {
+                    // User is not signed in, handle accordingly
+                    return;
+                }
+
+                // Build the query to fetch reminders for the specific user and current date
+                const remindersQuery = query(
+                    remindersCollectionRef,
+                    where('userId', '==', user.uid),
+                    where('date', '>=', Timestamp.fromDate(currentDate))
+                );
+
+                // Execute the query and get the query snapshot
+                const querySnapshot = await getDocs(remindersQuery);
+
+                // Map the query snapshot to an array of reminder objects
+                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+
+                setReminders(fetchedReminders);
+
+            } catch (error) {
+                console.error('Error fetching reminders:', error);
+            }
+        }, 400)
+    };
 
     const changeView = (e) => {
         setView({ view: e.target.value.view, day: e.target.value.day })
@@ -114,6 +151,7 @@ function Dashboard() {
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
     };
+
 
     return (
         <Page>
@@ -124,11 +162,11 @@ function Dashboard() {
                     <EventFilter />
                 </Left>
                 <Right>
-                    <NewCalendar date={value} setDate={onChange} reminders={reminders} />
+                    <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} />
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>
-                    <CreateEvent open={open} handleClose={handleClose} />
+                    <CreateEvent open={open} handleClose={handleClose} fetchReminders={fetchReminders} />
                 </Right>
             </Main>
             <BottomSection>

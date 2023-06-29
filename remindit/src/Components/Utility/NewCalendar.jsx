@@ -257,7 +257,7 @@ const Attachment = styled('div')(({ }) => ({
     marginBottom: '5px'
 }))
 
-function NewCalendar({ date, setDate }) {
+function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders }) {
     const theme = useTheme();
 
     const monthNames = [
@@ -277,7 +277,6 @@ function NewCalendar({ date, setDate }) {
     const [beforeDays, setBeforeDays] = useState(firstDay.getDay())
     const [prevMonthlast, setPrevMonthLast] = useState(new Date(date.getFullYear(), date.getMonth(), 0))
     const [afterDays, setAfterDays] = useState(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
-    const [reminders, setReminders] = useState([]);
     const [selectedReminder, setSelectedReminder] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const [uploadedAttachment, setUploadedAttachment] = useState(null);
@@ -350,47 +349,10 @@ function NewCalendar({ date, setDate }) {
         setAfterDays(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
     }, [date, monthNumber])
 
-    const fetchReminders = async () => {
-        setTimeout(async () => {
 
-            try {
-                // Create a reference to the "reminders" collection
-                const remindersCollectionRef = collection(firestore, 'reminders');
-
-                // Get the current date
-                const currentDate = new Date();
-
-                // Get the currently authenticated user
-                const user = auth.currentUser;
-                if (!user) {
-                    // User is not signed in, handle accordingly
-                    return;
-                }
-
-                // Build the query to fetch reminders for the specific user and current date
-                const remindersQuery = query(
-                    remindersCollectionRef,
-                    where('userId', '==', user.uid),
-                    where('date', '>=', Timestamp.fromDate(currentDate))
-                );
-
-                // Execute the query and get the query snapshot
-                const querySnapshot = await getDocs(remindersQuery);
-
-                // Map the query snapshot to an array of reminder objects
-                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
-
-                setReminders(fetchedReminders);
-
-            } catch (error) {
-                console.error('Error fetching reminders:', error);
-            }
-        }, 400)
-    };
 
     useEffect(() => {
         // This effect fetches reminders from Firestore and updates the reminders state
-
         fetchReminders();
     }, [date, auth]);
 
@@ -472,9 +434,11 @@ function NewCalendar({ date, setDate }) {
             // const newCategory = { name: categoryName, color: color };
             // const updatedCategories = categories ? [...categories, newCategory] : [newCategory];
             // setCategories(updatedCategories);
-            console.log(attachments)
-            const newAttachment = { name: attachmentName, attachmentURL }
-            const updatedAttachments = attachments ? [...attachments, newAttachment] : [newAttachment]
+            let updatedAttachments = attachments
+            if (attachmentURL != '' && attachmentName != '') {
+                const newAttachment = { name: attachmentName, attachmentURL }
+                updatedAttachments = attachments ? [...attachments, newAttachment] : [newAttachment]
+            }
 
 
             const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
@@ -489,6 +453,8 @@ function NewCalendar({ date, setDate }) {
                 // NEED CATEGORY
             }).then(() => {
                 fetchReminders()
+                setAttachmentName('')
+                setAttachmentURL('')
             })
             closePopup();
 

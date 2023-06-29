@@ -11,10 +11,10 @@ import { UserContext } from '../../App';
 
 const End = styled('div')({
     display: 'flex',
-    width: '100%',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: '10px'
+    gap: '10px',
+    width: '100%'
 })
 const Container = styled('div')({
     display: 'flex',
@@ -30,7 +30,7 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
 }))
 
 
-function Header() {
+function Header({ absolute }) {
     const theme = useTheme();
     const [open, setOpen] = useState(false)
     const { setUser, user } = useContext(UserContext)
@@ -66,7 +66,13 @@ function Header() {
     })
 
     return (
-        <End>
+        <End sx={{
+            width: absolute && '100vw',
+            position: absolute && 'absolute',
+            padding: absolute && '20px',
+            top: absolute && 0,
+            left: absolute && 0
+        }}>
             <Logo size={'180px'} />
             <Container>
 

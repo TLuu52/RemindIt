@@ -9,8 +9,8 @@ import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
 import interactionPlugin from '@fullcalendar/interaction' // a plugin!
 import NewCalendar from './Utility/NewCalendar';
-import { FcPlus } from 'react-icons/fc';
-import { BsPlus } from 'react-icons/bs';
+import { FcAbout, FcContacts, FcFeedback, FcPlus } from 'react-icons/fc';
+import { BsMailbox, BsPlus } from 'react-icons/bs';
 import ProfileIcon from './Utility/ProfileIcon';
 import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { DatePicker, TimePicker } from '@mui/x-date-pickers';
@@ -30,6 +30,7 @@ const TopCorner = styled('div')({
 })
 const Page = styled('div')({
     padding: '20px',
+    paddingBottom: '0',
     width: '100%',
     height: '100%',
     overflow: 'auto', // Enable scrolling
@@ -37,7 +38,7 @@ const Page = styled('div')({
 
 const Main = styled('div')({
     display: 'flex',
-    height: '100%',
+    height: '90vh',
     gap: '20px'
 })
 const Left = styled('div')(({ theme }) => ({
@@ -56,7 +57,7 @@ const Right = styled('div')(({ theme }) => ({
     marginTop: '40px',
     padding: '20px',
     flexGrow: '1',
-    height: '90%',
+    height: '100%',
     borderRadius: '16px',
     background: theme.palette.primary.border,
     position: 'relative',
@@ -84,15 +85,24 @@ const BottomRight = styled('div')(({ theme }) => ({
 }))
 
 const BottomSection = styled('div')(({ theme }) => ({
-    marginTop: '40px',
     padding: '20px',
     background: theme.palette.primary.border,
     borderRadius: '16px',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
+    gap: '14px'
 }));
+const StyledLink = styled(Link)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '15px', color: 'white',
+    textDecoration: 'none',
+    '& :hover': {
+        textDecoration: 'underline',
+    }
+
+}))
 
 
 function Dashboard() {
@@ -160,6 +170,23 @@ function Dashboard() {
                 <Left>
                     <CustomCalendar onChange={onChange} value={value} reminders={reminders} />
                     <EventFilter />
+                    <BottomSection>
+                        <div>
+                            <Typography variant="h6">Have any Questions?</Typography>
+                            <hr />
+                        </div>
+                        <Box>
+                            <StyledLink to="/About" style={{}}>
+                                <Typography variant="body1">About Us</Typography>
+                                <FcAbout />
+                            </StyledLink>
+                            <StyledLink to="/contact" style={{}}>
+                                <Typography variant="body1">Contact Us</Typography>
+                                <FcFeedback />
+                            </StyledLink>
+                        </Box>
+                        <Typography variant="body1">@remindit 2023</Typography>
+                    </BottomSection>
                 </Left>
                 <Right>
                     <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} />
@@ -169,17 +196,6 @@ function Dashboard() {
                     <CreateEvent open={open} handleClose={handleClose} fetchReminders={fetchReminders} />
                 </Right>
             </Main>
-            <BottomSection>
-                <Box sx={{ textAlign: 'center', marginBottom: '20px' }}>
-                    <Typography variant="h5">
-                        <Link to="/About">About Us</Link>
-                    </Typography>
-                    <Typography variant="h5" sx={{ marginTop: '2px' }}>
-                        <Link to="/contact">Contact Us</Link>
-                    </Typography>
-                </Box>
-                <Typography variant="body1">@remindit 2023</Typography>
-            </BottomSection>
         </Page>
     );
 }

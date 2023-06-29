@@ -141,7 +141,7 @@ const ContactForm = () => {
 const ContactUs = () => {
     return (
         <Page>
-            <Header />
+            <Header absolute={true} />
             <Content>
                 <Typography variant="h4" sx={{ marginBottom: '20px' }}>
                     Contact Us

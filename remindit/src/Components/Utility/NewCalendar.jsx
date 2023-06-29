@@ -1,12 +1,11 @@
-import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input } from '@mui/material';
+import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, query, where, getDocs, Timestamp, addDoc, doc, deleteDoc, updateDoc, FieldValue } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, updateDoc, FieldValue } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
-import { BsClipboard, BsClipboard2, BsLink, BsPencil, BsPencilFill, BsPencilSquare, BsUpload, BsTrashFill } from 'react-icons/bs';
+import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
-import { FcEditImage } from 'react-icons/fc';
 
 
 const Top = styled('div')({
@@ -69,7 +68,6 @@ const Container = styled('div')({
     flexDirection: 'column',
     height: '100%',
 })
-
 const SearchBar = styled('div')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
@@ -84,7 +82,6 @@ const SearchInput = styled('input')(({ theme }) => ({
     border: `1px solid ${theme.palette.primary.main}`,
     marginRight: '10px',
 }));
-
 const SearchButton = styled('button')(({ theme }) => ({
     padding: '8px 16px',
     borderRadius: '4px',
@@ -93,27 +90,23 @@ const SearchButton = styled('button')(({ theme }) => ({
     border: 'none',
     cursor: 'pointer',
 }));
-
 const FilterSection = styled('div')(({ theme }) => ({
     padding: '10px',
     background: theme.palette.primary.border,
     borderRadius: '4px',
     color: theme.palette.primary.contrastText,
 }));
-
 const FilterLabel = styled('label')({
     display: 'block',
     marginBottom: '5px',
     fontWeight: 'bold',
 });
-
 const FilterInput = styled('input')({
     width: '100%',
     padding: '8px',
     borderRadius: '4px',
     marginBottom: '10px',
 });
-
 const FilterButton = styled('button')(({ theme }) => ({
     padding: '8px 16px',
     borderRadius: '4px',
@@ -122,7 +115,6 @@ const FilterButton = styled('button')(({ theme }) => ({
     border: 'none',
     cursor: 'pointer',
 }));
-
 const CustomModal = styled(Modal)(({ theme }) => ({
     display: 'flex',
     justifyContent: 'center',
@@ -168,7 +160,6 @@ const StyledTextarea = styled(TextareaAutosize)(({ theme }) => ({
         border: `solid 1px ${theme.palette.primary.main}`
     }
 }))
-
 const PrioritySelect = styled(Select)(({ theme }) => ({
     color: '#fff',
     width: '120px',
@@ -180,7 +171,6 @@ const PrioritySelect = styled(Select)(({ theme }) => ({
         border: 'none'
     }
 }))
-
 const DurationSelect = styled(Select)(({ theme }) => ({
     color: '#fff',
     width: '70px',
@@ -193,7 +183,6 @@ const DurationSelect = styled(Select)(({ theme }) => ({
     },
     background: theme.palette.primary.light
 }))
-
 const Title = styled(Typography)({
     textTransform: 'uppercase'
 })
@@ -219,7 +208,6 @@ const CustomLabel = styled('label')(({ theme }) => ({
     borderRadius: '8px',
     border: `none`,
 }))
-
 const Attachment = styled('div')(({ }) => ({
     background: '#333',
     padding: '8px',
@@ -229,6 +217,12 @@ const Attachment = styled('div')(({ }) => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: '5px'
+}))
+const CustomPopover = styled(Popover)(({ theme }) => ({
+    '& .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation8.MuiPopover-paper': {
+        background: theme.palette.primary.dark,
+        color: theme.palette.primary.contrastText
+    }
 }))
 
 function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders }) {
@@ -277,8 +271,15 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
     const [searchResults, setSearchResults] = useState([]);
     const [selectedPriority, setSelectedPriority] = useState("");
     const [selectedDuration, setSelectedDuration] = useState("");
+    const [anchorEl, setAnchorEl] = useState(null)
+    const [newAttachmentName, setNewAttachmentName] = useState('')
+    const [newAttachmentURL, setNewAttachmentURL] = useState('')
+    const openEditAttachment = Boolean(anchorEl)
 
 
+    const closeEditAttachment = () => {
+        setAnchorEl(null)
+    }
 
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
@@ -392,9 +393,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
             ${activity}\n
             ${selectedReminder.docId}\n
             `)
-            // const newCategory = { name: categoryName, color: color };
-            // const updatedCategories = categories ? [...categories, newCategory] : [newCategory];
-            // setCategories(updatedCategories);
             let updatedAttachments = attachments
             if (attachmentURL != '' && attachmentName != '') {
                 const newAttachment = { name: attachmentName, attachmentURL }
@@ -425,39 +423,50 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         }
     };
 
-    const editAttachment = async (id, newName, newAttachmentURL) => {
+    const editAttachment = async (attachment) => {
+        const newAttachments = attachments
+        newAttachments.map(a => {
+            if (a.attachmentURL === attachment.attachmentURL) {
+                a.name = newAttachmentName;
+                a.attachmentURL = newAttachmentURL
+            }
+        })
         try {
             // Update the document in the "reminders" collection
-            const reminderDocRef = doc(firestore, 'reminders', id);
+            const reminderDocRef = doc(firestore, 'reminders', selectedReminder.docId)
             await updateDoc(reminderDocRef, {
-                attachments: FieldValue.arrayUnion({
-                    name: newName, // Update the name of the attachment
-                    attachmentURL: newAttachmentURL // Update the attachment URL if needed
-                })
-            });
-
-            // Update the attachments state with the modified attachment
-            setAttachments(prevAttachments =>
-                prevAttachments.map(item => {
-                    if (item.id === id) {
-                        return { ...item, name: newName, attachmentURL: newAttachmentURL };
-                    }
-                    return item;
-                })
-            );
+                attachments: newAttachments
+            }).then(() => {
+                setAttachments(newAttachments)
+                fetchReminders()
+                closeEditAttachment()
+            })
         } catch (error) {
             console.error('Error editing attachment: ', error);
         }
     };
 
-    const deleteAttachment = async (id) => {
+    const deleteAttachment = async (currentAttachment) => {
+        console.log(currentAttachment)
         try {
             // Delete the attachment document from the "reminders" collection
-            const attachmentDocRef = doc(firestore, 'reminders', id);
-            await deleteDoc(attachmentDocRef);
+            // Get all attachments, filter out the attachment that is selected, update doc with new attachments
+            console.log("ALL ATTACHMENTS :", attachments)
+            const newAttachments = attachments.filter(a => (a.name != currentAttachment.name && a.attachmentURL != currentAttachment.attachmentURL))
+            console.log('UPDATED : ', newAttachments)
 
-            // Update the attachments state by filtering out the deleted item
-            setAttachments(prevAttachments => prevAttachments.filter(item => item.id !== id));
+            const reminderDocRef = doc(firestore, 'reminders', selectedReminder.docId)
+            await updateDoc(reminderDocRef, {
+                attachments: newAttachments
+            }).then(() => {
+                setAttachments(newAttachments)
+                fetchReminders()
+            })
+            // const attachmentDocRef = doc(firestore, 'reminders', id);
+            // await deleteDoc(attachmentDocRef);
+
+            // // Update the attachments state by filtering out the deleted item
+            // setAttachments(prevAttachments => prevAttachments.filter(item => item.id !== id));
         } catch (error) {
             console.error('Error deleting attachment: ', error);
         }
@@ -491,12 +500,33 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         }
     }
 
+    const newEditAttachment = async (e) => {
+        const file = e.target.files[0];
+
+        try {
+            // Create a storage reference with a unique filename
+            const storageRef = ref(storage, `attachments/${auth.currentUser.uid}/${file.name}`);
+
+            // Upload the file to the storage reference using the put method
+            const snapshot = await uploadBytesResumable(storageRef, file);
+
+            // Get the download URL of the uploaded file
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            console.log('File uploaded successfully:', downloadURL);
+
+            // Update the state with the new picture URL
+            setNewAttachmentURL(downloadURL);
+        } catch (error) {
+            console.log('Error uploading file:', error);
+        }
+    }
+
     const newAttachment = async (e) => {
         const file = e.target.files[0];
 
         try {
             // Create a storage reference with a unique filename
-            const storageRef = ref(storage, `profilePictures/${auth.currentUser.uid}/${file.name}`);
+            const storageRef = ref(storage, `attachments/${auth.currentUser.uid}/${file.name}`);
 
             // Upload the file to the storage reference using the put method
             const snapshot = await uploadBytesResumable(storageRef, file);
@@ -812,65 +842,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                             </div>
 
 
-                            {/* <div style={{ color: 'white' }}>Activity: {selectedReminder.activity}</div>
-                            <div>
-                                <TextField
-                                    label="Notes"
-                                    variant="outlined"
-                                    multiline
-                                    rows={4}
-                                    fullWidth
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    InputLabelProps={{ style: { color: 'white' } }}
-                                />
-                            </div>
-                            <div style={{ color: 'white' }}>
-                                <label htmlFor="attachment-upload">Upload Attachment:</label>
-                            </div>
-                            <div>
-                                <input
-                                    type="file"
-                                    id="attachment-upload"
-                                    accept=".pdf,.doc,.docx,.png,.jpg"
-                                    onChange={(e) => setUploadedAttachment(e.target.files[0])}
-                                />
-                            </div>
-                            {uploadedAttachment && (
-                                <div>
-                                    <Typography variant="subtitle1" style={{ color: 'white' }}>Saved Attachment:</Typography>
-                                    <Typography style={{ color: 'white' }}>
-                                        <a href={URL.createObjectURL(uploadedAttachment)} download={uploadedAttachment.name}>
-                                            {uploadedAttachment.name}
-                                        </a>
-                                    </Typography>
-                                </div>
-                            )} */}
-
-
-                            {/* Display notes and attachments */}
-                            {/* {notesAttachments.map((item) => (
-                                <div key={item.id}>
-                                    <Typography variant="subtitle1" style={{ color: 'white' }}>Notes:</Typography>
-                                    <Typography style={{ color: 'white' }}>{item.notes}</Typography>
-                                    {item.attachmentUrl && (
-                                        <div>
-                                            <Typography variant="subtitle1" style={{ color: 'white' }}>Attachment:</Typography>
-                                            <Typography style={{ color: 'white' }}>
-                                                <a href={item.attachmentUrl} target="_blank" rel="noopener noreferrer">
-                                                    {item.attachmentUrl}
-                                                </a>
-                                            </Typography>
-                                        </div>
-                                    )}
-                                    <CustomButton onClick={() => deleteNotesAttachment(item.id)} text={'Delete'} size={'s'} color={2} />
-
-                                </div>
-                            ))}
-                            <div>
-                            </div> */}
-
-
                             {/* ***********CHANGE NOTES METHOD, ADD NOTES AND ATTACHMENTS TO REMINDERS COLLECTION********** */}
                             <div>
                                 <Title>Attachments : &nbsp; <BsUpload /></Title>
@@ -886,8 +857,41 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                                     <Attachment key={attachment.id}>
                                         <Typography variant='body1'>{attachment.name}</Typography>
                                         <div style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <BsPencilFill onClick={() => editAttachment(attachment.attachmentName)} />
-                                            <BsTrashFill onClick={() => deleteAttachment(attachment.attachmentDocRef)} />
+                                            <BsPencilFill style={{ cursor: 'pointer' }} onClick={(e) => setAnchorEl(e.currentTarget)} />
+                                            <CustomPopover
+                                                open={openEditAttachment}
+                                                anchorEl={anchorEl}
+                                                onClose={closeEditAttachment}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left'
+                                                }}
+
+                                            >
+                                                <>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '10px' }}>
+                                                        <Input
+                                                            placeholder='Attachment Name'
+                                                            sx={{
+                                                                fontSize: '16px !important',
+                                                                width: 'auto !important',
+                                                                color: theme.palette.primary.contrastText
+                                                            }}
+                                                            value={newAttachmentName}
+                                                            onChange={(e) => setNewAttachmentName(e.target.value)}
+                                                        />
+                                                        <CustomLabel>
+                                                            <input type="file" accept=".pdf,.doc,.docx, .png, .jpg, .jpeg, image/png, image/jpeg" onChange={newEditAttachment} />
+                                                            <BsUpload size={"20px"} />
+                                                        </CustomLabel>
+                                                    </div>
+                                                    <div style={{ padding: '0px 10px 10px', display: 'flex', gap: '10px' }}>
+                                                        <CustomButton size={'s'} color={0} text='Cancel' onClick={closeEditAttachment} />
+                                                        <CustomButton size={'s'} color={1} text='Save' onClick={() => editAttachment(attachment)} />
+                                                    </div>
+                                                </>
+                                            </CustomPopover>
+                                            <BsTrashFill style={{ cursor: 'pointer' }} onClick={() => deleteAttachment(attachment)} />
                                             <a style={{ cursor: 'pointer', color: 'inherit', display: 'grid', placeItems: 'center' }} onClick={() => navigator.clipboard.writeText(attachment.attachmentURL)}>
                                                 <BsClipboard2 />
                                             </a>

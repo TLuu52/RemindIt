@@ -276,6 +276,8 @@ function NewCalendar({ date, setDate }) {
     const [filterBy, setFilterBy] = useState('');
     const [sortBy, setSortBy] = useState('title');
     const [searchResults, setSearchResults] = useState([]);
+    const [selectedPriority, setSelectedPriority] = useState("");
+    const [selectedDuration, setSelectedDuration] = useState("");
 
 
 
@@ -586,9 +588,23 @@ function NewCalendar({ date, setDate }) {
 
     // Event handler for filter selection change
     const handleFilterChange = (e) => {
-        setFilterBy(e.target.value);
-        // Implement logic to filter the search results based on the selected filter
-        // Update the searchResults state accordingly
+        const selectedFilterBy = e.target.value;
+        setFilterBy(selectedFilterBy);
+
+        let filteredReminders = [];
+
+        if (selectedFilterBy === "priority") {
+            // Filter by priority
+            filteredReminders = reminders.filter((reminder) => reminder.priority === selectedPriority);
+        } else if (selectedFilterBy === "duration") {
+            // Filter by duration
+            filteredReminders = reminders.filter((reminder) => reminder.duration === selectedDuration);
+        } else {
+            // No specific filter, show all reminders
+            filteredReminders = reminders;
+        }
+
+        setSearchResults(filteredReminders);
     };
 
     // Event handler for sort selection change

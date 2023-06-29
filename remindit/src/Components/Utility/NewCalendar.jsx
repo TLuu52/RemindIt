@@ -593,9 +593,28 @@ function NewCalendar({ date, setDate }) {
 
     // Event handler for sort selection change
     const handleSortChange = (e) => {
-        setSortBy(e.target.value);
-        // Implement logic to sort the search results based on the selected sort option
-        // Update the searchResults state accordingly
+        const selectedSortBy = e.target.value;
+        setSortBy(selectedSortBy);
+
+        // Create a copy of the searchResults array to avoid directly modifying the state
+        const sortedResults = [...searchResults];
+
+        if (selectedSortBy === "title") {
+            // Sort by title
+            sortedResults.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (selectedSortBy === "priority") {
+            // Sort by priority
+            sortedResults.sort((a, b) => a.priority - b.priority);
+        } else if (selectedSortBy === "duration") {
+            // Sort by duration
+            sortedResults.sort((a, b) => {
+                const durationA = a.duration.split(":");
+                const durationB = b.duration.split(":");
+                return durationA[0] - durationB[0] || durationA[1] - durationB[1];
+            });
+        }
+
+        setSearchResults(sortedResults);
     };
 
     return (
@@ -652,7 +671,7 @@ function NewCalendar({ date, setDate }) {
                                         <ul>
                                             {searchResults.map((reminder) => (
                                                 <li key={reminder.id}>
-                                                    <a href={`/reminders/${encodeURIComponent(reminder.title)}`}>
+                                                    <a href={`${reminder.id}`}>
                                                         {reminder.title}
                                                     </a>
                                                 </li>

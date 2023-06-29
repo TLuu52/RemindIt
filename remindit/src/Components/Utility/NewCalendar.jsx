@@ -575,11 +575,13 @@ function NewCalendar({ date, setDate }) {
     };
 
     const handleSearch = () => {
-        const foundReminders = reminders.filter(
-            (reminder) => reminder.title.includes(searchTerm)
-        );
-        setSearchResults(foundReminders);
-        setShowModal(true); // Open the modal
+        if (searchTerm.trim() !== "") {
+            const foundReminders = reminders.filter(
+                (reminder) => reminder.title.includes(searchTerm)
+            );
+            setSearchResults(foundReminders);
+            setShowModal(true); // Open the modal when search term is not empty
+        }
     };
 
     // Event handler for filter selection change
@@ -621,42 +623,47 @@ function NewCalendar({ date, setDate }) {
                 {/* Modal */}
                 {showModal && (
                     <CustomModal open={showModal} onClose={closeModal}>
-                        <div className="modal-content">
-                            <h2>Search Results</h2>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%' }}>
+                            <div className="modal-content" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
+                                <h2 style={{ marginTop: 0, fontSize: '45px' }}>Search Results</h2>
+                                {/* Filter By */}
+                                <div className="filter-by">
+                                    <label htmlFor="filter-select">Filter By:</label>
+                                    <select id="filter-select" value={filterBy} onChange={handleFilterChange}>
+                                        <option value="">All</option>
+                                        <option value="priority">Priority</option>
+                                        <option value="duration">Duration</option>
+                                    </select>
+                                </div>
 
-                            {/* Filter By */}
-                            <div className="filter-by">
-                                <label htmlFor="filter-select">Filter By:</label>
-                                <select id="filter-select" value={filterBy} onChange={handleFilterChange}>
-                                    <option value="">All</option>
-                                    <option value="priority">Priority</option>
-                                    <option value="duration">Duration</option>
-                                </select>
-                            </div>
+                                {/* Sort By */}
+                                <div className="sort-by">
+                                    <label htmlFor="sort-select">Sort By:</label>
+                                    <select id="sort-select" value={sortBy} onChange={handleSortChange}>
+                                        <option value="title">Title</option>
+                                        <option value="priority">Priority</option>
+                                        <option value="duration">Duration</option>
+                                    </select>
+                                </div>
 
-                            {/* Sort By */}
-                            <div className="sort-by">
-                                <label htmlFor="sort-select">Sort By:</label>
-                                <select id="sort-select" value={sortBy} onChange={handleSortChange}>
-                                    <option value="title">Title</option>
-                                    <option value="priority">Priority</option>
-                                    <option value="duration">Duration</option>
-                                </select>
+                                {/* Search Results */}
+                                <div className="result-box">
+                                    {searchResults.length > 0 ? (
+                                        <ul>
+                                            {searchResults.map((reminder) => (
+                                                <li key={reminder.id}>
+                                                    <a href={`/reminders/${encodeURIComponent(reminder.title)}`}>
+                                                        {reminder.title}
+                                                    </a>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p>No reminders found.</p>
+                                    )}
+                                </div>
                             </div>
-
-                            {/* Search Results */}
-                            <div className="result-box">
-                                {searchResults.length > 0 ? (
-                                    <ul>
-                                        {searchResults.map((reminder) => (
-                                            <li key={reminder.id}>{reminder.title}</li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No reminders found.</p>
-                                )}
-                            </div>
-                        </div>
+                        </Box>
                     </CustomModal>
                 )}
             </div>

@@ -4,6 +4,8 @@ import { BsBellFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import { useNavigate } from 'react-router-dom';
 import NotificationBox from './NotificationBox';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
 import Logo from './Logo';
 
 const End = styled('div')({
@@ -58,10 +60,10 @@ function Header({ absolute }) {
         setShowNotificationBox(false);
     };
 
-    const logout = () => {
-        // Implement your logout logic here
-        navigate('/'); // Navigate to the desired route after logout
-    };
+    const logout = async () => {
+        await auth.signOut()
+        navigate('/')
+    }
 
     return (
         <End

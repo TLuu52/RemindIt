@@ -138,11 +138,15 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
 
         try {
 
+            console.log('time:', time, typeof time);
+            console.log('date:', date, typeof date);
+
+
             const timeValue = time instanceof Date ? time : new Date(time);
             const dateValue = date instanceof Date ? date : new Date(date);
 
             console.log('timeValue:', timeValue, typeof timeValue);
-
+            console.log('dateValue:', dateValue, typeof dateValue);
 
             // Get the current user ID
             const user = auth.currentUser;
@@ -195,13 +199,14 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
                 };
 
                 const recurringOptionValue = recurringOptions[recurringOption];
-                let recurringDate = new Date(dateValue);
+                const initialDate = new Date(dateValue);
 
                 // Create copies of the reminder based on the recurring option
-                for (let i = 1; i < 5; i++) {
-                    recurringDate.setDate(recurringDate.getDate() + recurringOptionValue.weeks * 7);
-                    recurringDate.setMonth(recurringDate.getMonth() + recurringOptionValue.months);
-                    recurringDate.setFullYear(recurringDate.getFullYear() + recurringOptionValue.years);
+                for (let i = 1; i <= 5; i++) {
+                    const recurringDate = new Date(initialDate);
+                    recurringDate.setDate(initialDate.getDate() + (recurringOptionValue.weeks * 7 * (i - 1)));
+                    recurringDate.setMonth(initialDate.getMonth() + (recurringOptionValue.months * (i - 1)));
+                    recurringDate.setFullYear(initialDate.getFullYear() + (recurringOptionValue.years * (i - 1)));
 
                     // Create a new document with the same data as the initial reminder
                     const newReminderCopyDocRef = doc(remindersCollectionRef);
@@ -211,7 +216,7 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
                         description: description,
                         activity: activity,
                         time: Timestamp.fromDate(new Date(timeValue)),
-                        date: Timestamp.fromDate(new Date(recurringDate)),
+                        date: recurringDate, // Use the calculated recurringDate
                         priority: priority,
                         userId: userId,
                         recurringOption: recurringOption,
@@ -240,6 +245,7 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
 
             // Close the modal
             handleClose();
+
             console.log('Reminder saved successfully. Document ID:', newReminderDocRef.id);
         } catch (error) {
             console.error('Error adding document: ', error);

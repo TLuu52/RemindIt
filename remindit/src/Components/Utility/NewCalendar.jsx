@@ -420,7 +420,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
             if (isComplete) {
                 // Delete the reminder and mark it as completed
                 await deleteDoc(reminderRef);
-                // Update the UI or take appropriate action for a completed reminder
+                setIsComplete(false);
             } else {
                 // Update the reminder with the new data
                 await updateDoc(reminderRef, {
@@ -746,19 +746,19 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                 {/* Days of the current month */}
                 {Array.from({ length: numDays }).map((__, i) => {
                     const reminderDay = i + 1;
-                    const remindersForDay = reminders
-                        .filter((reminder) => {
-                            const reminderTime = new Date(reminder.time.toDate());
-                            const isSameDay =
-                                reminderTime.getUTCFullYear() === year &&
-                                reminderTime.getUTCMonth() === monthNumber &&
-                                reminderTime.getUTCDate() === reminderDay;
+                    const remindersForDay = reminders.filter((reminder) => {
+                        const reminderTime = new Date(reminder.time.toDate());
+                        const isSameDay =
+                            reminderTime.getUTCFullYear() === year &&
+                            reminderTime.getUTCMonth() === monthNumber &&
+                            reminderTime.getUTCDate() === reminderDay;
 
-                            return isSameDay;
-                        })
-                        .sort((a, b) => b.priority - a.priority);
+                        return isSameDay;
+                    });
 
-                    const highestPriorityReminder = remindersForDay.length > 0 ? remindersForDay[0] : null;
+                    const reminderCount = remindersForDay.length;
+
+                    const highestPriorityReminder = reminderCount > 0 ? remindersForDay[0] : null;
 
                     const hasReminder = highestPriorityReminder !== null;
                     let progress = 0;
@@ -803,6 +803,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                                         <LinearProgress variant="determinate" value={progress} />
                                     </>
                                 )}
+                                {reminderCount > 0 && <div>Reminder Count: {reminderCount}</div>}
                             </button>
                         </Day>
                     );

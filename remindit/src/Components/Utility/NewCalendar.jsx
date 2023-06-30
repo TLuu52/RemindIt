@@ -274,6 +274,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
     const [anchorEl, setAnchorEl] = useState(null)
     const [newAttachmentName, setNewAttachmentName] = useState('')
     const [newAttachmentURL, setNewAttachmentURL] = useState('')
+    const [isComplete, setIsComplete] = useState(false);
     const openEditAttachment = Boolean(anchorEl)
 
 
@@ -415,6 +416,26 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                 setAttachmentName('')
                 setAttachmentURL('')
             })
+
+            if (isComplete) {
+                // Delete the reminder and mark it as completed
+                await deleteDoc(reminderRef);
+                // Update the UI or take appropriate action for a completed reminder
+            } else {
+                // Update the reminder with the new data
+                await updateDoc(reminderRef, {
+                    priority: priority,
+                    description: description || '',
+                    duration: totalDuration,
+                    notes: notes || '',
+                    activity: activity || '',
+                    title: title,
+                    attachments: updatedAttachments
+                    // NEED CATEGORY
+                });
+                // Perform any additional logic or UI updates for an updated reminder
+            }
+            
             closePopup();
 
             // console.log('Notes and Attachments saved successfully. Document ID:', newNotesAttachmentsDocRef.id);
@@ -834,6 +855,10 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                                         <MenuItem value={'45'}>45</MenuItem>
                                     </DurationSelect>
                                     <Typography variant='body1'>Minutes</Typography>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <input type="checkbox" checked={isComplete} onChange={(e) => setIsComplete(e.target.checked)} />
+                                    <Typography variant="body1">Mark as complete</Typography>
                                 </div>
                             </div>
                             <div>

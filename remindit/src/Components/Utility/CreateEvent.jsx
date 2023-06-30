@@ -141,6 +141,9 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
             const timeValue = time instanceof Date ? time : new Date(time);
             const dateValue = date instanceof Date ? date : new Date(date);
 
+            console.log('timeValue:', timeValue, typeof timeValue);
+
+
             // Get the current user ID
             const user = auth.currentUser;
             const userId = user.uid;
@@ -182,6 +185,49 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
                 }).then(() => {
                     fetchReminders()
                 })
+
+            // Handle recurring options
+            if (recurringOption !== 'No') {
+                const recurringOptions = {
+                    '1 week': { weeks: 1 },
+                    '1 month': { months: 1 },
+                    '1 year': { years: 1 }
+                };
+
+                const recurringOptionValue = recurringOptions[recurringOption];
+                let recurringDate = new Date(dateValue);
+
+                // Create copies of the reminder based on the recurring option
+                for (let i = 1; i < 5; i++) {
+                    recurringDate.setDate(recurringDate.getDate() + recurringOptionValue.weeks * 7);
+                    recurringDate.setMonth(recurringDate.getMonth() + recurringOptionValue.months);
+                    recurringDate.setFullYear(recurringDate.getFullYear() + recurringOptionValue.years);
+
+                    // Create a new document with the same data as the initial reminder
+                    const newReminderCopyDocRef = doc(remindersCollectionRef);
+
+                    const recurringReminderData = {
+                        title: title,
+                        description: description,
+                        activity: activity,
+                        time: Timestamp.fromDate(new Date(timeValue)),
+                        date: Timestamp.fromDate(new Date(recurringDate)),
+                        priority: priority,
+                        userId: userId,
+                        recurringOption: recurringOption,
+                        duration: duration,
+                        category: NewCategory,
+                        docId: newReminderCopyDocRef.id
+                    };
+
+                    // Create the recurring reminder copy
+                    await setDoc(newReminderCopyDocRef, recurringReminderData);
+                }
+            }
+
+            // Fetch reminders
+            fetchReminders();
+
 
             // Clear input fields
             setTitle('');

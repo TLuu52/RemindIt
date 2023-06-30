@@ -394,7 +394,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
             ${activity}\n
             ${selectedReminder.docId}\n
             `)
-            let updatedAttachments = attachments
+            let updatedAttachments = attachments || []; // Initialize with an empty array if attachments is undefined
             if (attachmentURL != '' && attachmentName != '') {
                 const newAttachment = { name: attachmentName, attachmentURL }
                 updatedAttachments = attachments ? [...attachments, newAttachment] : [newAttachment]
@@ -435,7 +435,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                 });
                 // Perform any additional logic or UI updates for an updated reminder
             }
-            
+
             closePopup();
 
             // console.log('Notes and Attachments saved successfully. Document ID:', newNotesAttachmentsDocRef.id);

@@ -24,10 +24,11 @@ import { Link } from 'react-router-dom';
 const TopCorner = styled('div')({
     position: 'absolute',
     top: '0',
-    left: '0',
+    right: '0',  // Updated from 'left' to 'right'
     width: '200px',
     padding: '20px'
-})
+  });
+
 const Page = styled('div')({
     padding: '20px',
     paddingBottom: '0',
@@ -105,6 +106,8 @@ const StyledLink = styled(Link)(({ theme }) => ({
 }))
 
 
+
+
 function Dashboard() {
 
 
@@ -112,6 +115,7 @@ function Dashboard() {
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [selectedCategory, setSelectedCategory] = useState('');
     const [reminders, setReminders] = useState([]);
+    const [inbox, setInbox] = useState([]);
 
 
     const [open, setOpen] = useState(false);
@@ -161,6 +165,25 @@ function Dashboard() {
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
     };
+
+
+    // Add an inbox notification when a reminder is due
+    useEffect(() => {
+        const currentDate = new Date();
+
+        // Filter reminders that are due today or in the future
+        const upcomingReminders = reminders.filter(
+            (reminder) => reminder.date.toDate() >= currentDate
+        );
+
+        // Sort reminders by date in ascending order
+        upcomingReminders.sort((a, b) => a.date.toDate() - b.date.toDate());
+
+        // Get the first 5 reminders from the upcoming reminders
+        const inboxNotifications = upcomingReminders.slice(0, 5);
+
+        setInbox(inboxNotifications);
+    }, [reminders]);
 
 
     return (

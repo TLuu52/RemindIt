@@ -597,27 +597,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         }
     };
 
-    // Event handler for filter selection change
-    const handleFilterChange = (e) => {
-        const selectedFilterBy = e.target.value;
-        setFilterBy(selectedFilterBy);
-
-        let filteredReminders = [];
-
-        if (selectedFilterBy === "priority") {
-            // Filter by priority
-            filteredReminders = reminders.filter((reminder) => reminder.priority === selectedPriority);
-        } else if (selectedFilterBy === "duration") {
-            // Filter by duration
-            filteredReminders = reminders.filter((reminder) => reminder.duration === selectedDuration);
-        } else {
-            // No specific filter, show all reminders
-            filteredReminders = reminders;
-        }
-
-        setSearchResults(filteredReminders);
-    };
-
     // Event handler for sort selection change
     const handleSortChange = (e) => {
         const selectedSortBy = e.target.value;
@@ -672,15 +651,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%' }}>
                             <div className="modal-content" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
                                 <h2 style={{ marginTop: 0, fontSize: '45px' }}>Search Results</h2>
-                                {/* Filter By */}
-                                <div className="filter-by">
-                                    <label htmlFor="filter-select">Filter By:</label>
-                                    <select id="filter-select" value={filterBy} onChange={handleFilterChange}>
-                                        <option value="">All</option>
-                                        <option value="priority">Priority</option>
-                                        <option value="duration">Duration</option>
-                                    </select>
-                                </div>
+
 
                                 {/* Sort By */}
                                 <div className="sort-by">

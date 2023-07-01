@@ -49,7 +49,7 @@ const AboutUs = () => {
             We are a reminder website dedicated to helping you stay organized and never miss an important task or event again. Our mission is to provide a simple and efficient platform that allows you to set reminders for various aspects of your life, such as appointments, deadlines, birthdays, and more.
           </Typography>
           <Typography variant="body1">
-            With our intuitive interface and customizable reminder settings, you can easily create and manage reminders that suit your specific needs. Whether you prefer email notifications, push notifications on your mobile device, or both, our website has you covered.
+            With our intuitive interface and customizable reminder settings, you can easily create and manage reminders that suit your specific need as our website has you covered.
           </Typography>
           <Typography variant="body1">
             We understand the value of time and the importance of staying on top of your commitments. That's why we built this website—to empower you with the tools you need to stay organized, reduce stress, and make the most out of every day.

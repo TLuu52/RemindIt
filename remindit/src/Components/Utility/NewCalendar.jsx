@@ -627,11 +627,29 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
     };
 
     const showPreviousReminder = () => {
-        // Function logic for showing the previous reminder
+        const currentDate = selectedReminder.date; // Assuming the selected reminder has a "date" property
+        const remindersOnSameDate = reminders.filter(reminder => reminder.date === currentDate);
+        const currentIndex = remindersOnSameDate.findIndex(reminder => reminder.id === selectedReminder.id);
+
+        let previousIndex = currentIndex - 1;
+        if (previousIndex < 0) {
+            previousIndex = remindersOnSameDate.length - 1;
+        }
+        const previousReminder = remindersOnSameDate[previousIndex];
+        setSelectedReminder(previousReminder);
     };
 
     const showNextReminder = () => {
-        // Function logic for showing the next reminder
+        const currentDate = selectedReminder.date; // Assuming the selected reminder has a "date" property
+        const remindersOnSameDate = reminders.filter(reminder => reminder.date === currentDate);
+        const currentIndex = remindersOnSameDate.findIndex(reminder => reminder.id === selectedReminder.id);
+
+        let nextIndex = currentIndex + 1;
+        if (nextIndex >= remindersOnSameDate.length) {
+            nextIndex = 0;
+        }
+        const nextReminder = remindersOnSameDate[nextIndex];
+        setSelectedReminder(nextReminder);
     };
 
 

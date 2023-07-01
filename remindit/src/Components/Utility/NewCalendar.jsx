@@ -6,6 +6,8 @@ import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
 import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
+
 
 
 const Top = styled('div')({
@@ -224,6 +226,7 @@ const CustomPopover = styled(Popover)(({ theme }) => ({
         color: theme.palette.primary.contrastText
     }
 }))
+
 
 function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders }) {
     const theme = useTheme();
@@ -623,6 +626,15 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         setSearchResults(sortedResults);
     };
 
+    const showPreviousReminder = () => {
+        // Function logic for showing the previous reminder
+    };
+
+    const showNextReminder = () => {
+        // Function logic for showing the next reminder
+    };
+
+
     return (
         <Container>
             <div>
@@ -789,164 +801,175 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
             </Calendar>
 
             <CustomModal open={showPopup} onClose={closePopup}>
-                <Box style={{ maxHeight: '80vh', overflow: 'auto' }}>
-                    {selectedReminder && (
-                        <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
-                            <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                                <div style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <Title variant='h6' sx={{ fontSize: '16px' }}>Priority:</Title>
-                                    <PrioritySelect value={priority} sx={{ background: getSelectBG() }} onChange={(e) => setPriority(e.target.value)}>
-                                        <MenuItem value={'high'}>HIGH</MenuItem>
-                                        <MenuItem value={'medium'}>MEDIUM</MenuItem>
-                                        <MenuItem value={'low'}>LOW</MenuItem>
-                                    </PrioritySelect>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <Title variant='h6' sx={{ fontSize: '16px' }}>Duration:</Title>
-                                    <DurationSelect value={durationHours} onChange={(e) => setDurationHours(e.target.value)}>
-                                        <MenuItem value={'00'}>00</MenuItem>
-                                        <MenuItem value={'01'}>01</MenuItem>
-                                        <MenuItem value={'02'}>02</MenuItem>
-                                        <MenuItem value={'03'}>03</MenuItem>
-                                        <MenuItem value={'04'}>04</MenuItem>
-                                        <MenuItem value={'05'}>05</MenuItem>
-                                        <MenuItem value={'06'}>06</MenuItem>
-                                        <MenuItem value={'07'}>07</MenuItem>
-                                        <MenuItem value={'08'}>08</MenuItem>
-                                        <MenuItem value={'09'}>09</MenuItem>
-                                        <MenuItem value={'10'}>10</MenuItem>
-                                        <MenuItem value={'11'}>11</MenuItem>
-                                        <MenuItem value={'12'}>12</MenuItem>
-                                    </DurationSelect>
-                                    <Typography variant='body1'>Hour(s)</Typography>
-                                    <DurationSelect value={durationMin} onChange={(e) => setDurationMin(e.target.value)}>
-                                        <MenuItem value={'00'}>00</MenuItem>
-                                        <MenuItem value={'15'}>15</MenuItem>
-                                        <MenuItem value={'30'}>30</MenuItem>
-                                        <MenuItem value={'45'}>45</MenuItem>
-                                    </DurationSelect>
-                                    <Typography variant='body1'>Minutes</Typography>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <input type="checkbox" checked={isComplete} onChange={(e) => setIsComplete(e.target.checked)} />
-                                    <Typography variant="body1">Mark as complete</Typography>
-                                </div>
-                            </div>
-                            <div>
-                                <Title>Description:</Title>
-                                <StyledTextarea value={description} onChange={(e) => setDescription(e.target.value)} />
-                            </div>
-
-
-                            {/* ***********CHANGE NOTES METHOD, ADD NOTES AND ATTACHMENTS TO REMINDERS COLLECTION********** */}
-                            <div>
-                                <Title>Attachments : &nbsp; <BsUpload /></Title>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '10px' }}>
-                                    <Input placeholder='Attachment Name' sx={{ fontSize: '16px !important', width: 'auto !important' }} value={attachmentName} onChange={(e) => setAttachmentName(e.target.value)} />
-                                    <CustomLabel>
-                                        <input type="file" accept=".pdf,.doc,.docx, .png, .jpg, .jpeg, image/png, image/jpeg" onChange={newAttachment} />
-                                        <BsUpload size={"20px"} />
-                                    </CustomLabel>
-                                </div>
-                                {/* <Attachment > */}
-                                {attachments && attachments.map(attachment => (
-                                    <Attachment key={attachment.id}>
-                                        <Typography variant='body1'>{attachment.name}</Typography>
-                                        <div style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <BsPencilFill style={{ cursor: 'pointer' }} onClick={(e) => setAnchorEl(e.currentTarget)} />
-                                            <CustomPopover
-                                                open={openEditAttachment}
-                                                anchorEl={anchorEl}
-                                                onClose={closeEditAttachment}
-                                                anchorOrigin={{
-                                                    vertical: 'bottom',
-                                                    horizontal: 'left'
-                                                }}
-
-                                            >
-                                                <>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '10px' }}>
-                                                        <Input
-                                                            placeholder='Attachment Name'
-                                                            sx={{
-                                                                fontSize: '16px !important',
-                                                                width: 'auto !important',
-                                                                color: theme.palette.primary.contrastText
-                                                            }}
-                                                            value={newAttachmentName}
-                                                            onChange={(e) => setNewAttachmentName(e.target.value)}
-                                                        />
-                                                        <CustomLabel>
-                                                            <input type="file" accept=".pdf,.doc,.docx, .png, .jpg, .jpeg, image/png, image/jpeg" onChange={newEditAttachment} />
-                                                            <BsUpload size={"20px"} />
-                                                        </CustomLabel>
-                                                    </div>
-                                                    <div style={{ padding: '0px 10px 10px', display: 'flex', gap: '10px' }}>
-                                                        <CustomButton size={'s'} color={0} text='Cancel' onClick={closeEditAttachment} />
-                                                        <CustomButton size={'s'} color={1} text='Save' onClick={() => editAttachment(attachment)} />
-                                                    </div>
-                                                </>
-                                            </CustomPopover>
-                                            <BsTrashFill style={{ cursor: 'pointer' }} onClick={() => deleteAttachment(attachment)} />
-                                            <a style={{ cursor: 'pointer', color: 'inherit', display: 'grid', placeItems: 'center' }} onClick={() => navigator.clipboard.writeText(attachment.attachmentURL)}>
-                                                <BsClipboard2 />
-                                            </a>
-                                            <a style={{ color: 'inherit', display: 'grid', placeItems: 'center' }} href={attachment.attachmentURL} target='_blank'>
-                                                <BsLink />
-                                            </a>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Button onClick={showPreviousReminder}>
+                        <IoIosArrowBack />
+                    </Button>
+                    <div>
+                        <Box style={{ maxHeight: '80vh', overflow: 'auto' }}>
+                            {selectedReminder && (
+                                <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                                    <Input placeholder={'Title'} value={title} onChange={(e) => setTitle(e.target.value)} />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                        <div style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <Title variant='h6' sx={{ fontSize: '16px' }}>Priority:</Title>
+                                            <PrioritySelect value={priority} sx={{ background: getSelectBG() }} onChange={(e) => setPriority(e.target.value)}>
+                                                <MenuItem value={'high'}>HIGH</MenuItem>
+                                                <MenuItem value={'medium'}>MEDIUM</MenuItem>
+                                                <MenuItem value={'low'}>LOW</MenuItem>
+                                            </PrioritySelect>
                                         </div>
-                                    </Attachment>
-                                ))}
-                            </div>
-
-                            <Title>Notes:</Title>
-                            <StyledTextarea value={notes} onChange={e => setNotes(e.target.value)} />
-
-                            <Title>Activity:</Title>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
-                                <ProfileIcon img='default' />
-                                <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={activity} onChange={(e) => setActivity(e.target.value)} />
-                            </div>
-                            {activity && (
-                                <div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Title variant='h6' sx={{ fontSize: '16px' }}>Duration:</Title>
+                                            <DurationSelect value={durationHours} onChange={(e) => setDurationHours(e.target.value)}>
+                                                <MenuItem value={'00'}>00</MenuItem>
+                                                <MenuItem value={'01'}>01</MenuItem>
+                                                <MenuItem value={'02'}>02</MenuItem>
+                                                <MenuItem value={'03'}>03</MenuItem>
+                                                <MenuItem value={'04'}>04</MenuItem>
+                                                <MenuItem value={'05'}>05</MenuItem>
+                                                <MenuItem value={'06'}>06</MenuItem>
+                                                <MenuItem value={'07'}>07</MenuItem>
+                                                <MenuItem value={'08'}>08</MenuItem>
+                                                <MenuItem value={'09'}>09</MenuItem>
+                                                <MenuItem value={'10'}>10</MenuItem>
+                                                <MenuItem value={'11'}>11</MenuItem>
+                                                <MenuItem value={'12'}>12</MenuItem>
+                                            </DurationSelect>
+                                            <Typography variant='body1'>Hour(s)</Typography>
+                                            <DurationSelect value={durationMin} onChange={(e) => setDurationMin(e.target.value)}>
+                                                <MenuItem value={'00'}>00</MenuItem>
+                                                <MenuItem value={'15'}>15</MenuItem>
+                                                <MenuItem value={'30'}>30</MenuItem>
+                                                <MenuItem value={'45'}>45</MenuItem>
+                                            </DurationSelect>
+                                            <Typography variant='body1'>Minutes</Typography>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <input type="checkbox" checked={isComplete} onChange={(e) => setIsComplete(e.target.checked)} />
+                                            <Typography variant="body1">Mark as complete</Typography>
+                                        </div>
+                                    </div>
                                     <div>
-                                        <Title variant="h6">Description:</Title>
-                                        <TextField
-                                            sx={{ color: '#fff' }}
-                                            multiline
-                                            rows={4}
-                                            placeholder="Enter a description..."
-                                            value={discussionDescription}
-                                            onChange={(e) => setDiscussionDescription(e.target.value)}
-                                            variant="outlined"
-                                            fullWidth
-                                        />
+                                        <Title>Description:</Title>
+                                        <StyledTextarea value={description} onChange={(e) => setDescription(e.target.value)} />
                                     </div>
-                                    <Button variant="contained" color="primary" onClick={handleSaveDiscussion}>Save</Button>
-                                    <Comments activity={activity} />
-                                </div>
-                            )}
-                            <div>
-                                <Title>Discussion Threads:</Title>
-                                {discussionThreads.map((thread, index) => (
-                                    <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <ProfileIcon img='default' />
-                                        <div>
-                                            <Typography variant="h6">Activity: {thread.activity}</Typography>
-                                            <Typography variant="body1">Description: {thread.description}</Typography>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
 
-                    )}
-                    <CustomButton onClick={closePopup} text={'Close'} color={0} size={'s'} />
-                    <CustomButton onClick={submit} text={'Submit'} color={1} size={'s'} />
-                </Box>
+
+                                    {/* ***********CHANGE NOTES METHOD, ADD NOTES AND ATTACHMENTS TO REMINDERS COLLECTION********** */}
+                                    <div>
+                                        <Title>Attachments : &nbsp; <BsUpload /></Title>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '10px' }}>
+                                            <Input placeholder='Attachment Name' sx={{ fontSize: '16px !important', width: 'auto !important' }} value={attachmentName} onChange={(e) => setAttachmentName(e.target.value)} />
+                                            <CustomLabel>
+                                                <input type="file" accept=".pdf,.doc,.docx, .png, .jpg, .jpeg, image/png, image/jpeg" onChange={newAttachment} />
+                                                <BsUpload size={"20px"} />
+                                            </CustomLabel>
+                                        </div>
+                                        {/* <Attachment > */}
+                                        {attachments && attachments.map(attachment => (
+                                            <Attachment key={attachment.id}>
+                                                <Typography variant='body1'>{attachment.name}</Typography>
+                                                <div style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <BsPencilFill style={{ cursor: 'pointer' }} onClick={(e) => setAnchorEl(e.currentTarget)} />
+                                                    <CustomPopover
+                                                        open={openEditAttachment}
+                                                        anchorEl={anchorEl}
+                                                        onClose={closeEditAttachment}
+                                                        anchorOrigin={{
+                                                            vertical: 'bottom',
+                                                            horizontal: 'left'
+                                                        }}
+
+                                                    >
+                                                        <>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '10px' }}>
+                                                                <Input
+                                                                    placeholder='Attachment Name'
+                                                                    sx={{
+                                                                        fontSize: '16px !important',
+                                                                        width: 'auto !important',
+                                                                        color: theme.palette.primary.contrastText
+                                                                    }}
+                                                                    value={newAttachmentName}
+                                                                    onChange={(e) => setNewAttachmentName(e.target.value)}
+                                                                />
+                                                                <CustomLabel>
+                                                                    <input type="file" accept=".pdf,.doc,.docx, .png, .jpg, .jpeg, image/png, image/jpeg" onChange={newEditAttachment} />
+                                                                    <BsUpload size={"20px"} />
+                                                                </CustomLabel>
+                                                            </div>
+                                                            <div style={{ padding: '0px 10px 10px', display: 'flex', gap: '10px' }}>
+                                                                <CustomButton size={'s'} color={0} text='Cancel' onClick={closeEditAttachment} />
+                                                                <CustomButton size={'s'} color={1} text='Save' onClick={() => editAttachment(attachment)} />
+                                                            </div>
+                                                        </>
+                                                    </CustomPopover>
+                                                    <BsTrashFill style={{ cursor: 'pointer' }} onClick={() => deleteAttachment(attachment)} />
+                                                    <a style={{ cursor: 'pointer', color: 'inherit', display: 'grid', placeItems: 'center' }} onClick={() => navigator.clipboard.writeText(attachment.attachmentURL)}>
+                                                        <BsClipboard2 />
+                                                    </a>
+                                                    <a style={{ color: 'inherit', display: 'grid', placeItems: 'center' }} href={attachment.attachmentURL} target='_blank'>
+                                                        <BsLink />
+                                                    </a>
+                                                </div>
+                                            </Attachment>
+                                        ))}
+                                    </div>
+
+                                    <Title>Notes:</Title>
+                                    <StyledTextarea value={notes} onChange={e => setNotes(e.target.value)} />
+
+                                    <Title>Activity:</Title>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
+                                        <ProfileIcon img='default' />
+                                        <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={activity} onChange={(e) => setActivity(e.target.value)} />
+                                    </div>
+                                    {activity && (
+                                        <div>
+                                            <div>
+                                                <Title variant="h6">Description:</Title>
+                                                <TextField
+                                                    sx={{ color: '#fff' }}
+                                                    multiline
+                                                    rows={4}
+                                                    placeholder="Enter a description..."
+                                                    value={discussionDescription}
+                                                    onChange={(e) => setDiscussionDescription(e.target.value)}
+                                                    variant="outlined"
+                                                    fullWidth
+                                                />
+                                            </div>
+                                            <Button variant="contained" color="primary" onClick={handleSaveDiscussion}>Save</Button>
+                                            <Comments activity={activity} />
+                                        </div>
+                                    )}
+                                    <div>
+                                        <Title>Discussion Threads:</Title>
+                                        {discussionThreads.map((thread, index) => (
+                                            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <ProfileIcon img='default' />
+                                                <div>
+                                                    <Typography variant="h6">Activity: {thread.activity}</Typography>
+                                                    <Typography variant="body1">Description: {thread.description}</Typography>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                            )}
+
+                            <CustomButton onClick={closePopup} text={'Close'} color={0} size={'s'} />
+                            <CustomButton onClick={submit} text={'Submit'} color={1} size={'s'} />
+                        </Box>
+                    </div>
+                    <Button onClick={showNextReminder}>
+                        <IoIosArrowForward />
+                    </Button>
+                </div>
             </CustomModal>
-        </Container>
+        </Container >
 
     );
 }

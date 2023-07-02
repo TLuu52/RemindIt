@@ -157,21 +157,8 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
             })[0]
 
 
-            // Create a new document in the "reminders" collection with a generated ID
             const remindersCollectionRef = collection(firestore, 'reminders');
-            // const newReminderDocRef = await addDoc(remindersCollectionRef, {
-            //     title: title,
-            //     description: description,
-            //     activity: activity,
-            //     time: Timestamp.fromDate(timeValue),
-            //     date: Timestamp.fromDate(dateValue),
-            //     priority: priority,
-            //     userId: userId, // Include the user ID in the reminder document
-            //     recurringOption: recurringOption, // Include the selected recurring option
-            //     duration: duration, // Include the duration of the reminder,
-            //     category: NewCategory,
-            //     docId: remindersCollectionRef.id
-            // });
+
             const newReminderDocRef = doc(collection(firestore, 'reminders'));
             await setDoc(newReminderDocRef
                 , {

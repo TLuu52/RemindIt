@@ -4,7 +4,7 @@ import { collection, getDocs, doc, deleteDoc, updateDoc, FieldValue } from 'fire
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
-import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill } from 'react-icons/bs';
+import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill, BsCircleFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
@@ -173,6 +173,17 @@ const PrioritySelect = styled(Select)(({ theme }) => ({
         border: 'none'
     }
 }))
+const CategorySelect = styled(Select)(({ theme }) => ({
+    color: '#fff',
+    width: '300px !important',
+    height: '40px',
+    border: 'none',
+    outline: 'none',
+    fontWeight: '600',
+    '& .MuiOutlinedInput-notchedOutline': {
+        border: 'none'
+    }
+}))
 const DurationSelect = styled(Select)(({ theme }) => ({
     color: '#fff',
     width: '70px',
@@ -228,7 +239,7 @@ const CustomPopover = styled(Popover)(({ theme }) => ({
 }))
 
 
-function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders }) {
+function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, categories, setCategories, selectedCategories }) {
     const theme = useTheme();
 
     const monthNames = [
@@ -278,6 +289,10 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
     const [newAttachmentName, setNewAttachmentName] = useState('')
     const [newAttachmentURL, setNewAttachmentURL] = useState('')
     const [isComplete, setIsComplete] = useState(false);
+    const [category, setCategory] = useState({
+        name: '',
+        color: 'transparent',
+    })
     const openEditAttachment = Boolean(anchorEl)
 
 
@@ -351,6 +366,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                 setNotes(selectedReminder.notes)
                 setAttachments(selectedReminder.attachments)
                 setTitle(selectedReminder.title)
+                setCategory(selectedReminder.category)
             }
         }, 400)
     }, [selectedReminder])
@@ -381,13 +397,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                 });
             }
 
-            // // Create a new document in the "NotesAttachments" collection
-            // const notesattachmentsCollectionRef = collection(firestore, 'NotesAttachments');
-            // const newNotesAttachmentsDocRef = await addDoc(notesattachmentsCollectionRef, {
-            //     notes: notes,
-            //     attachmentUrl: downloadURL,
-            //     userId: userId,
-            // });
             const totalDuration = `${durationHours}:${durationMin}`
             console.log(`
             ${priority}\n
@@ -412,8 +421,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                 notes: notes || '',
                 activity: activity || '',
                 title: title,
-                attachments: updatedAttachments
-                // NEED CATEGORY
+                attachments: updatedAttachments,
+                category: category
             }).then(() => {
                 fetchReminders()
                 setAttachmentName('')
@@ -523,6 +532,15 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                 return theme.palette.error.main
         }
     }
+
+    const getCategoryBG = () => {
+        return category?.color || 'transparent'
+    }
+    const changeCategory = (e) => {
+        const cat = categories.filter(c => c.name === e)[0]
+        setCategory(cat)
+    }
+
 
     const newEditAttachment = async (e) => {
         const file = e.target.files[0];
@@ -651,6 +669,11 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
         const nextReminder = remindersOnSameDate[nextIndex];
         setSelectedReminder(nextReminder);
     };
+
+    const isCategory = (reminder) => {
+        const newCats = selectedCategories.filter(c => c.name === reminder.category.name);
+        return newCats.length > 0
+    }
 
 
     return (
@@ -797,14 +820,14 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                                 }}
                             >
                                 <DuringMonth>{i + 1}</DuringMonth>
-                                {hasReminder && (
+                                {hasReminder && (isCategory(highestPriorityReminder)) && (
                                     <>
                                         <div>Title: {highestPriorityReminder.title}</div>
                                         {/* Progress bar */}
                                         <LinearProgress variant="determinate" value={progress} />
+                                        <div>Reminder Count: {reminderCount}</div>
                                     </>
                                 )}
-                                {reminderCount > 0 && <div>Reminder Count: {reminderCount}</div>}
                             </button>
                         </Day>
                     );
@@ -867,6 +890,16 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders })
                                             <input type="checkbox" checked={isComplete} onChange={(e) => setIsComplete(e.target.checked)} />
                                             <Typography variant="body1">Mark as complete</Typography>
                                         </div>
+                                    </div>
+                                    <div>
+                                        <Title>Category:</Title>
+                                        <CategorySelect value={category.name} sx={{ background: getCategoryBG() }} onChange={(e) => changeCategory(e.target.value)}>
+                                            {categories && categories.map((c, idx) => (
+                                                <MenuItem key={idx} value={c.name} sx={{ display: 'flex', alignItems: 'center', gap: '10px', }}>
+                                                    <Typography sx={{ display: 'inline-block' }}>{c.name}</Typography><BsCircleFill color={c.color} />
+                                                </MenuItem>
+                                            ))}
+                                        </CategorySelect>
                                     </div>
                                     <div>
                                         <Title>Description:</Title>

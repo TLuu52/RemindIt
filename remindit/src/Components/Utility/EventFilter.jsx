@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react"
 import { BsCircleFill, BsPlus } from "react-icons/bs"
 import CreateCategory from "./CreateCategory"
 import { UserContext } from "../../App"
-import { doc, getDoc } from "firebase/firestore"
+import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { firestore } from "../../firebase"
 
 const CustomContainer = styled(Container)(({ theme }) => ({
@@ -40,32 +40,37 @@ const ItemTitle = styled('div')({
     gap: '18px'
 })
 
-function EventFilter() {
+function EventFilter({ getCategories, setSelectedCategories, selectedCategories, categories, setCategories }) {
     const [open, setOpen] = useState(false)
     const { user } = useContext(UserContext)
-    const [categories, setCategories] = useState(null);
     const handleClose = () => setOpen(false)
-
-    const getCategories = async () => {
-        const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
-        const docSnap = await getDoc(categoryDocRef)
-
-        if (docSnap.exists()) {
-            setCategories(docSnap.data().categories)
-        } else {
-            console.log('NOT FOUND')
-        }
-    }
-
-
 
     useEffect(() => {
         setTimeout(() => {
             if (user.currentUser && categories === null) {
-                getCategories()
+                getCategories(setCategories)
             }
         }, 400)
     }, [user])
+    const changeCategoryActive = async (category) => {
+        const newCategories = categories;
+        newCategories.map(c => {
+            if (c.name === category.name) {
+                c.active = !c.active
+            }
+        })
+        try {
+            const categoriesDocRef = doc(firestore, 'categories', user.currentUser.uid)
+            await updateDoc(categoriesDocRef, {
+                categories: newCategories
+            }).then(() => {
+                getCategories(setCategories)
+            })
+        } catch (err) {
+            console.log('Error editing category: ', err)
+        }
+    }
+    console.log(selectedCategories)
 
     return (
         <CustomContainer>
@@ -83,7 +88,7 @@ function EventFilter() {
                             <BsCircleFill size={14} color={category.color} />
                             <Typography variant="h6">{category.name}</Typography>
                         </ItemTitle>
-                        <Switch />
+                        <Switch checked={category.active || false} onChange={() => changeCategoryActive(category)} />
                     </ListItem>
                 ))}
             </List>

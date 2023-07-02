@@ -1,6 +1,6 @@
 import Header from './Utility/Header'
 import { Box, FormLabel, Input, Modal, OutlinedInput, Typography, styled } from '@mui/material'
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import CustomCalendar from './Utility/CustomCalendar';
 import EventFilter from './Utility/EventFilter';
@@ -16,9 +16,10 @@ import TextareaAutosize from '@mui/base/TextareaAutosize';
 import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import CustomButton from './Utility/CustomButton';
 import { auth, firestore, storage } from "../firebase";
-import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where, Timestamp } from "firebase/firestore";
+import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where, Timestamp, getDoc } from "firebase/firestore";
 import CreateEvent from './Utility/CreateEvent';
 import { Link } from 'react-router-dom';
+import { UserContext } from '../App';
 
 
 const TopCorner = styled('div')({
@@ -27,7 +28,7 @@ const TopCorner = styled('div')({
     right: '0',  // Updated from 'left' to 'right'
     width: '200px',
     padding: '20px'
-  });
+});
 
 const Page = styled('div')({
     padding: '20px',
@@ -115,7 +116,10 @@ function Dashboard() {
     const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
     const [selectedCategory, setSelectedCategory] = useState('');
     const [reminders, setReminders] = useState([]);
+    const { user } = useContext(UserContext)
     const [inbox, setInbox] = useState([]);
+    const [selectedCategories, setSelectedCategories] = useState([])
+    const [categories, setCategories] = useState(null)
 
 
     const [open, setOpen] = useState(false);
@@ -158,6 +162,16 @@ function Dashboard() {
             }
         }, 400)
     };
+    const getCategories = async (setCategories) => {
+        const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
+        const docSnap = await getDoc(categoryDocRef)
+        if (docSnap.exists()) {
+            setSelectedCategories(docSnap.data().categories.filter(c => c.active))
+            setCategories(docSnap.data().categories)
+        } else {
+            console.log('NOT FOUND')
+        }
+    }
 
     const changeView = (e) => {
         setView({ view: e.target.value.view, day: e.target.value.day })
@@ -183,7 +197,8 @@ function Dashboard() {
         const inboxNotifications = upcomingReminders.slice(0, 5);
 
         setInbox(inboxNotifications);
-    }, [reminders]);
+
+    }, [reminders, selectedCategories]);
 
 
     return (
@@ -192,7 +207,7 @@ function Dashboard() {
             <Main>
                 <Left>
                     <CustomCalendar onChange={onChange} value={value} reminders={reminders} />
-                    <EventFilter />
+                    <EventFilter selectedCategories={selectedCategories} setSelectedCategories={setSelectedCategories} getCategories={getCategories} categories={categories} setCategories={setCategories} />
                     <BottomSection>
                         <div>
                             <Typography variant="h6">Have any Questions?</Typography>
@@ -212,7 +227,7 @@ function Dashboard() {
                     </BottomSection>
                 </Left>
                 <Right>
-                    <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} />
+                    <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} categories={categories} selectedCategories={selectedCategories} />
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>

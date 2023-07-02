@@ -1,12 +1,13 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, getDocs, doc, deleteDoc, updateDoc, FieldValue } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, updateDoc, FieldValue, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
 import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill, BsCircleFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
+import AllReminders from './AllReminders';
 
 
 
@@ -238,6 +239,11 @@ const CustomPopover = styled(Popover)(({ theme }) => ({
     }
 }))
 
+const Reminder = styled('div')({
+    padding: '5px',
+    textAlign: 'left'
+})
+
 
 function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, categories, setCategories, selectedCategories }) {
     const theme = useTheme();
@@ -293,6 +299,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         name: '',
         color: 'transparent',
     })
+    const [allRemindersOpen, setAllRemindersOpen] = useState(false)
+    const [dayReminders, setDayReminders] = useState([])
+    const [reminderDay, setReminderDay] = useState('')
     const openEditAttachment = Boolean(anchorEl)
 
 
@@ -316,6 +325,17 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     const changeView = (newView) => {
         setView(newView)
+    }
+
+    const formatAMPM = (date) => {
+        let hours = date.getHours();
+        let minutes = date.getMinutes();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        const strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
     }
 
     useEffect(() => {
@@ -371,6 +391,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }, 400)
     }, [selectedReminder])
 
+    console.log(allRemindersOpen)
 
     const storage = getStorage(); // Initialize Firebase Storage
 
@@ -803,12 +824,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                             }}
                         >
                             <button
-                                onClick={() => {
-                                    if (hasReminder) {
-                                        setSelectedReminder(highestPriorityReminder);
-                                        setShowPopup(true);
-                                    }
-                                }}
+
                                 style={{
                                     background: 'transparent',
                                     border: 'none',
@@ -816,18 +832,43 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     height: '100%',
                                     padding: 0,
                                     margin: 0,
-                                    cursor: hasReminder ? 'pointer' : 'default',
                                 }}
                             >
                                 <DuringMonth>{i + 1}</DuringMonth>
-                                {hasReminder && (isCategory(highestPriorityReminder)) && (
-                                    <>
-                                        <div>Title: {highestPriorityReminder.title}</div>
-                                        {/* Progress bar */}
-                                        <LinearProgress variant="determinate" value={progress} />
-                                        <div>Reminder Count: {reminderCount}</div>
-                                    </>
-                                )}
+
+                                {remindersForDay && (reminderCount <= 2) && remindersForDay.map(r => {
+                                    const time = formatAMPM(new Timestamp(r.time.seconds, r.time.nanoseconds).toDate())
+                                    const hours = Number(r.duration.split(':')[0]);
+                                    const minutes = Number(r.duration.split(':')[1]);
+                                    if (isCategory(r)) {
+                                        return (
+                                            <>
+                                                <Reminder style={{ background: r.category.color, cursor: 'pointer' }}
+                                                    onClick={() => {
+                                                        setSelectedReminder(r);
+                                                        setShowPopup(true);
+                                                    }}
+                                                >
+                                                    <Typography variant='body1'>{r.title}</Typography>
+                                                    <Typography variant='body1'>{time}</Typography>
+                                                    <Typography variant='body1'>{hours} hour(s) {minutes} minutes</Typography>
+                                                    <LinearProgress variant="determinate" value={progress} /></Reminder>
+                                            </>
+                                        )
+                                    }
+                                })}
+                                {(reminderCount > 2) &&
+                                    <div style={{ background: theme.palette.primary.main, width: '70%', margin: 'auto', padding: '5px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
+                                        onClick={() => {
+                                            setAllRemindersOpen(true)
+                                            setDayReminders(remindersForDay)
+                                            setReminderDay(i + 1)
+                                        }}
+                                    >
+                                        SHOW ALL REMINDERS
+                                    </div>
+                                }
+                                {reminderCount > 0 && (<div style={{ position: 'absolute', bottom: '0', paddingLeft: '4px' }}>{reminderCount} {reminderCount === 1 ? 'Reminder' : 'Reminders'}</div>)}
                             </button>
                         </Day>
                     );
@@ -1020,6 +1061,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     </Button>
                 </div>
             </CustomModal>
+            <AllReminders open={allRemindersOpen} setOpen={setAllRemindersOpen} reminders={dayReminders} setSelectedReminder={setSelectedReminder} setShowPopup={setShowPopup} reminderDay={reminderDay} month={month} formatAMPM={formatAMPM} />
         </Container >
 
     );

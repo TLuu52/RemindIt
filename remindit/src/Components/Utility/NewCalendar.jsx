@@ -665,6 +665,17 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         setSearchResults(sortedResults);
     };
 
+    const handleReminderClick = (reminder) => {
+        setSelectedReminder(reminder);
+        setShowPopup(true);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     const isCategory = (reminder) => {
         const newCats = selectedCategories.filter(c => c.name === reminder.category.name);
         return newCats.length > 0
@@ -682,16 +693,21 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         list="suggestions"
+                        onKeyDown={handleKeyDown}
                     />
                     <SearchButton onClick={handleSearch}>Search</SearchButton>
                 </SearchBar>
 
                 {/* Suggestions list */}
-                <datalist id="suggestions">
-                    {reminders.map((reminder) => (
-                        <option key={reminder.id} value={reminder.title} />
-                    ))}
-                </datalist>
+                {searchTerm && (
+                    <datalist id="suggestions">
+                        {reminders
+                            .filter((reminder) => reminder.title.includes(searchTerm))
+                            .map((reminder) => (
+                                <option key={reminder.id} value={reminder.title} />
+                            ))}
+                    </datalist>
+                )}
 
                 {/* Modal */}
                 {showModal && (
@@ -717,9 +733,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <ul>
                                             {searchResults.map((reminder) => (
                                                 <li key={reminder.id}>
-                                                    <a href={`${reminder.id}`}>
+                                                    <button onClick={() => handleReminderClick(reminder)}>
                                                         {reminder.title}
-                                                    </a>
+                                                    </button>
                                                 </li>
                                             ))}
                                         </ul>

@@ -195,11 +195,11 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
 
                     // Calculate the recurring date based on the recurring option
                     if (recurringOptionValue.weeks)
-                        recurringDate.setDate(initialDate.getDate() + (recurringOptionValue.weeks * 7 * (i - 1)));
+                        recurringDate.setDate(initialDate.getDate() + (recurringOptionValue.weeks * 7 * i));
                     if (recurringOptionValue.months)
-                        recurringDate.setMonth(initialDate.getMonth() + (recurringOptionValue.months * (i - 1)));
+                        recurringDate.setMonth(initialDate.getMonth() + (recurringOptionValue.months * i));
                     if (recurringOptionValue.years)
-                        recurringDate.setFullYear(initialDate.getFullYear() + (recurringOptionValue.years * (i - 1)));
+                        recurringDate.setFullYear(initialDate.getFullYear() + (recurringOptionValue.years * i));
 
                     // Set the time for recurring reminders
                     recurringDate.setHours(timeValue.getHours());

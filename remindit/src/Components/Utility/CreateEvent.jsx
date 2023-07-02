@@ -158,8 +158,8 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
 
 
             const remindersCollectionRef = collection(firestore, 'reminders');
-
             const newReminderDocRef = doc(collection(firestore, 'reminders'));
+
             await setDoc(newReminderDocRef
                 , {
                     title: title,
@@ -177,6 +177,7 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
                     fetchReminders()
                 })
 
+
             // Handle recurring options
             if (recurringOption !== 'No') {
                 const recurringOptions = {
@@ -191,9 +192,18 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
                 // Create copies of the reminder based on the recurring option
                 for (let i = 1; i <= 5; i++) {
                     const recurringDate = new Date(initialDate);
-                    recurringDate.setDate(initialDate.getDate() + (recurringOptionValue.weeks * 7 * (i - 1)));
-                    recurringDate.setMonth(initialDate.getMonth() + (recurringOptionValue.months * (i - 1)));
-                    recurringDate.setFullYear(initialDate.getFullYear() + (recurringOptionValue.years * (i - 1)));
+
+                    // Calculate the recurring date based on the recurring option
+                    if (recurringOptionValue.weeks)
+                        recurringDate.setDate(initialDate.getDate() + (recurringOptionValue.weeks * 7 * (i - 1)));
+                    if (recurringOptionValue.months)
+                        recurringDate.setMonth(initialDate.getMonth() + (recurringOptionValue.months * (i - 1)));
+                    if (recurringOptionValue.years)
+                        recurringDate.setFullYear(initialDate.getFullYear() + (recurringOptionValue.years * (i - 1)));
+
+                    // Set the time for recurring reminders
+                    recurringDate.setHours(timeValue.getHours());
+                    recurringDate.setMinutes(timeValue.getMinutes());
 
                     // Create a new document with the same data as the initial reminder
                     const newReminderCopyDocRef = doc(remindersCollectionRef);
@@ -202,8 +212,8 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
                         title: title,
                         description: description,
                         activity: activity,
-                        time: Timestamp.fromDate(new Date(timeValue)),
-                        date: recurringDate, // Use the calculated recurringDate
+                        time: Timestamp.fromDate(recurringDate),
+                        date: Timestamp.fromDate(recurringDate),
                         priority: priority,
                         userId: userId,
                         recurringOption: recurringOption,

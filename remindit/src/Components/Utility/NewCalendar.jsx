@@ -632,7 +632,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const handleSearch = () => {
         if (searchTerm.trim() !== "") {
             const foundReminders = reminders.filter(
-                (reminder) => reminder.title.includes(searchTerm)
+                (reminder) => reminder.title.toLowerCase().includes(searchTerm.toLowerCase())
             );
             setSearchResults(foundReminders);
             setShowModal(true); // Open the modal when search term is not empty

@@ -94,6 +94,17 @@ function NotificationBox() {
     );
   };
 
+  const renderReminder = (reminder, index) => {
+    const isDueSoon = reminder.daysUntilDue <= 7; // Customize the threshold for "due soon" as needed
+
+    return (
+      <Typography key={index} variant="body2">
+        {reminder.title} - {reminder.daysUntilDue} days until due{' '}
+        {isDueSoon && <span style={{ color: 'red' }}>⚠️</span>}
+      </Typography>
+    );
+  };
+
   if (displayedReminders.length === 0) {
     return (
       <Box>
@@ -126,11 +137,7 @@ function NotificationBox() {
           Sort by Length
         </Button>
       </Box>
-      {remindersToShow.map((notification, index) => (
-        <Typography key={index} variant="body2">
-          {notification.title} - {notification.daysUntilDue} days until due
-        </Typography>
-      ))}
+      {remindersToShow.map(renderReminder)}
       {renderPaginationButtons()}
     </Box>
   );

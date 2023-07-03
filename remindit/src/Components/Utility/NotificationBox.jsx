@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, query, where } from 'firebase/firestore';
+import { auth } from "../../firebase";
 
 function NotificationBox() {
   const [inbox, setInbox] = useState([]);
@@ -10,23 +11,44 @@ function NotificationBox() {
   const remindersPerPage = 10; // Adjust the number of reminders per page as needed
 
   useEffect(() => {
-    const db = getFirestore();
-    const remindersCollection = collection(db, 'reminders');
+    const fetchReminders = async () => {
+      try {
+        const db = getFirestore();
+        const remindersCollection = collection(db, 'reminders');
 
-    const unsubscribe = onSnapshot(remindersCollection, (snapshot) => {
-      const reminders = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        const dueDate = data.date.toDate();
-        const daysUntilDue = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 3600 * 24));
-        data.daysUntilDue = daysUntilDue;
-        reminders.push(data);
-      });
-      setInbox(reminders);
-    });
+        const user = auth.currentUser;
+        if (!user) {
+          // User is not signed in, handle accordingly
+          return;
+        }
 
-    return () => unsubscribe();
-  }, []);
+        const remindersQuery = query(
+          remindersCollection,
+          where('userId', '==', user.uid)
+        );
+
+        const unsubscribe = onSnapshot(remindersQuery, (snapshot) => {
+          const reminders = [];
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const dueDate = data.date.toDate();
+            const daysUntilDue = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 3600 * 24));
+            data.daysUntilDue = daysUntilDue;
+            reminders.push(data);
+          });
+          setInbox(reminders);
+        });
+
+        return () => unsubscribe();
+      } catch (error) {
+        console.error('Error fetching reminders:', error);
+      }
+    };
+
+    if (auth.currentUser) {
+      fetchReminders();
+    }
+  }, [auth]);
 
   const filterReminders = (value) => {
     setFilter(value);
@@ -37,16 +59,20 @@ function NotificationBox() {
   };
 
   const filteredReminders = () => {
-    let filtered = inbox;
+    const currentDate = new Date();
+    let filtered = inbox.filter(
+      (reminder) => reminder.daysUntilDue >= 0 && reminder.date.toDate() >= currentDate
+    );
+
     switch (filter) {
       case 'week':
-        filtered = filtered.filter((reminder) => reminder.daysUntilDue >= 0 && reminder.daysUntilDue <= 7);
+        filtered = filtered.filter((reminder) => reminder.daysUntilDue <= 7);
         break;
       case 'month':
-        filtered = filtered.filter((reminder) => reminder.daysUntilDue >= 0 && reminder.daysUntilDue <= 30);
+        filtered = filtered.filter((reminder) => reminder.daysUntilDue <= 30);
         break;
       case 'year':
-        filtered = filtered.filter((reminder) => reminder.daysUntilDue >= 0 && reminder.daysUntilDue <= 365);
+        filtered = filtered.filter((reminder) => reminder.daysUntilDue <= 365);
         break;
       default:
         break;

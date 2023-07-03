@@ -8,6 +8,7 @@ import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill, BsCircleFill
 import ProfileIcon from './ProfileIcon';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import AllReminders from './AllReminders';
+import { ArrowRightIcon } from '@mui/x-date-pickers';
 
 
 
@@ -710,12 +711,11 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 {/* Modal */}
                 {showModal && (
                     <CustomModal open={showModal} onClose={closeModal}>
-                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%' }}>
-                            <div className="modal-content" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
-                                <h2 style={{ marginTop: 0, fontSize: '45px' }}>Search Results</h2>
 
-
-                                {/* Sort By */}
+                        <Box sx={{ display: 'flex', flexDirection: 'column', background: theme.palette.primary.border, padding: '20px', borderRadius: '8px', width: '50%', gap: '20px' }}>
+                            <Typography variant='h3' paddingLeft={'5px'}>All Results for "{searchTerm}" : </Typography>
+                            <hr />
+                            <div style={{ display: 'grid', }}>
                                 <div className="sort-by">
                                     <label htmlFor="sort-select">Sort By:</label>
                                     <select id="sort-select" value={sortBy} onChange={handleSortChange}>
@@ -724,23 +724,58 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <option value="duration">Duration</option>
                                     </select>
                                 </div>
-
-                                {/* Search Results */}
-                                <div className="result-box">
-                                    {searchResults.length > 0 ? (
-                                        <ul>
-                                            {searchResults.map((reminder) => (
-                                                <li key={reminder.id}>
-                                                    <button onClick={() => handleReminderClick(reminder)}>
-                                                        {reminder.title}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p>No reminders found.</p>
-                                    )}
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', padding: '10px' }}>
+                                    <Typography>Title</Typography>
+                                    <Typography>Category</Typography>
+                                    <Typography>Time</Typography>
+                                    <Typography>Duration</Typography>
                                 </div>
+                                {/* {reminders && reminders.map(reminder => {
+                                    const hours = Number(reminder.duration.split(':')[0]);
+                                    const minutes = Number(reminder.duration.split(':')[1]);
+                                    const time = formatAMPM(new Timestamp(reminder.time.seconds, reminder.time.nanoseconds).toDate())
+
+                                    return (
+                                        <div onClick={() => {
+                                            closeModal()
+                                            setSelectedReminder(reminder)
+                                            setShowPopup(true)
+                                        }}
+                                            style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center' }}
+                                        >
+                                            <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>{reminder.title}</Typography>
+                                            <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '180px', padding: '5px' }}>{reminder.category.name}</Typography>
+                                            <Typography variant="body1">{time}</Typography>
+                                            <Typography variant="body1">{hours} hour(s) {minutes} minutes</Typography>
+                                            <p style={{ placeSelf: 'end', marginRight: '20px', display: 'inline-block', cursor: 'pointer' }}>
+                                                <ArrowRightIcon />
+                                            </p>
+                                        </div>
+                                    )
+                                })} */}
+                                {searchResults && searchResults.map(reminder => {
+                                    const hours = Number(reminder.duration.split(':')[0]);
+                                    const minutes = Number(reminder.duration.split(':')[1]);
+                                    const time = formatAMPM(new Timestamp(reminder.time.seconds, reminder.time.nanoseconds).toDate())
+
+                                    return (
+                                        <div onClick={() => {
+                                            closeModal()
+                                            setSelectedReminder(reminder)
+                                            setShowPopup(true)
+                                        }}
+                                            style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center' }}
+                                        >
+                                            <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>{reminder.title}</Typography>
+                                            <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '160px', padding: '5px' }}>{reminder.category.name}</Typography>
+                                            <Typography variant="body1">{time}</Typography>
+                                            <Typography variant="body1">{hours} hour(s) {minutes} minutes</Typography>
+                                            <p style={{ placeSelf: 'end', marginRight: '20px', display: 'inline-block', cursor: 'pointer' }}>
+                                                <ArrowRightIcon />
+                                            </p>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </Box>
                     </CustomModal>

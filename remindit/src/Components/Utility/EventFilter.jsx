@@ -70,7 +70,6 @@ function EventFilter({ getCategories, setSelectedCategories, selectedCategories,
             console.log('Error editing category: ', err)
         }
     }
-    console.log(selectedCategories)
 
     return (
         <CustomContainer>

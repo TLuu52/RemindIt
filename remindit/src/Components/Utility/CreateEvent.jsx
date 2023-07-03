@@ -159,6 +159,8 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
 
             const remindersCollectionRef = collection(firestore, 'reminders');
             const newReminderDocRef = doc(collection(firestore, 'reminders'));
+            console.log(Timestamp.fromDate(dateValue))
+
 
             await setDoc(newReminderDocRef
                 , {

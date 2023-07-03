@@ -376,7 +376,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     }, [notes]);
 
     useEffect(() => {
-        console.log(selectedReminder?.priority)
         setTimeout(() => {
             if (selectedReminder?.priority) {
                 setPriority(selectedReminder.priority)
@@ -391,7 +390,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }, 400)
     }, [selectedReminder])
 
-    console.log(allRemindersOpen)
 
     const storage = getStorage(); // Initialize Firebase Storage
 
@@ -782,7 +780,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 {Array.from({ length: numDays }).map((__, i) => {
                     const reminderDay = i + 1;
                     const remindersForDay = reminders.filter((reminder) => {
-                        const reminderTime = new Date(reminder.time.toDate());
+                        const reminderTime = new Date(reminder.date.toDate());
                         const isSameDay =
                             reminderTime.getUTCFullYear() === year &&
                             reminderTime.getUTCMonth() === monthNumber &&

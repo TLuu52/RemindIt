@@ -49,6 +49,7 @@ const Day = styled('div')(({ theme }) => ({
 }))
 const BeforeMonth = styled('p')(({ theme }) => ({
     position: 'absolute',
+    top: 0,
     right: 0,
     padding: '5px',
     color: theme.palette.primary.light
@@ -62,6 +63,7 @@ const DuringMonth = styled('p')(({ theme }) => ({
 }))
 const AfterMonth = styled('p')(({ theme }) => ({
     position: 'absolute',
+    top: 0,
     right: 0,
     padding: '5px',
     color: theme.palette.primary.light
@@ -245,6 +247,14 @@ const Reminder = styled('div')({
     textAlign: 'left'
 })
 
+const WeeklyDay = styled('div')(({ theme }) => ({
+    width: '100%',
+    border: `solid 1px ${theme.palette.secondary.main}`,
+    height: '100%',
+    position: 'relative',
+    color: theme.palette.primary.contrastText,
+    paddingTop: '50px'
+}))
 
 function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, categories, setCategories, selectedCategories }) {
     const theme = useTheme();
@@ -680,6 +690,95 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         return newCats.length > 0
     }
 
+    const days = (i) => {
+        const diff = date.getDay() - i
+        const lastDay = new Date(date.getYear(), date.getMonth() + 1, 0)
+        if (date.getDate() - diff < 1) {
+            //need to get prev month ending
+            return (<WeeklyDay><BeforeMonth sx={{ fontSize: '26px' }}>{prevMonthlast - (diff - 1)}</BeforeMonth></WeeklyDay>)
+        }
+        if (date.getDate() - diff > lastDay.getDate()) {
+            //need to get next month beginning
+            // date === 28
+            // diff === -5
+            // date - diff === 33
+            // last day === 31
+            // i===6 : Saturday 
+            // day === 1 : Monday
+            // NEED to return '2', (date-diff) - lastDay
+            return (<WeeklyDay><AfterMonth sx={{ fontSize: '26px' }}>{(date.getDate() - diff) - lastDay.getDate()}</AfterMonth></WeeklyDay>)
+        }
+        const newDate = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - diff}`)
+        const remindersForDay = reminders.filter((reminder) => {
+            const reminderTime = new Date(reminder.date.toDate());
+            const isSameDay =
+                reminderTime.getUTCFullYear() === newDate.getFullYear() &&
+                reminderTime.getUTCMonth() === newDate.getMonth() &&
+                reminderTime.getUTCDate() === newDate.getDate();
+
+            return isSameDay;
+        });
+
+        const reminderCount = remindersForDay.length;
+
+        const highestPriorityReminder = reminderCount > 0 ? remindersForDay[0] : null;
+
+        const hasReminder = highestPriorityReminder !== null;
+        let progress = 0;
+
+        if (hasReminder) {
+            const currentDate = new Date();
+            const reminderDate = new Date(highestPriorityReminder.time.toDate());
+            const timeDiff = reminderDate.getTime() - currentDate.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
+        }
+
+        return (
+
+            <WeeklyDay>
+                <DuringMonth sx={{ fontSize: '26px' }}>{date.getDate() - diff}</DuringMonth>
+
+                {
+                    remindersForDay && (reminderCount <= 2) && remindersForDay.map(r => {
+                        const time = formatAMPM(new Timestamp(r.time.seconds, r.time.nanoseconds).toDate())
+                        const hours = Number(r.duration.split(':')[0]);
+                        const minutes = Number(r.duration.split(':')[1]);
+                        if (isCategory(r)) {
+                            return (
+                                <>
+                                    <Reminder style={{ background: r.category.color, cursor: 'pointer' }}
+                                        onClick={() => {
+                                            setSelectedReminder(r);
+                                            setShowPopup(true);
+                                        }}
+                                    >
+                                        <Typography variant='body1'>{r.title}</Typography>
+                                        <Typography variant='body1'>{time}</Typography>
+                                        <Typography variant='body1'>{hours} hour(s) {minutes} minutes</Typography>
+                                        <LinearProgress variant="determinate" value={progress} /></Reminder>
+                                </>
+                            )
+                        }
+                    })
+                }
+                {
+                    (reminderCount > 6) &&
+                    <div style={{ background: theme.palette.primary.main, width: '70%', margin: 'auto', padding: '5px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
+                        onClick={() => {
+                            setAllRemindersOpen(true)
+                            setDayReminders(remindersForDay)
+                            setReminderDay(i + 1)
+                        }}
+                    >
+                        SHOW ALL REMINDERS
+                    </div>
+                }
+                {reminderCount > 0 && (<div style={{ position: 'absolute', bottom: '0', paddingLeft: '4px' }}>{reminderCount} {reminderCount === 1 ? 'Reminder' : 'Reminders'}</div>)}
+            </WeeklyDay>
+        );
+
+    }
 
     return (
         <Container>
@@ -798,112 +897,127 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     <Button disabled={view === 'daily'} onClick={() => changeView('daily')}>Daily</Button>
                 </ButtonGroup>
             </Top>
-            <Row>
-                {weekdays.map((weekday, i) => (
-                    <Typography variant='h6' key={i}>{weekday}</Typography>
-                ))}
-            </Row>
+            {(view === 'monthly' || view === 'weekly') &&
+                (
+                    <Row>
+                        {weekdays.map((weekday, i) => (
+                            <Typography variant='h6' key={i}>{weekday}</Typography>
+                        ))}
+                    </Row>
 
-            <Calendar>
-                {/* Days from the previous month */}
-                {Array.from({ length: beforeDays }).map((__, i) => (
-                    <Day key={i + 1}>
-                        <BeforeMonth>{prevMonthlast - beforeDays + i + 1}</BeforeMonth>
-                    </Day>
-                ))}
-                {/* Days of the current month */}
-                {Array.from({ length: numDays }).map((__, i) => {
-                    const reminderDay = i + 1;
-                    const remindersForDay = reminders.filter((reminder) => {
-                        const reminderTime = new Date(reminder.date.toDate());
-                        const isSameDay =
-                            reminderTime.getUTCFullYear() === year &&
-                            reminderTime.getUTCMonth() === monthNumber &&
-                            reminderTime.getUTCDate() === reminderDay;
+                )}
 
-                        return isSameDay;
-                    });
+            {view === 'monthly' && (
+                <Calendar>
+                    {/* Days from the previous month */}
+                    {Array.from({ length: beforeDays }).map((__, i) => (
+                        <Day key={i + 1}>
+                            <BeforeMonth>{prevMonthlast - beforeDays + i + 1}</BeforeMonth>
+                        </Day>
+                    ))}
+                    {/* Days of the current month */}
+                    {Array.from({ length: numDays }).map((__, i) => {
+                        const reminderDay = i + 1;
+                        const remindersForDay = reminders.filter((reminder) => {
+                            const reminderTime = new Date(reminder.date.toDate());
+                            const isSameDay =
+                                reminderTime.getUTCFullYear() === year &&
+                                reminderTime.getUTCMonth() === monthNumber &&
+                                reminderTime.getUTCDate() === reminderDay;
 
-                    const reminderCount = remindersForDay.length;
+                            return isSameDay;
+                        });
 
-                    const highestPriorityReminder = reminderCount > 0 ? remindersForDay[0] : null;
+                        const reminderCount = remindersForDay.length;
 
-                    const hasReminder = highestPriorityReminder !== null;
-                    let progress = 0;
+                        const highestPriorityReminder = reminderCount > 0 ? remindersForDay[0] : null;
 
-                    if (hasReminder) {
-                        const currentDate = new Date();
-                        const reminderDate = new Date(highestPriorityReminder.time.toDate());
-                        const timeDiff = reminderDate.getTime() - currentDate.getTime();
-                        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                        progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
-                    }
+                        const hasReminder = highestPriorityReminder !== null;
+                        let progress = 0;
 
-                    return (
-                        <Day
-                            key={i + 1}
-                            style={{
-                                background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent',
-                            }}
-                        >
-                            <button
+                        if (hasReminder) {
+                            const currentDate = new Date();
+                            const reminderDate = new Date(highestPriorityReminder.time.toDate());
+                            const timeDiff = reminderDate.getTime() - currentDate.getTime();
+                            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                            progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
+                        }
 
+                        return (
+                            <Day
+                                key={i + 1}
                                 style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    width: '100%',
-                                    height: '100%',
-                                    padding: 0,
-                                    margin: 0,
+                                    background: i + 1 === day ? theme.palette.secondary.contrastText : 'transparent',
                                 }}
                             >
-                                <DuringMonth>{i + 1}</DuringMonth>
+                                <button
 
-                                {remindersForDay && (reminderCount <= 2) && remindersForDay.map(r => {
-                                    const time = formatAMPM(new Timestamp(r.time.seconds, r.time.nanoseconds).toDate())
-                                    const hours = Number(r.duration.split(':')[0]);
-                                    const minutes = Number(r.duration.split(':')[1]);
-                                    if (isCategory(r)) {
-                                        return (
-                                            <>
-                                                <Reminder style={{ background: r.category.color, cursor: 'pointer' }}
-                                                    onClick={() => {
-                                                        setSelectedReminder(r);
-                                                        setShowPopup(true);
-                                                    }}
-                                                >
-                                                    <Typography variant='body1'>{r.title}</Typography>
-                                                    <Typography variant='body1'>{time}</Typography>
-                                                    <Typography variant='body1'>{hours} hour(s) {minutes} minutes</Typography>
-                                                    <LinearProgress variant="determinate" value={progress} /></Reminder>
-                                            </>
-                                        )
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        width: '100%',
+                                        height: '100%',
+                                        padding: 0,
+                                        margin: 0,
+                                    }}
+                                >
+                                    <DuringMonth>{i + 1}</DuringMonth>
+
+                                    {remindersForDay && (reminderCount <= 2) && remindersForDay.map(r => {
+                                        const time = formatAMPM(new Timestamp(r.time.seconds, r.time.nanoseconds).toDate())
+                                        const hours = Number(r.duration.split(':')[0]);
+                                        const minutes = Number(r.duration.split(':')[1]);
+                                        if (isCategory(r)) {
+                                            return (
+                                                <>
+                                                    <Reminder style={{ background: r.category.color, cursor: 'pointer' }}
+                                                        onClick={() => {
+                                                            setSelectedReminder(r);
+                                                            setShowPopup(true);
+                                                        }}
+                                                    >
+                                                        <Typography variant='body1'>{r.title}</Typography>
+                                                        <Typography variant='body1'>{time}</Typography>
+                                                        <Typography variant='body1'>{hours} hour(s) {minutes} minutes</Typography>
+                                                        <LinearProgress variant="determinate" value={progress} /></Reminder>
+                                                </>
+                                            )
+                                        }
+                                    })}
+                                    {(reminderCount > 2) &&
+                                        <div style={{ background: theme.palette.primary.main, width: '70%', margin: 'auto', padding: '5px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
+                                            onClick={() => {
+                                                setAllRemindersOpen(true)
+                                                setDayReminders(remindersForDay)
+                                                setReminderDay(i + 1)
+                                            }}
+                                        >
+                                            SHOW ALL REMINDERS
+                                        </div>
                                     }
-                                })}
-                                {(reminderCount > 2) &&
-                                    <div style={{ background: theme.palette.primary.main, width: '70%', margin: 'auto', padding: '5px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
-                                        onClick={() => {
-                                            setAllRemindersOpen(true)
-                                            setDayReminders(remindersForDay)
-                                            setReminderDay(i + 1)
-                                        }}
-                                    >
-                                        SHOW ALL REMINDERS
-                                    </div>
-                                }
-                                {reminderCount > 0 && (<div style={{ position: 'absolute', bottom: '0', paddingLeft: '4px' }}>{reminderCount} {reminderCount === 1 ? 'Reminder' : 'Reminders'}</div>)}
-                            </button>
-                        </Day>
-                    );
-                })}
+                                    {reminderCount > 0 && (<div style={{ position: 'absolute', bottom: '0', paddingLeft: '4px' }}>{reminderCount} {reminderCount === 1 ? 'Reminder' : 'Reminders'}</div>)}
+                                </button>
+                            </Day>
+                        );
+                    })}
 
-                {/* Days from the next month */}
-                {Array.from({ length: afterDays === 0 ? 0 : 7 - afterDays }).map((__, i) => (
-                    <Day key={i + 1}>
-                        <AfterMonth>{i + 1}</AfterMonth>
-                    </Day>
-                ))}
-            </Calendar>
+                    {/* Days from the next month */}
+                    {Array.from({ length: afterDays === 0 ? 0 : 7 - afterDays }).map((__, i) => (
+                        <Day key={i + 1}>
+                            <AfterMonth>{i + 1}</AfterMonth>
+                        </Day>
+                    ))}
+                </Calendar>
+            )}
+            {view === 'weekly' && (
+                <Calendar>
+                    {weekdays.map((weekday, i) => (
+                        <>
+                            {days(i)}
+                        </>
+                    ))}
+                </Calendar>
+            )}
 
             <CustomModal open={showPopup} onClose={closePopup}>
                 <div>

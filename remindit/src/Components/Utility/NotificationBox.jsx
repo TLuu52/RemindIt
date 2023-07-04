@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+import { auth } from '../../firebase';
 
 function NotificationBox() {
   const [inbox, setInbox] = useState([]);
@@ -17,16 +18,18 @@ function NotificationBox() {
       const reminders = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        const dueDate = data.date.toDate();
-        const daysUntilDue = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 3600 * 24));
-        data.daysUntilDue = daysUntilDue;
-        reminders.push(data);
+        if (data.userId === auth.currentUser.uid) {
+          const dueDate = data.date.toDate();
+          const daysUntilDue = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 3600 * 24));
+          data.daysUntilDue = daysUntilDue;
+          reminders.push(data);
+        }
       });
       setInbox(reminders);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth.currentUser]);
 
   const filterReminders = (value) => {
     setFilter(value);

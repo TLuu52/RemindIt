@@ -112,7 +112,7 @@ const CustomMenuItem = styled(MenuItem)({
 })
 
 
-function CreateEvent({ open, handleClose, fetchReminders }) {
+function CreateEvent({ open, handleClose, fetchReminders, categories, getCategories, setCategories }) {
     const theme = useTheme();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -123,7 +123,6 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
     const [recurringOption, setRecurringOption] = useState('');
     const [duration, setDuration] = useState('');
     const [category, setCategory] = useState('');
-    const [categories, setCategories] = useState(null);
     const { user } = useContext(UserContext)
 
 
@@ -251,21 +250,10 @@ function CreateEvent({ open, handleClose, fetchReminders }) {
         }
     };
 
-    const getCategories = async () => {
-        const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
-        const docSnap = await getDoc(categoryDocRef)
-
-        if (docSnap.exists()) {
-            setCategories(docSnap.data().categories)
-        } else {
-            console.log('NOT FOUND')
-        }
-    }
-
     useEffect(() => {
         if (user.currentUser && categories === null) {
             setTimeout(() => {
-                getCategories();
+                getCategories(setCategories);
             }, 400);
         }
     }, [user.currentUser])

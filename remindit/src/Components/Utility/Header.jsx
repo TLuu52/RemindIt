@@ -75,7 +75,7 @@ function Header({ absolute }) {
                 left: absolute && 0,
             }}
         >
-            <Logo size={'180px'} />
+            <Logo size={'180px'} onClick={() => navigate('/dashboard')} />
             <Container>
                 <BsBellFill color={theme.palette.primary.light} size="30px" onClick={handleBellClick} />
                 <Box ref={anchorRef}>

@@ -1,9 +1,9 @@
 import LogoSrc from '../../Icons/logo.png' // Importing the logo image file
 
 // Logo component
-function Logo({ size }) {
+function Logo({ size, onClick = () => { } }) {
     return (
-        <img src={LogoSrc} alt="RemindIt Logo" style={{ width: `${size}` }} />
+        <img src={LogoSrc} alt="RemindIt Logo" style={{ width: `${size}`, cursor: 'pointer' }} onClick={onClick} />
     )
 }
 

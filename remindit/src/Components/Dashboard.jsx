@@ -113,7 +113,7 @@ function Dashboard() {
 
 
     const [value, onChange] = useState(new Date());
-    const [view, setView] = useState({ view: 'dayGridMonth', day: '2023-06-13' })
+    const [view, setView] = useState({ view: 'monthly', day: '2023-06-13' })
     const [selectedCategory, setSelectedCategory] = useState('');
     const [reminders, setReminders] = useState([]);
     const { user } = useContext(UserContext)
@@ -195,6 +195,8 @@ function Dashboard() {
 
         // Get the first 5 reminders from the upcoming reminders
         const inboxNotifications = upcomingReminders.slice(0, 5);
+        console.log(inboxNotifications)
+
 
         setInbox(inboxNotifications);
 
@@ -227,11 +229,11 @@ function Dashboard() {
                     </BottomSection>
                 </Left>
                 <Right>
-                    <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} categories={categories} selectedCategories={selectedCategories} />
+                    <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} categories={categories} selectedCategories={selectedCategories} view={view} />
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>
-                    <CreateEvent open={open} handleClose={handleClose} fetchReminders={fetchReminders} />
+                    <CreateEvent open={open} handleClose={handleClose} fetchReminders={fetchReminders} categories={categories} getCategories={getCategories} setCategories={setCategories} />
                 </Right>
             </Main>
         </Page>

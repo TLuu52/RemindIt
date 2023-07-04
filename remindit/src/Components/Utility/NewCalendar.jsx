@@ -625,6 +625,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         // Save the updated threads in localStorage
         localStorage.setItem('discussionThreads', JSON.stringify(updatedThreads));
 
+        // Update the discussionThreads state
+        setDiscussionThreads(updatedThreads);
+
         // Clear the input fields
         setActivity('');
         setDiscussionDescription('');

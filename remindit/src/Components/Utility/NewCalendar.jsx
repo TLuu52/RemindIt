@@ -315,6 +315,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [reminderDay, setReminderDay] = useState('')
     const openEditAttachment = Boolean(anchorEl)
     const [dependency, setDependency] = useState('');
+    const [replyText, setReplyText] = useState('');
+    const [showReplies, setShowReplies] = useState(false);
 
 
 
@@ -796,6 +798,39 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     }
 
+
+    const handleReply = (thread) => {
+        // Logic to handle adding the reply to the thread
+        // You can access the thread object and the replyText state variable here
+        // Perform the necessary operations to add the reply to the thread
+        // For example, you can update the thread object with the new reply
+        // and update the state accordingly
+
+        // Assuming you have a state variable `discussionThreads` that holds the discussion threads array
+        const updatedThreads = discussionThreads.map((t) => {
+            if (t.id === thread.id) {
+                // Check if t.replies is an array, if not initialize it as an empty array
+                const replies = Array.isArray(t.replies) ? t.replies : [];
+
+                // Update the thread with the new reply
+                const updatedThread = {
+                    ...t,
+                    replies: [...replies, replyText],
+                };
+                return updatedThread;
+            }
+            return t;
+        });
+
+        // Update the state with the updated discussion threads
+        setDiscussionThreads(updatedThreads);
+
+        // Clear the reply text
+        setReplyText('');
+    };
+
+
+
     return (
         <Container>
             <div>
@@ -1219,10 +1254,42 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     <Title>Discussion Threads:</Title>
                                     {discussionThreads.map((thread, index) => (
                                         <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <ProfileIcon img='default' />
+                                            <ProfileIcon img="default" />
                                             <div>
                                                 <Typography variant="h6">Activity: {thread.activity}</Typography>
                                                 <Typography variant="body1">Description: {thread.description}</Typography>
+
+                                                {/* Render replies if showReplies is true */}
+                                                {showReplies &&
+                                                    thread.replies &&
+                                                    thread.replies.map((reply, idx) => (
+                                                        <div key={idx} style={{ display: 'flex', alignItems: 'center', marginLeft: '20px', marginTop: '10px' }}>
+                                                            <ProfileIcon img="profile-image" /> {/* Replace 'profile-image' with the actual image source */}
+                                                            <Typography variant="body1">{reply}</Typography>
+                                                        </div>
+                                                    ))}
+
+                                                {/* Toggle for showing/hiding the replies */}
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    onClick={() => setShowReplies(!showReplies)}
+                                                    style={{ marginTop: '10px' }}
+                                                >
+                                                    {showReplies ? 'Hide Replies' : 'Show Replies'}
+                                                </Button>
+
+                                                {/* Reply option */}
+                                                <div>
+                                                    <OutlinedInput
+                                                        placeholder="Write a reply..."
+                                                        value={replyText}
+                                                        onChange={(e) => setReplyText(e.target.value)}
+                                                    />
+                                                    <Button variant="contained" color="primary" onClick={() => handleReply(thread)}>
+                                                        Reply
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

@@ -314,6 +314,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [dayReminders, setDayReminders] = useState([])
     const [reminderDay, setReminderDay] = useState('')
     const openEditAttachment = Boolean(anchorEl)
+    const [dependency, setDependency] = useState('');
+
 
 
     const closeEditAttachment = () => {
@@ -814,7 +816,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 {showModal && (
                     <CustomModal open={showModal} onClose={closeModal}>
 
-                        <Box sx={{ display: 'flex', flexDirection: 'column', background: theme.palette.primary.border, padding: '20px', borderRadius: '8px', width: '50%', gap: '20px' }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', background: theme.palette.primary.border, padding: '20px', borderRadius: '8px', width: '50%', gap: '20px',  maxHeight: '80vh', overflow: 'auto', }}>
                             <Typography variant='h3' paddingLeft={'5px'}>All Results for "{searchTerm}" : </Typography>
                             <hr />
                             <div style={{ display: 'grid', }}>
@@ -1068,6 +1070,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <Typography variant="body1">Mark as complete</Typography>
                                     </div>
                                 </div>
+                                
                                 <div>
                                     <Title>Category:</Title>
                                     <CategorySelect value={category.name} sx={{ background: getCategoryBG() }} onChange={(e) => changeCategory(e.target.value)}>

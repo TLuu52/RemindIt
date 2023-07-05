@@ -1,4 +1,4 @@
-import { Box, FormLabel, Input, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography, styled } from "@mui/material"
+import { Box, FormLabel, Input, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography, styled, FormControlLabel, Checkbox } from "@mui/material"
 import ProfileIcon from "./ProfileIcon"
 import { DatePicker, TimePicker } from "@mui/x-date-pickers"
 import CustomButton from "./CustomButton"
@@ -124,6 +124,8 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
     const [duration, setDuration] = useState('');
     const [category, setCategory] = useState('');
     const { user } = useContext(UserContext)
+    const [dependency, setDependency] = useState(false);
+
 
 
     const handleDateChange = (newDate) => {
@@ -173,7 +175,8 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     recurringOption: recurringOption, // Include the selected recurring option
                     duration: duration, // Include the duration of the reminder,
                     category: NewCategory,
-                    docId: newReminderDocRef.id
+                    docId: newReminderDocRef.id,
+                    dependency: dependency, // Include the dependency option
                 }).then(() => {
                     fetchReminders()
                 })
@@ -220,7 +223,9 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                         recurringOption: recurringOption,
                         duration: duration,
                         category: NewCategory,
-                        docId: newReminderCopyDocRef.id
+                        docId: newReminderCopyDocRef.id,
+                        dependency: dependency, // Include the dependency option
+
                     };
 
                     // Create the recurring reminder copy
@@ -361,6 +366,17 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                                 <MenuItem value="1 month">1 month</MenuItem>
                                 <MenuItem value="1 year">1 year</MenuItem>
                             </StyledSelect>
+                        </div>
+                        <div>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={dependency}
+                                        onChange={(e) => setDependency(e.target.checked)}
+                                    />
+                                }
+                                label="Make this a dependency?"
+                            />
                         </div>
                         <div style={{ display: 'flex', gap: '10px', flexDirection: 'row', }}>
                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} color={0} />

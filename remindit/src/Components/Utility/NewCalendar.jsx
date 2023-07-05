@@ -785,19 +785,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     }
 
-    const handleCompleteReminder = () => {
-        // Check if a dependency is selected and if it is not completed
-        if (dependency && !reminders.find(reminder => reminder.id === dependency)?.isComplete) {
-            // Show an error message or take appropriate action
-            console.log('Cannot complete reminder without completing the selected dependency');
-            return;
-        }
-
-        // Proceed with completing the current reminder
-
-    };
-
-
     return (
         <Container>
             <div>
@@ -1091,11 +1078,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         sx={{ background: theme.palette.background.default }}
                                     >
                                         <MenuItem value="">None</MenuItem>
-                                        {reminders.map((reminder) => (
-                                            <MenuItem key={reminder.id} value={reminder.id}>
-                                                {reminder.title}
-                                            </MenuItem>
-                                        ))}
+                                        <MenuItem value="dependency1">Dependency 1</MenuItem>
+                                        <MenuItem value="dependency2">Dependency 2</MenuItem>
+                                        {/* Add more dependency options as needed */}
                                     </Select>
                                 </div>
                                 <div>

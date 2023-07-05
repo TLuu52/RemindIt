@@ -658,6 +658,13 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         const selectedSortBy = e.target.value;
         setSortBy(selectedSortBy);
 
+        // Define the priority order
+        const priorityOrder = {
+            high: 3,
+            medium: 2,
+            low: 1
+        };
+
         // Create a copy of the searchResults array to avoid directly modifying the state
         const sortedResults = [...searchResults];
 
@@ -665,8 +672,12 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             // Sort by title
             sortedResults.sort((a, b) => a.title.localeCompare(b.title));
         } else if (selectedSortBy === "priority") {
-            // Sort by priority
-            sortedResults.sort((a, b) => a.priority - b.priority);
+            // Sort by priority (from high to low)
+            sortedResults.sort((a, b) => {
+                const priorityA = priorityOrder[a.priority.toLowerCase()];
+                const priorityB = priorityOrder[b.priority.toLowerCase()];
+                return priorityB - priorityA;
+            });
         } else if (selectedSortBy === "duration") {
             // Sort by duration
             sortedResults.sort((a, b) => {
@@ -832,6 +843,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     <Typography>Title</Typography>
                                     <Typography>Category</Typography>
                                     <Typography>Time</Typography>
+                                    <Typography>Priority</Typography>
                                     <Typography>Duration</Typography>
                                 </div>
                                 {/* {reminders && reminders.map(reminder => {
@@ -860,25 +872,41 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                 {searchResults && searchResults.map(reminder => {
                                     const hours = Number(reminder.duration.split(':')[0]);
                                     const minutes = Number(reminder.duration.split(':')[1]);
-                                    const time = formatAMPM(new Timestamp(reminder.time.seconds, reminder.time.nanoseconds).toDate())
+                                    const time = formatAMPM(new Timestamp(reminder.time.seconds, reminder.time.nanoseconds).toDate());
 
                                     return (
-                                        <div onClick={() => {
-                                            closeModal()
-                                            setSelectedReminder(reminder)
-                                            setShowPopup(true)
-                                        }}
-                                            style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center' }}
+                                        <div
+                                            onClick={() => {
+                                                closeModal();
+                                                setSelectedReminder(reminder);
+                                                setShowPopup(true);
+                                            }}
+                                            style={{
+                                                display: 'grid',
+                                                gridTemplateColumns: 'repeat(5, 1fr)',
+                                                background: theme.palette.primary.dark,
+                                                padding: '20px 10px',
+                                                borderRadius: '8px',
+                                                marginBottom: '10px',
+                                                alignItems: 'center'
+                                            }}
                                         >
-                                            <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>{reminder.title}</Typography>
-                                            <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '160px', padding: '5px' }}>{reminder.category.name}</Typography>
-                                            <Typography variant="body1">{time}</Typography>
-                                            <Typography variant="body1">{hours} hour(s) {minutes} minutes</Typography>
+                                            <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>
+                                                {reminder.title}
+                                            </Typography>
+                                            <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '160px', padding: '5px' }}>
+                                                {reminder.category.name}
+                                            </Typography>
+                                            <Typography variant="body1">{time}</Typography> {/* Display the time */}
+                                            <Typography variant="body1">{reminder.priority}</Typography> {/* Display the priority */}
+                                            <Typography variant="body1">
+                                                {hours} hour(s) {minutes} minutes
+                                            </Typography>
                                             <p style={{ placeSelf: 'end', marginRight: '20px', display: 'inline-block', cursor: 'pointer' }}>
                                                 <ArrowRightIcon />
                                             </p>
                                         </div>
-                                    )
+                                    );
                                 })}
                             </div>
                         </Box>

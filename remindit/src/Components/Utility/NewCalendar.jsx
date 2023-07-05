@@ -785,6 +785,19 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     }
 
+    const handleCompleteReminder = () => {
+        // Check if a dependency is selected and if it is not completed
+        if (dependency && !reminders.find(reminder => reminder.id === dependency)?.isComplete) {
+            // Show an error message or take appropriate action
+            console.log('Cannot complete reminder without completing the selected dependency');
+            return;
+        }
+
+        // Proceed with completing the current reminder
+
+    };
+
+
     return (
         <Container>
             <div>
@@ -816,7 +829,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 {showModal && (
                     <CustomModal open={showModal} onClose={closeModal}>
 
-                        <Box sx={{ display: 'flex', flexDirection: 'column', background: theme.palette.primary.border, padding: '20px', borderRadius: '8px', width: '50%', gap: '20px',  maxHeight: '80vh', overflow: 'auto', }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', background: theme.palette.primary.border, padding: '20px', borderRadius: '8px', width: '50%', gap: '20px', maxHeight: '80vh', overflow: 'auto', }}>
                             <Typography variant='h3' paddingLeft={'5px'}>All Results for "{searchTerm}" : </Typography>
                             <hr />
                             <div style={{ display: 'grid', }}>
@@ -1070,7 +1083,21 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <Typography variant="body1">Mark as complete</Typography>
                                     </div>
                                 </div>
-                                
+                                <div>
+                                    <Title>Dependency:</Title>
+                                    <Select
+                                        value={dependency}
+                                        onChange={(e) => setDependency(e.target.value)}
+                                        sx={{ background: theme.palette.background.default }}
+                                    >
+                                        <MenuItem value="">None</MenuItem>
+                                        {reminders.map((reminder) => (
+                                            <MenuItem key={reminder.id} value={reminder.id}>
+                                                {reminder.title}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </div>
                                 <div>
                                     <Title>Category:</Title>
                                     <CategorySelect value={category.name} sx={{ background: getCategoryBG() }} onChange={(e) => changeCategory(e.target.value)}>

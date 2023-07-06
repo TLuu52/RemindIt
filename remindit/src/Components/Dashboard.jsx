@@ -233,7 +233,7 @@ function Dashboard() {
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>
-                    <CreateEvent open={open} handleClose={handleClose} fetchReminders={fetchReminders} categories={categories} getCategories={getCategories} setCategories={setCategories} />
+                    <CreateEvent open={open} handleClose={handleClose} fetchReminders={fetchReminders} categories={categories} getCategories={getCategories} setCategories={setCategories} reminders={reminders} />
                 </Right>
             </Main>
         </Page>

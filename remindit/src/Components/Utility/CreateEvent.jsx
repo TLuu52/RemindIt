@@ -1,4 +1,4 @@
-import { Box, FormLabel, Input, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography, styled, FormControlLabel, Checkbox } from "@mui/material"
+import { Box, FormLabel, Input, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography, styled, FormControlLabel, Checkbox, Autocomplete, TextField, Popper } from "@mui/material"
 import ProfileIcon from "./ProfileIcon"
 import { DatePicker, TimePicker } from "@mui/x-date-pickers"
 import CustomButton from "./CustomButton"
@@ -110,9 +110,29 @@ const CustomSelect = styled(Select)({
 const CustomMenuItem = styled(MenuItem)({
     display: 'flex', alignItems: 'center', gap: '10px',
 })
+const StyledTextField = styled(TextField)(({ theme }) => ({
+    '& .MuiInputBase-input.MuiOutlinedInput-input.MuiInputBase-inputAdornedEnd.MuiAutocomplete-input.MuiAutocomplete-inputFocused': {
+        width: '100%'
+    }
+}))
+const StyledAutoCompleteDiv = styled('div')(({ theme }) => ({
+    color: "#222 !important",
+    '& .MuiAutocomplete-popper.MuiAutocomplete-popperDisablePortal.MuiPopper-root': {
+        color: "#222 !important"
+    },
+    '& .MuiAutocomplete-listbox ': {
+        background: '#333'
+    }
+}))
+const CustomPopper = styled(Popper)({
+    '&.MuiPopper-root': {
+        background: '#222 !important',
+
+    }
+})
 
 
-function CreateEvent({ open, handleClose, fetchReminders, categories, getCategories, setCategories }) {
+function CreateEvent({ open, handleClose, fetchReminders, categories, getCategories, setCategories, reminders }) {
     const theme = useTheme();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -125,6 +145,9 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
     const [category, setCategory] = useState('');
     const { user } = useContext(UserContext)
     const [dependency, setDependency] = useState(false);
+
+
+    console.log('REMINDERS : ', reminders)
 
 
 
@@ -266,6 +289,15 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
     const changeCategory = (e) => {
         setCategory(e.target.value);
     }
+    const filterReminders = () => {
+        let uniqueNames = [];
+        reminders.forEach(reminder => {
+            if (!uniqueNames.includes(reminder.title)) {
+                uniqueNames.push(reminder.title)
+            }
+        })
+        return uniqueNames
+    }
 
     return (
 
@@ -367,17 +399,17 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                                 <MenuItem value="1 year">1 year</MenuItem>
                             </StyledSelect>
                         </div>
-                        <div>
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={dependency}
-                                        onChange={(e) => setDependency(e.target.checked)}
-                                    />
-                                }
-                                label="Make this a dependency?"
+                        <StyledAutoCompleteDiv>
+                            <FormLabel>Attach Reminder </FormLabel>
+                            {/* NOTE FOR UPDATE: REMINDER NAMES MUST BE UNIQUE UNLESS IT IS RECURRING */}
+                            <Autocomplete
+                                options={filterReminders()}
+                                disablePortal
+                                id="reminder-attachment"
+                                PopperComponent={(props) => <Popper sx={{ color: 'black !important' }} {...props} placement='bottom'></Popper >}
+                                renderInput={(params) => <StyledTextField {...params} placeholder="Reminder Title" />}
                             />
-                        </div>
+                        </StyledAutoCompleteDiv>
                         <div style={{ display: 'flex', gap: '10px', flexDirection: 'row', }}>
                             <CustomButton size={'s'} text={'Cancel'} onClick={handleClose} color={0} />
                             <CustomButton onClick={submit} size={'s'} text={'Create'} color={1} />
@@ -385,7 +417,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     </Flex>
                 </ModalRight>
             </Box>
-        </CustomModal>
+        </CustomModal >
     )
 }
 

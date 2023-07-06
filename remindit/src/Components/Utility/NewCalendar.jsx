@@ -256,7 +256,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [notesAttachments, setNotesAttachments] = useState([]);
     const [showFilter, setShowFilter] = useState(false); // State to manage filter section visibility
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
     const [priority, setPriority] = useState('low');
     const [durationHours, setDurationHours] = useState('00')
     const [durationMin, setDurationMin] = useState('00')
@@ -363,11 +362,36 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 setAttachments(selectedReminder.attachments)
                 setTitle(selectedReminder.title)
                 setCategory(selectedReminder.category)
+                setDiscussionThreads(selectedReminder.discussionThreads)
             }
         }, 400)
     }, [selectedReminder])
 
     const storage = getStorage(); // Initialize Firebase Storage
+
+    const handleSaveDiscussion = () => {
+        const newDiscussionThread = {
+            activity: activity,
+            description: discussionDescription,
+        };
+
+        if (Array.isArray(discussionThreads)) {
+            const updatedThreads = [...discussionThreads, newDiscussionThread];
+
+            // Update the local state with the new discussion thread
+            setDiscussionThreads(updatedThreads);
+        } else {
+            // Initialize discussionThreads with the new thread
+            const updatedThreads = [newDiscussionThread];
+
+            // Update the local state with the new discussion thread
+            setDiscussionThreads(updatedThreads);
+        }
+
+        // Clear the discussion input fields
+        setActivity('');
+        setDiscussionDescription('');
+    };
 
     const submit = async (e) => {
         e.preventDefault();
@@ -412,10 +436,20 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             const reminderDoc = await getDoc(reminderRef);
             const existingDiscussionThreads = reminderDoc.data().discussionThreads || [];
 
+            const newDiscussionThread = {
+                activity: activity,
+                description: discussionDescription,
+                userId: userId
+            };
+
+            // Call handleSaveDiscussion to update the local state and clear the input fields
+            handleSaveDiscussion();
+
             const updatedDiscussionThreads = [
                 ...existingDiscussionThreads,
-                { activity, description, userId } // Add the newly created discussion thread
+                newDiscussionThread // Add the newly created discussion thread
             ];
+
 
             await updateDoc(reminderRef, {
                 priority: priority,
@@ -446,8 +480,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     notes: notes || '',
                     activity: activity || '',
                     title: title,
-                    attachments: updatedAttachments
-                    // NEED CATEGORY
+                    attachments: updatedAttachments,
+                    category: category,
+                    discussionThreads: updatedDiscussionThreads
                 });
                 // Perform any additional logic or UI updates for an updated reminder
             }
@@ -584,25 +619,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         } catch (error) {
             console.log('Error uploading file:', error);
         }
-    };
-
-    const handleSaveDiscussion = () => {
-        const newDiscussionThread = {
-            activity: activity,
-            description: discussionDescription,
-        };
-
-        const updatedThreads = [...discussionThreads, newDiscussionThread];
-
-        // Save the updated threads in localStorage
-        localStorage.setItem('discussionThreads', JSON.stringify(updatedThreads));
-
-        // Update the discussionThreads state
-        setDiscussionThreads(updatedThreads);
-
-        // Clear the input fields
-        setActivity('');
-        setDiscussionDescription('');
     };
 
     const closeModal = () => {
@@ -784,10 +800,20 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         setEditModalOpen(false);
     };
 
-    const handleDelete = (thread) => {
-        // Implement the logic to delete the discussion thread
-        const updatedThreads = discussionThreads.filter((t) => t !== thread);
-        setDiscussionThreads(updatedThreads);
+    const handleDelete = async (thread) => {
+        try {
+            // Delete the discussion thread from the Firestore database
+            const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
+            const updatedThreads = discussionThreads.filter((t) => t !== thread);
+
+            await updateDoc(reminderRef, {
+                discussionThreads: updatedThreads.length > 0 ? updatedThreads : null
+            });
+
+            setDiscussionThreads(updatedThreads);
+        } catch (error) {
+            console.error('Error deleting discussion thread:', error);
+        }
     };
 
     return (
@@ -1210,53 +1236,54 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     </div>
                                 )}
 
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingTop: '10px', paddingBottom: '10px' }}>
-                                    <Title>Discussion Threads:</Title>
-                                    {discussionThreads.map((thread, index) => (
-                                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <ProfileIcon img="default" />
-                                            <div>
-                                                <Typography variant="h6">Activity: {thread.activity}</Typography>
-                                                <Typography variant="body1">Description: {thread.description}</Typography>
+                                {discussionThreads && discussionThreads.length > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingTop: '10px', paddingBottom: '10px' }}>
+                                        <Title>Discussion Threads:</Title>
+                                        {discussionThreads.map((thread, index) => (
+                                            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <ProfileIcon img="default" />
+                                                <div>
+                                                    <Typography variant="h6">Activity: {thread.activity}</Typography>
+                                                    <Typography variant="body1">Description: {thread.description}</Typography>
+                                                </div>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => handleEdit(thread)}
+                                                >
+                                                    Edit
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => handleDelete(thread)}
+                                                >
+                                                    Delete
+                                                </Button>
                                             </div>
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                                size="small"
-                                                onClick={() => handleEdit(thread)}
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                                size="small"
-                                                onClick={() => handleDelete(thread)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    ))}
-
-                                    <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
-                                        {/* Modal content */}
-                                        <form onSubmit={handleEditSubmit}>
-                                            <input
-                                                type="text"
-                                                value={editedActivity}
-                                                onChange={(e) => setEditedActivity(e.target.value)}
-                                                placeholder="Enter updated activity"
-                                            />
-                                            <input
-                                                type="text"
-                                                value={editedDescription}
-                                                onChange={(e) => setEditedDescription(e.target.value)}
-                                                placeholder="Enter updated description"
-                                            />
-                                            <button type="submit">Save</button>
-                                        </form>
-                                    </Modal>
-                                </div>
+                                        ))}
+                                        <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
+                                            {/* Modal content */}
+                                            <form onSubmit={handleEditSubmit}>
+                                                <input
+                                                    type="text"
+                                                    value={editedActivity}
+                                                    onChange={(e) => setEditedActivity(e.target.value)}
+                                                    placeholder="Enter updated activity"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={editedDescription}
+                                                    onChange={(e) => setEditedDescription(e.target.value)}
+                                                    placeholder="Enter updated description"
+                                                />
+                                                <button type="submit">Save</button>
+                                            </form>
+                                        </Modal>
+                                    </div>
+                                )}
                             </div>
                         )}
 

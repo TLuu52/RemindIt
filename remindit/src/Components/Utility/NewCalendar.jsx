@@ -1,6 +1,6 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, getDocs, doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
@@ -238,7 +238,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         "July", "August", "September", "October", "November", "December"
     ];
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
     const [month, setMonth] = useState(monthNames[date.getMonth()])
     const [monthNumber, setMonthNumber] = useState(date.getMonth())
     const [year, setYear] = useState(date.getFullYear())
@@ -408,8 +407,16 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 updatedAttachments = attachments ? [...attachments, newAttachment] : [newAttachment]
             }
 
-
             const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
+
+            const reminderDoc = await getDoc(reminderRef);
+            const existingDiscussionThreads = reminderDoc.data().discussionThreads || [];
+
+            const updatedDiscussionThreads = [
+                ...existingDiscussionThreads,
+                { activity, description, userId } // Add the newly created discussion thread
+            ];
+
             await updateDoc(reminderRef, {
                 priority: priority,
                 description: description || '',
@@ -419,7 +426,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 title: title,
                 attachments: updatedAttachments,
                 category: category,
-                discussionThreads: discussionThreads, // Save the discussion threads
+                discussionThreads: updatedDiscussionThreads // Save the discussion threads
             }).then(() => {
                 fetchReminders()
                 setAttachmentName('')
@@ -781,8 +788,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         // Implement the logic to delete the discussion thread
         const updatedThreads = discussionThreads.filter((t) => t !== thread);
         setDiscussionThreads(updatedThreads);
-      };
-      
+    };
+
     return (
         <Container>
             <div>

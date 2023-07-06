@@ -315,8 +315,10 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [reminderDay, setReminderDay] = useState('')
     const openEditAttachment = Boolean(anchorEl)
     const [dependency, setDependency] = useState('');
-    const [replyText, setReplyText] = useState('');
-    const [showReplies, setShowReplies] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editedActivity, setEditedActivity] = useState('');
+    const [editedDescription, setEditedDescription] = useState('');
+    const [editThread, setEditThread] = useState(null);
 
 
 
@@ -456,7 +458,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 activity: activity || '',
                 title: title,
                 attachments: updatedAttachments,
-                category: category
+                category: category,
+                discussionThreads: discussionThreads, // Save the discussion threads
             }).then(() => {
                 fetchReminders()
                 setAttachmentName('')
@@ -799,36 +802,39 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     }
 
 
-    const handleReply = (thread) => {
-        // Logic to handle adding the reply to the thread
-        // You can access the thread object and the replyText state variable here
-        // Perform the necessary operations to add the reply to the thread
-        // For example, you can update the thread object with the new reply
-        // and update the state accordingly
+    const handleEdit = (thread) => {
+        // Open the edit modal
+        setEditedActivity(thread.activity);
+        setEditedDescription(thread.description);
+        setEditModalOpen(true);
+        setEditThread(thread); // Store the current thread being edited
+    };
 
-        // Assuming you have a state variable `discussionThreads` that holds the discussion threads array
+    const handleEditSubmit = () => {
+        // Update the discussion thread with the edited values
         const updatedThreads = discussionThreads.map((t) => {
-            if (t.id === thread.id) {
-                // Check if t.replies is an array, if not initialize it as an empty array
-                const replies = Array.isArray(t.replies) ? t.replies : [];
-
-                // Update the thread with the new reply
-                const updatedThread = {
+            if (t === editThread) {
+                return {
                     ...t,
-                    replies: [...replies, replyText],
+                    activity: editedActivity,
+                    description: editedDescription,
                 };
-                return updatedThread;
             }
             return t;
         });
 
-        // Update the state with the updated discussion threads
         setDiscussionThreads(updatedThreads);
 
-        // Clear the reply text
-        setReplyText('');
+        // Close the edit modal
+        setEditModalOpen(false);
     };
 
+    const handleDelete = (thread) => {
+        // Implement the logic to delete the discussion thread
+        const updatedThreads = discussionThreads.filter((t) => t !== thread);
+        setDiscussionThreads(updatedThreads);
+      };
+      
 
 
     return (
@@ -1259,48 +1265,44 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                             <div>
                                                 <Typography variant="h6">Activity: {thread.activity}</Typography>
                                                 <Typography variant="body1">Description: {thread.description}</Typography>
-
-                                                {/* Render replies if showReplies is true */}
-                                                {showReplies &&
-                                                    thread.replies &&
-                                                    thread.replies.map((reply, idx) => (
-                                                        <div key={idx} style={{ display: 'flex', alignItems: 'center', marginLeft: '20px', marginTop: '10px' }}>
-                                                            <ProfileIcon img="profile-image" /> {/* Replace 'profile-image' with the actual image source */}
-                                                            <Typography variant="body1">{reply}</Typography>
-                                                        </div>
-                                                    ))}
-
-                                                {/* Toggle for showing/hiding the replies */}
-                                                <Button
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    size="small" // Set the size to 'small'
-                                                    onClick={() => setShowReplies(!showReplies)}
-                                                    style={{ marginTop: '10px', marginBottom: '10px' }} // Add marginBottom for spacing
-                                                >
-                                                    {showReplies ? 'Hide Replies' : 'Show Replies'}
-                                                </Button>
-
-                                                {/* Reply option */}
-                                                <div>
-                                                    <OutlinedInput
-                                                        placeholder="Write a reply..."
-                                                        value={replyText}
-                                                        onChange={(e) => setReplyText(e.target.value)}
-                                                    />
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        size="small" // Set the size to 'small'
-                                                        onClick={() => handleReply(thread)}
-                                                        style={{ marginTop: '10px' }}
-                                                    >
-                                                        Reply
-                                                    </Button>
-                                                </div>
                                             </div>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                size="small"
+                                                onClick={() => handleEdit(thread)}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                size="small"
+                                                onClick={() => handleDelete(thread)}
+                                            >
+                                                Delete
+                                            </Button>
                                         </div>
                                     ))}
+
+                                    <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
+                                        {/* Modal content */}
+                                        <form onSubmit={handleEditSubmit}>
+                                            <input
+                                                type="text"
+                                                value={editedActivity}
+                                                onChange={(e) => setEditedActivity(e.target.value)}
+                                                placeholder="Enter updated activity"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={editedDescription}
+                                                onChange={(e) => setEditedDescription(e.target.value)}
+                                                placeholder="Enter updated description"
+                                            />
+                                            <button type="submit">Save</button>
+                                        </form>
+                                    </Modal>
                                 </div>
                             </div>
                         )}

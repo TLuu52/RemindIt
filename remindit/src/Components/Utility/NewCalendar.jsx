@@ -1250,7 +1250,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <Comments activity={activity} />
                                     </div>
                                 )}
-                                <div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingTop: '10px', paddingBottom: '10px' }}>
                                     <Title>Discussion Threads:</Title>
                                     {discussionThreads.map((thread, index) => (
                                         <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1273,8 +1274,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                                 <Button
                                                     variant="outlined"
                                                     color="primary"
+                                                    size="small" // Set the size to 'small'
                                                     onClick={() => setShowReplies(!showReplies)}
-                                                    style={{ marginTop: '10px' }}
+                                                    style={{ marginTop: '10px', marginBottom: '10px' }} // Add marginBottom for spacing
                                                 >
                                                     {showReplies ? 'Hide Replies' : 'Show Replies'}
                                                 </Button>
@@ -1286,7 +1288,13 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                                         value={replyText}
                                                         onChange={(e) => setReplyText(e.target.value)}
                                                     />
-                                                    <Button variant="contained" color="primary" onClick={() => handleReply(thread)}>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        size="small" // Set the size to 'small'
+                                                        onClick={() => handleReply(thread)}
+                                                        style={{ marginTop: '10px' }}
+                                                    >
                                                         Reply
                                                     </Button>
                                                 </div>
@@ -1295,11 +1303,11 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     ))}
                                 </div>
                             </div>
-
                         )}
 
                         <CustomButton onClick={closePopup} text={'Close'} color={0} size={'s'} />
                         <CustomButton onClick={submit} text={'Submit'} color={1} size={'s'} />
+
                     </Box>
                 </div>
             </CustomModal>

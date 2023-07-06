@@ -1,5 +1,4 @@
 import { Typography, styled } from "@mui/material"
-import Logo from "./Utility/Logo"
 import Header from "./Utility/Header";
 import CustomButton from "./Utility/CustomButton";
 import CustomInput from "./Utility/CustomInput";
@@ -13,15 +12,6 @@ import { updateEmail, updateProfile } from "firebase/auth";
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
-
-
-const TopCorner = styled('div')({
-    position: 'relative',
-    top: '0',
-    left: '0',
-    width: '200px',
-    padding: '20px'
-})
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
     fontWeight: '600',

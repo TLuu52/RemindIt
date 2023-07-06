@@ -4,7 +4,6 @@ import { BsBellFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import { useNavigate } from 'react-router-dom';
 import NotificationBox from './NotificationBox';
-import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import Logo from './Logo';
 

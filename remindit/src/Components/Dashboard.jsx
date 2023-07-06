@@ -1,34 +1,17 @@
 import Header from './Utility/Header'
-import { Box, FormLabel, Input, Modal, OutlinedInput, Typography, styled } from '@mui/material'
+import { Box, Typography, styled } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react';
 import 'react-calendar/dist/Calendar.css';
 import CustomCalendar from './Utility/CustomCalendar';
 import EventFilter from './Utility/EventFilter';
-import FullCalendar from '@fullcalendar/react' // must go before plugins
-import dayGridPlugin from '@fullcalendar/daygrid' // a plugin!
-import timeGridPlugin from '@fullcalendar/timegrid' // a plugin!
-import interactionPlugin from '@fullcalendar/interaction' // a plugin!
 import NewCalendar from './Utility/NewCalendar';
-import { FcAbout, FcContacts, FcFeedback, FcPlus } from 'react-icons/fc';
-import { BsMailbox, BsPlus } from 'react-icons/bs';
-import ProfileIcon from './Utility/ProfileIcon';
-import TextareaAutosize from '@mui/base/TextareaAutosize';
-import { DatePicker, TimePicker } from '@mui/x-date-pickers';
-import CustomButton from './Utility/CustomButton';
-import { auth, firestore, storage } from "../firebase";
-import { collection, doc, addDoc, getDocs, setDoc, updateDoc, query, where, Timestamp, getDoc } from "firebase/firestore";
+import { FcAbout, FcFeedback,} from 'react-icons/fc';
+import { BsPlus } from 'react-icons/bs';
+import { auth, firestore,} from "../firebase";
+import { collection, doc, getDocs, query, where, Timestamp, getDoc } from "firebase/firestore";
 import CreateEvent from './Utility/CreateEvent';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../App';
-
-
-const TopCorner = styled('div')({
-    position: 'absolute',
-    top: '0',
-    right: '0',  // Updated from 'left' to 'right'
-    width: '200px',
-    padding: '20px'
-});
 
 const Page = styled('div')({
     padding: '20px',
@@ -114,7 +97,6 @@ function Dashboard() {
 
     const [value, onChange] = useState(new Date());
     const [view, setView] = useState({ view: 'monthly', day: '2023-06-13' })
-    const [selectedCategory, setSelectedCategory] = useState('');
     const [reminders, setReminders] = useState([]);
     const { user } = useContext(UserContext)
     const [inbox, setInbox] = useState([]);
@@ -123,7 +105,6 @@ function Dashboard() {
 
 
     const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const fetchReminders = async () => {
         setTimeout(async () => {
@@ -172,14 +153,6 @@ function Dashboard() {
             console.log('NOT FOUND')
         }
     }
-
-    const changeView = (e) => {
-        setView({ view: e.target.value.view, day: e.target.value.day })
-    }
-    const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value);
-    };
-
 
     // Add an inbox notification when a reminder is due
     useEffect(() => {

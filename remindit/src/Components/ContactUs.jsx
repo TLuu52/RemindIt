@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Box, Button, TextField, Typography, styled, Snackbar } from '@mui/material';
 import Header from './Utility/Header';
 import { Link } from 'react-router-dom';
-import { collection, addDoc, getDocs, setDoc, Timestamp, doc, getDoc } from "firebase/firestore"
-import { auth, firestore } from "../firebase"
+import { collection, addDoc,} from "firebase/firestore"
+import { firestore } from "../firebase"
 
 const Page = styled('div')({
     padding: '20px',

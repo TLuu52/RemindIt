@@ -1,12 +1,11 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, getDocs, doc, deleteDoc, updateDoc, FieldValue, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
 import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill, BsCircleFill } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
-import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import AllReminders from './AllReminders';
 import { ArrowRightIcon } from '@mui/x-date-pickers';
 
@@ -89,31 +88,6 @@ const SearchInput = styled('input')(({ theme }) => ({
     marginRight: '10px',
 }));
 const SearchButton = styled('button')(({ theme }) => ({
-    padding: '8px 16px',
-    borderRadius: '4px',
-    background: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    border: 'none',
-    cursor: 'pointer',
-}));
-const FilterSection = styled('div')(({ theme }) => ({
-    padding: '10px',
-    background: theme.palette.primary.border,
-    borderRadius: '4px',
-    color: theme.palette.primary.contrastText,
-}));
-const FilterLabel = styled('label')({
-    display: 'block',
-    marginBottom: '5px',
-    fontWeight: 'bold',
-});
-const FilterInput = styled('input')({
-    width: '100%',
-    padding: '8px',
-    borderRadius: '4px',
-    marginBottom: '10px',
-});
-const FilterButton = styled('button')(({ theme }) => ({
     padding: '8px 16px',
     borderRadius: '4px',
     background: theme.palette.primary.main,
@@ -283,7 +257,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [notesAttachments, setNotesAttachments] = useState([]);
     const [showFilter, setShowFilter] = useState(false); // State to manage filter section visibility
     const [searchTerm, setSearchTerm] = useState('');
-    const [keyword, setKeyword] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [priority, setPriority] = useState('low');
     const [durationHours, setDurationHours] = useState('00')
@@ -297,11 +270,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [discussionDescription, setDiscussionDescription] = useState('');
     const [discussionThreads, setDiscussionThreads] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [filterBy, setFilterBy] = useState('');
     const [sortBy, setSortBy] = useState('title');
     const [searchResults, setSearchResults] = useState([]);
-    const [selectedPriority, setSelectedPriority] = useState("");
-    const [selectedDuration, setSelectedDuration] = useState("");
     const [anchorEl, setAnchorEl] = useState(null)
     const [newAttachmentName, setNewAttachmentName] = useState('')
     const [newAttachmentURL, setNewAttachmentURL] = useState('')
@@ -320,25 +290,17 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [editedDescription, setEditedDescription] = useState('');
     const [editThread, setEditThread] = useState(null);
 
-
-
     const closeEditAttachment = () => {
         setAnchorEl(null)
     }
-
-    const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value);
-    };
 
     const toggleFilter = () => {
         setShowFilter(!showFilter); // Toggle filter section visibility
     };
 
-
     const closePopup = () => {
         setShowPopup(false);
     };
-
 
     const changeView = (newView) => {
         setView(newView)
@@ -367,7 +329,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         setPrevMonthLast(new Date(date.getFullYear(), date.getMonth(), 0).getDate())
         setAfterDays(new Date(date.getFullYear(), date.getMonth() + 1, 1).getDay())
     }, [date, monthNumber])
-
 
     useEffect(() => {
         // This effect fetches reminders from Firestore and updates the reminders state
@@ -406,7 +367,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             }
         }, 400)
     }, [selectedReminder])
-
 
     const storage = getStorage(); // Initialize Firebase Storage
 
@@ -542,7 +502,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }
     };
 
-
     const today = () => {
         setDate(new Date())
     }
@@ -577,7 +536,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         const cat = categories.filter(c => c.name === e)[0]
         setCategory(cat)
     }
-
 
     const newEditAttachment = async (e) => {
         const file = e.target.files[0];
@@ -640,10 +598,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         setDiscussionDescription('');
     };
 
-    const openModal = () => {
-        setShowModal(true);
-    };
-
     const closeModal = () => {
         setShowModal(false);
     };
@@ -693,11 +647,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }
 
         setSearchResults(sortedResults);
-    };
-
-    const handleReminderClick = (reminder) => {
-        setSelectedReminder(reminder);
-        setShowPopup(true);
     };
 
     const handleKeyDown = (e) => {
@@ -801,7 +750,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     }
 
-
     const handleEdit = (thread) => {
         // Open the edit modal
         setEditedActivity(thread.activity);
@@ -835,8 +783,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         setDiscussionThreads(updatedThreads);
       };
       
-
-
     return (
         <Container>
             <div>

@@ -1,4 +1,4 @@
-import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover } from '@mui/material';
+import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover, Autocomplete, Popper } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import { collection, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -229,6 +229,20 @@ const WeeklyDay = styled('div')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
     paddingTop: '50px'
 }))
+const StyledTextField = styled(TextField)(({ theme }) => ({
+    '& .MuiInputBase-input.MuiOutlinedInput-input.MuiInputBase-inputAdornedEnd.MuiAutocomplete-input.MuiAutocomplete-inputFocused': {
+        width: '100%'
+    }
+}))
+const StyledAutoCompleteDiv = styled('div')(({ theme }) => ({
+    color: "#222 !important",
+    '& .MuiAutocomplete-popper.MuiAutocomplete-popperDisablePortal.MuiPopper-root': {
+        color: "#222 !important"
+    },
+    '& .MuiAutocomplete-listbox ': {
+        background: '#333'
+    }
+}))
 
 function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, categories, setCategories, selectedCategories }) {
     const theme = useTheme();
@@ -287,9 +301,24 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [editedActivity, setEditedActivity] = useState('');
     const [editedDescription, setEditedDescription] = useState('');
     const [editThread, setEditThread] = useState(null);
+    const [changeDep, setChangeDep] = useState(false)
+    const [inputValue, setInputValue] = useState('');
+    const [dependencyValue, setDependencyValue] = useState('None')
 
     const closeEditAttachment = () => {
         setAnchorEl(null)
+    }
+    const getNewVal = (newVal) => {
+        if (newVal === null) {
+            return
+        }
+        if (newVal != 'None') {
+            setDependencyValue(reminders.filter(r => r.title === newVal)[0].title)
+            setDependency(reminders.filter(r => r.title === newVal)[0])
+        } else {
+            setDependencyValue('None')
+            setDependency('')
+        }
     }
 
     const toggleFilter = () => {
@@ -298,6 +327,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     const closePopup = () => {
         setShowPopup(false);
+        setChangeDep(false)
     };
 
     const changeView = (newView) => {
@@ -350,10 +380,20 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
         fetchNotesAttachments();
     }, [notes]);
+    const getReminderByID = async (docId) => {
+        if (docId === '') {
+            return
+        }
+        const docRef = doc(firestore, 'reminders', docId)
+        const docSnap = await getDoc(docRef)
+
+        return docSnap.data()
+    }
 
     useEffect(() => {
-        setTimeout(() => {
+        setTimeout(async () => {
             if (selectedReminder?.priority) {
+                const dep = await getReminderByID(selectedReminder.dependency)
                 setPriority(selectedReminder.priority)
                 setDurationHours(selectedReminder.duration.split(':')[0])
                 setDurationMin(selectedReminder.duration.split(':')[1])
@@ -363,6 +403,8 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 setTitle(selectedReminder.title)
                 setCategory(selectedReminder.category)
                 setDiscussionThreads(selectedReminder.discussionThreads)
+                setDependency(dep)
+                setDependencyValue(dep ? dep.title : '')
             }
         }, 400)
     }, [selectedReminder])
@@ -443,12 +485,14 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             };
 
             // Call handleSaveDiscussion to update the local state and clear the input fields
-            handleSaveDiscussion();
 
-            const updatedDiscussionThreads = [
-                ...existingDiscussionThreads,
-                newDiscussionThread // Add the newly created discussion thread
-            ];
+            let updatedDiscussionThreads = existingDiscussionThreads
+            if (activity != '' && discussionDescription != '') {
+                updatedDiscussionThreads.push(newDiscussionThread)
+            }
+
+            handleSaveDiscussion();
+            //DEPENDENCY
 
 
             await updateDoc(reminderRef, {
@@ -460,6 +504,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 title: title,
                 attachments: updatedAttachments,
                 category: category,
+                dependency: dependency?.docId || '',
                 discussionThreads: updatedDiscussionThreads // Save the discussion threads
             }).then(() => {
                 fetchReminders()
@@ -523,9 +568,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         try {
             // Delete the attachment document from the "reminders" collection
             // Get all attachments, filter out the attachment that is selected, update doc with new attachments
-            console.log("ALL ATTACHMENTS :", attachments)
             const newAttachments = attachments.filter(a => (a.name != currentAttachment.name && a.attachmentURL != currentAttachment.attachmentURL))
-            console.log('UPDATED : ', newAttachments)
 
             const reminderDocRef = doc(firestore, 'reminders', selectedReminder.docId)
             await updateDoc(reminderDocRef, {
@@ -624,6 +667,16 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const closeModal = () => {
         setShowModal(false);
     };
+    const filterReminders = () => {
+        let uniqueNames = [];
+        reminders.forEach(r => {
+            if (r.docId === selectedReminder.docId) return
+            if (!uniqueNames.includes(r.title)) {
+                uniqueNames.push(r.title)
+            }
+        })
+        return uniqueNames
+    }
 
     const handleSearch = () => {
         if (searchTerm.trim() !== "") {
@@ -866,29 +919,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     <Typography>Priority</Typography>
                                     <Typography>Duration</Typography>
                                 </div>
-                                {/* {reminders && reminders.map(reminder => {
-                                    const hours = Number(reminder.duration.split(':')[0]);
-                                    const minutes = Number(reminder.duration.split(':')[1]);
-                                    const time = formatAMPM(new Timestamp(reminder.time.seconds, reminder.time.nanoseconds).toDate())
 
-                                    return (
-                                        <div onClick={() => {
-                                            closeModal()
-                                            setSelectedReminder(reminder)
-                                            setShowPopup(true)
-                                        }}
-                                            style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center' }}
-                                        >
-                                            <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>{reminder.title}</Typography>
-                                            <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '180px', padding: '5px' }}>{reminder.category.name}</Typography>
-                                            <Typography variant="body1">{time}</Typography>
-                                            <Typography variant="body1">{hours} hour(s) {minutes} minutes</Typography>
-                                            <p style={{ placeSelf: 'end', marginRight: '20px', display: 'inline-block', cursor: 'pointer' }}>
-                                                <ArrowRightIcon />
-                                            </p>
-                                        </div>
-                                    )
-                                })} */}
                                 {searchResults && searchResults.map(reminder => {
                                     const hours = Number(reminder.duration.split(':')[0]);
                                     const minutes = Number(reminder.duration.split(':')[1]);
@@ -1119,17 +1150,31 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     </div>
                                 </div>
                                 <div>
-                                    <Title>Dependency:</Title>
-                                    <Select
-                                        value={dependency}
-                                        onChange={(e) => setDependency(e.target.value)}
-                                        sx={{ background: theme.palette.background.default }}
-                                    >
-                                        <MenuItem value="">None</MenuItem>
-                                        <MenuItem value="dependency1">Dependency 1</MenuItem>
-                                        <MenuItem value="dependency2">Dependency 2</MenuItem>
-                                        {/* Add more dependency options as needed */}
-                                    </Select>
+                                    <Title>Attached Reminders:</Title>
+                                    <div style={{ display: changeDep ? 'none' : 'flex', width: '50%', justifyContent: 'space-between', alignItems: 'center', background: theme.palette.primary.dark, padding: '10px', borderRadius: '8px' }}>
+                                        {(dependency && !changeDep) &&
+                                            <div>
+                                                <Typography variant='h6'>{dependency.title}</Typography>
+                                                <Typography variant='body1'>{formatAMPM(new Timestamp(dependency.time.seconds, dependency.time.nanoseconds).toDate())}</Typography>
+                                            </div>
+                                        }
+                                        {!changeDep && <CustomButton text={'Change'} color={1} size={'s'} onClick={() => setChangeDep(true)} />}
+                                    </div>
+                                    {changeDep && <StyledAutoCompleteDiv>
+                                        <Autocomplete
+                                            options={['None', ...filterReminders()]}
+                                            value={dependencyValue}
+                                            onChange={(e, newVal) => (getNewVal(newVal))}
+                                            inputValue={inputValue}
+                                            onInputChange={(event, newInputValue) => {
+                                                setInputValue(newInputValue);
+                                            }}
+                                            disablePortal
+                                            id="reminder-attachment"
+                                            PopperComponent={(props) => <Popper sx={{ color: 'black !important' }} {...props} placement='bottom'></Popper >}
+                                            renderInput={(params) => <StyledTextField {...params} placeholder="Reminder Title" />}
+                                        />
+                                    </StyledAutoCompleteDiv>}
                                 </div>
                                 <div>
                                     <Title>Category:</Title>
@@ -1231,7 +1276,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                                 fullWidth
                                             />
                                         </div>
-                                        <Button variant="contained" color="primary" onClick={handleSaveDiscussion}>Save</Button>
                                         <Comments activity={activity} />
                                     </div>
                                 )}
@@ -1292,7 +1336,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
                     </Box>
                 </div>
-            </CustomModal>
+            </CustomModal >
             <AllReminders open={allRemindersOpen} setOpen={setAllRemindersOpen} reminders={dayReminders} setSelectedReminder={setSelectedReminder} setShowPopup={setShowPopup} reminderDay={reminderDay} month={month} formatAMPM={formatAMPM} />
         </Container >
 

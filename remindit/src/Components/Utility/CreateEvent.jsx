@@ -145,9 +145,10 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
     const [category, setCategory] = useState('');
     const { user } = useContext(UserContext)
     const [dependency, setDependency] = useState(false);
+    const [dependencyValue, setDependencyValue] = useState('None');
+    const [dependantReminder, setDependantReminder] = useState('')
+    const [inputValue, setInputValue] = useState('');
 
-
-    console.log('REMINDERS : ', reminders)
 
 
 
@@ -162,15 +163,11 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
 
         try {
 
-            console.log('time:', time, typeof time);
-            console.log('date:', date, typeof date);
+
 
 
             const timeValue = time instanceof Date ? time : new Date(time);
             const dateValue = date instanceof Date ? date : new Date(date);
-
-            console.log('timeValue:', timeValue, typeof timeValue);
-            console.log('dateValue:', dateValue, typeof dateValue);
 
             // Get the current user ID
             const user = auth.currentUser;
@@ -183,7 +180,6 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
 
             const remindersCollectionRef = collection(firestore, 'reminders');
             const newReminderDocRef = doc(collection(firestore, 'reminders'));
-            console.log(Timestamp.fromDate(dateValue))
 
 
             await setDoc(newReminderDocRef
@@ -199,7 +195,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     duration: duration, // Include the duration of the reminder,
                     category: NewCategory,
                     docId: newReminderDocRef.id,
-                    dependency: dependency, // Include the dependency option
+                    dependency: dependantReminder ? dependantReminder.docId : '', // Include the dependency option
                 }).then(() => {
                     fetchReminders()
                 })
@@ -247,7 +243,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                         duration: duration,
                         category: NewCategory,
                         docId: newReminderCopyDocRef.id,
-                        dependency: dependency, // Include the dependency option
+                        dependency: dependantReminder ? dependantReminder.docId : '', // Include the dependency option
 
                     };
 
@@ -299,6 +295,18 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
         return uniqueNames
     }
 
+    const getNewVal = (newVal) => {
+        if (newVal === null) {
+            return
+        }
+        if (newVal != 'None') {
+            setDependencyValue(reminders.filter(r => r.title === newVal)[0].title)
+            setDependantReminder(reminders.filter(r => r.title === newVal)[0])
+        } else {
+            setDependencyValue('None')
+            setDependantReminder('')
+        }
+    }
     return (
 
         <CustomModal
@@ -403,7 +411,13 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                             <FormLabel>Attach Reminder </FormLabel>
                             {/* NOTE FOR UPDATE: REMINDER NAMES MUST BE UNIQUE UNLESS IT IS RECURRING */}
                             <Autocomplete
-                                options={filterReminders()}
+                                options={['None', ...filterReminders()]}
+                                value={dependencyValue}
+                                onChange={(e, newVal) => (getNewVal(newVal))}
+                                inputValue={inputValue}
+                                onInputChange={(event, newInputValue) => {
+                                    setInputValue(newInputValue);
+                                }}
                                 disablePortal
                                 id="reminder-attachment"
                                 PopperComponent={(props) => <Popper sx={{ color: 'black !important' }} {...props} placement='bottom'></Popper >}

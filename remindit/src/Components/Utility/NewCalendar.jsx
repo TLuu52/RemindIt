@@ -869,6 +869,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }
     };
 
+    const isAttachedReminderCompleted = dependency ? dependency.isComplete : false;
+
+
     return (
         <Container>
             <div>
@@ -1145,7 +1148,12 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <Typography variant='body1'>Minutes</Typography>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <input type="checkbox" checked={isComplete} onChange={(e) => setIsComplete(e.target.checked)} />
+                                        <input
+                                            type="checkbox"
+                                            checked={isComplete}
+                                            onChange={(e) => setIsComplete(e.target.checked)}
+                                            disabled={!isAttachedReminderCompleted}
+                                        />
                                         <Typography variant="body1">Mark as complete</Typography>
                                     </div>
                                 </div>

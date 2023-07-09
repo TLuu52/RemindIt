@@ -8,6 +8,7 @@ function NotificationBox() {
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedReminder, setSelectedReminder] = useState(null);
   const remindersPerPage = 10; // Adjust the number of reminders per page as needed
 
   useEffect(() => {
@@ -124,6 +125,10 @@ function NotificationBox() {
   const renderReminder = (reminder, index) => {
     const isDueSoon = reminder.daysUntilDue <= 7; // Customize the threshold for "due soon" as needed
 
+    const handleReminderClick = () => {
+      setSelectedReminder(reminder);
+    };
+
     const handleMarkComplete = async () => {
       try {
         const db = getFirestore();
@@ -149,10 +154,12 @@ function NotificationBox() {
 
     return (
       <Box key={index} display="flex" alignItems="center">
-        <Typography variant="body2">
-          {reminder.title} - {reminder.daysUntilDue} days until due{' '}
-          {isDueSoon && <span style={{ color: 'red' }}>⚠️</span>}
-        </Typography>
+        <Button onClick={handleReminderClick} style={{ textTransform: 'none' }}>
+          <Typography variant="body2">
+            {reminder.title} - {reminder.daysUntilDue} days until due{' '}
+            {isDueSoon && <span style={{ color: 'red' }}>⚠️</span>}
+          </Typography>
+        </Button>
         <Button variant="contained" color="primary" onClick={handleMarkComplete}>
           Mark as Complete
         </Button>

@@ -1,10 +1,10 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover, Autocomplete, Popper } from '@mui/material';
 import React, { useEffect, useState } from 'react'
-import { collection, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc, query, where } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
 import CustomButton from './CustomButton';
-import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill, BsCircleFill } from 'react-icons/bs';
+import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill, BsCircleFill, BsSend } from 'react-icons/bs';
 import ProfileIcon from './ProfileIcon';
 import AllReminders from './AllReminders';
 import { ArrowRightIcon } from '@mui/x-date-pickers';
@@ -243,6 +243,13 @@ const StyledAutoCompleteDiv = styled('div')(({ theme }) => ({
         background: '#333'
     }
 }))
+const Comment = styled('div')({
+    display: 'grid',
+    gridTemplateColumns: 'auto 16fr auto',
+    width: '100%',
+    gridColumnGap: '10px',
+    paddingBottom: '10px'
+})
 
 function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, categories, setCategories, selectedCategories }) {
     const theme = useTheme();
@@ -304,6 +311,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [changeDep, setChangeDep] = useState(false)
     const [inputValue, setInputValue] = useState('');
     const [dependencyValue, setDependencyValue] = useState('None')
+    const [comment, setComment] = useState('')
 
     const closeEditAttachment = () => {
         setAnchorEl(null)
@@ -361,7 +369,29 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     useEffect(() => {
         // This effect fetches reminders from Firestore and updates the reminders state
         fetchReminders();
+
+        resetAct()
+        // collection(firestore, "reminders").get().then(function (querySnapshot) {
+        //     querySnapshot.forEach(function (doc) {
+        //         // doc.ref.update({
+        //         //     capital: true
+        //         // });
+        //         console.log(doc.ref)
+        //     });
+        // });
     }, [date, auth]);
+
+    const resetAct = async () => {
+        const q = query(collection(firestore, 'reminders'), where('activity', '==', ''));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(async (docu) => {
+            const docRef = doc(firestore, 'reminders', docu.data().docId)
+            await updateDoc(docRef, {
+                activity: []
+            })
+        })
+
+    }
 
     // Fetch the data from the "NotesAttachments" collection
     useEffect(() => {
@@ -402,7 +432,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 setAttachments(selectedReminder.attachments)
                 setTitle(selectedReminder.title)
                 setCategory(selectedReminder.category)
-                setDiscussionThreads(selectedReminder.discussionThreads)
+                setActivity(selectedReminder.activity.sort((a, b) => { return b.time.toDate() - a.time.toDate() }))
                 setDependency(dep)
                 setDependencyValue(dep ? dep.title : '')
             }
@@ -411,27 +441,24 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     const storage = getStorage(); // Initialize Firebase Storage
 
-    const handleSaveDiscussion = () => {
-        const newDiscussionThread = {
-            activity: activity,
-            description: discussionDescription,
+    const handleSaveDiscussion = async () => {
+        const newActivity = {
+            comment: comment,
+            userId: auth.currentUser.uid,
+            photoURL: auth.currentUser.photoURL,
+            email: auth.currentUser.email,
+            time: new Date()
         };
+        const currentActivity = [...activity, newActivity]
+        const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
+        await updateDoc(reminderRef, {
+            activity: currentActivity
+        }).then(() => {
 
-        if (Array.isArray(discussionThreads)) {
-            const updatedThreads = [...discussionThreads, newDiscussionThread];
-
-            // Update the local state with the new discussion thread
-            setDiscussionThreads(updatedThreads);
-        } else {
-            // Initialize discussionThreads with the new thread
-            const updatedThreads = [newDiscussionThread];
-
-            // Update the local state with the new discussion thread
-            setDiscussionThreads(updatedThreads);
-        }
+        })
 
         // Clear the discussion input fields
-        setActivity('');
+        setActivity(currentActivity);
         setDiscussionDescription('');
     };
 
@@ -459,14 +486,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             }
 
             const totalDuration = `${durationHours}:${durationMin}`
-            console.log(`
-            ${priority}\n
-            ${description}\n
-            ${totalDuration}\n
-            ${notes}\n
-            ${activity}\n
-            ${selectedReminder.docId}\n
-            `)
             let updatedAttachments = attachments || []; // Initialize with an empty array if attachments is undefined
             if (attachmentURL != '' && attachmentName != '') {
                 const newAttachment = { name: attachmentName, attachmentURL }
@@ -476,23 +495,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
 
             const reminderDoc = await getDoc(reminderRef);
-            const existingDiscussionThreads = reminderDoc.data().discussionThreads || [];
-
-            const newDiscussionThread = {
-                activity: activity,
-                description: discussionDescription,
-                userId: userId
-            };
-
-            // Call handleSaveDiscussion to update the local state and clear the input fields
-
-            let updatedDiscussionThreads = existingDiscussionThreads
-            if (activity != '' && discussionDescription != '') {
-                updatedDiscussionThreads.push(newDiscussionThread)
-            }
-
-            handleSaveDiscussion();
-            //DEPENDENCY
 
 
             await updateDoc(reminderRef, {
@@ -500,12 +502,10 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 description: description || '',
                 duration: totalDuration,
                 notes: notes || '',
-                activity: activity || '',
                 title: title,
                 attachments: updatedAttachments,
                 category: category,
                 dependency: dependency?.docId || '',
-                discussionThreads: updatedDiscussionThreads // Save the discussion threads
             }).then(() => {
                 fetchReminders()
                 setAttachmentName('')
@@ -523,18 +523,15 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     description: description || '',
                     duration: totalDuration,
                     notes: notes || '',
-                    activity: activity || '',
                     title: title,
                     attachments: updatedAttachments,
                     category: category,
-                    discussionThreads: updatedDiscussionThreads
                 });
                 // Perform any additional logic or UI updates for an updated reminder
             }
 
             closePopup();
 
-            // console.log('Notes and Attachments saved successfully. Document ID:', newNotesAttachmentsDocRef.id);
         } catch (error) {
             console.error('Error adding document: ', error);
         }
@@ -564,7 +561,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     };
 
     const deleteAttachment = async (currentAttachment) => {
-        console.log(currentAttachment)
         try {
             // Delete the attachment document from the "reminders" collection
             // Get all attachments, filter out the attachment that is selected, update doc with new attachments
@@ -577,11 +573,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 setAttachments(newAttachments)
                 fetchReminders()
             })
-            // const attachmentDocRef = doc(firestore, 'reminders', id);
-            // await deleteDoc(attachmentDocRef);
-
-            // // Update the attachments state by filtering out the deleted item
-            // setAttachments(prevAttachments => prevAttachments.filter(item => item.id !== id));
         } catch (error) {
             console.error('Error deleting attachment: ', error);
         }
@@ -665,7 +656,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     };
 
     const closeModal = () => {
+        setSelectedReminder(null)
         setShowModal(false);
+        fetchReminders();
     };
     const filterReminders = () => {
         let uniqueNames = [];
@@ -828,49 +821,67 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
     const handleEdit = (thread) => {
         // Open the edit modal
-        setEditedActivity(thread.activity);
-        setEditedDescription(thread.description);
+        setEditedActivity(thread.comment);
         setEditModalOpen(true);
         setEditThread(thread); // Store the current thread being edited
     };
 
-    const handleEditSubmit = () => {
+    const handleEditSubmit = async () => {
         // Update the discussion thread with the edited values
-        const updatedThreads = discussionThreads.map((t) => {
+        const updatedThreads = activity.map((t) => {
             if (t === editThread) {
                 return {
                     ...t,
-                    activity: editedActivity,
-                    description: editedDescription,
+                    comment: editedActivity,
                 };
             }
             return t;
         });
 
-        setDiscussionThreads(updatedThreads);
+        const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
+        await updateDoc(reminderRef, {
+            activity: updatedThreads
+        }).then(() => {
+            setActivity(updatedThreads);
+            setEditModalOpen(false);
+            setEditedActivity('')
+
+        })
+
 
         // Close the edit modal
-        setEditModalOpen(false);
     };
 
     const handleDelete = async (thread) => {
         try {
             // Delete the discussion thread from the Firestore database
             const reminderRef = doc(firestore, 'reminders', selectedReminder.docId);
-            const updatedThreads = discussionThreads.filter((t) => t !== thread);
+            const updatedThreads = activity.filter((t) => t !== thread);
 
             await updateDoc(reminderRef, {
-                discussionThreads: updatedThreads.length > 0 ? updatedThreads : null
+                activity: updatedThreads.length > 0 ? updatedThreads : []
             });
 
-            setDiscussionThreads(updatedThreads);
+            setActivity(updatedThreads);
         } catch (error) {
             console.error('Error deleting discussion thread:', error);
         }
     };
 
-    const isAttachedReminderCompleted = dependency ? dependency.isComplete : false;
+    const closeEditModal = () => {
+        setEditModalOpen(false)
+        setEditThread(null)
+        setEditedActivity('')
+    }
+    Date.prototype.today = function () {
+        return ((this.getDate() < 10) ? "0" : "") + this.getDate() + "/" + (((this.getMonth() + 1) < 10) ? "0" : "") + (this.getMonth() + 1) + "/" + this.getFullYear();
+    }
 
+    Date.prototype.timeNow = function () {
+        return ((this.getHours() < 10) ? "0" : "") + this.getHours() + ":" + ((this.getMinutes() < 10) ? "0" : "") + this.getMinutes()
+    }
+
+    const isAttachedReminderCompleted = dependency ? dependency.isComplete : false;
 
     return (
         <Container>
@@ -1267,73 +1278,74 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                 <Title>Activity:</Title>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
                                     <ProfileIcon img='default' />
-                                    <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={activity} onChange={(e) => setActivity(e.target.value)} />
+                                    <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={comment} onChange={(e) => setComment(e.target.value)} endAdornment={<BsSend size={24} onClick={handleSaveDiscussion} />} />
                                 </div>
-                                {activity && (
-                                    <div>
-                                        <div>
-                                            <Title variant="h6">Description:</Title>
-                                            <TextField
-                                                sx={{ color: '#fff' }}
-                                                multiline
-                                                rows={4}
-                                                placeholder="Enter a description..."
-                                                value={discussionDescription}
-                                                onChange={(e) => setDiscussionDescription(e.target.value)}
-                                                variant="outlined"
-                                                fullWidth
-                                            />
-                                        </div>
-                                        <Comments activity={activity} />
-                                    </div>
-                                )}
 
-                                {discussionThreads && discussionThreads.length > 0 && (
+                                {activity && activity.length > 0 && (
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingTop: '10px', paddingBottom: '10px' }}>
-                                        <Title>Discussion Threads:</Title>
-                                        {discussionThreads.map((thread, index) => (
-                                            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <ProfileIcon img="default" />
-                                                <div>
-                                                    <Typography variant="h6">Activity: {thread.activity}</Typography>
-                                                    <Typography variant="body1">Description: {thread.description}</Typography>
-                                                </div>
-                                                <Button
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    size="small"
-                                                    onClick={() => handleEdit(thread)}
-                                                >
-                                                    Edit
-                                                </Button>
-                                                <Button
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    size="small"
-                                                    onClick={() => handleDelete(thread)}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        ))}
-                                        <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
-                                            {/* Modal content */}
-                                            <form onSubmit={handleEditSubmit}>
-                                                <input
-                                                    type="text"
-                                                    value={editedActivity}
-                                                    onChange={(e) => setEditedActivity(e.target.value)}
-                                                    placeholder="Enter updated activity"
-                                                />
-                                                <input
-                                                    type="text"
-                                                    value={editedDescription}
-                                                    onChange={(e) => setEditedDescription(e.target.value)}
-                                                    placeholder="Enter updated description"
-                                                />
-                                                <button type="submit">Save</button>
-                                            </form>
-                                        </Modal>
+
+                                        {activity.map((thread, index) => {
+                                            if ('seconds' in thread.time) {
+                                                var datetime = new Date(thread.time.toDate()).today() + " @ " + formatAMPM(new Date(thread.time.toDate()));
+                                            } else {
+                                                var datetime = new Date(thread.time).today() + " @ " + formatAMPM(new Date(thread.time))
+                                            }
+                                            return (
+                                                <Comment key={index}>
+                                                    <ProfileIcon img={thread.photoURL} sx={{ gridRowStart: 1, gridRowEnd: 3 }} />
+                                                    <Typography variant="h6" >{thread.email}</Typography>
+                                                    <Typography variant="body1" sx={{ fontSize: '12px', opacity: '.5', alignSelf: 'center', textAlign: 'right' }}>{datetime}</Typography>
+                                                    {(editModalOpen && editThread === thread) ?
+                                                        <OutlinedInput defaultValue={thread.comment} value={editedActivity} onChange={(e) => setEditedActivity(e.target.value)} />
+                                                        :
+                                                        <Typography variant="body1">{thread.comment}</Typography>
+
+                                                    }{ }
+                                                    <div>
+                                                        {(editModalOpen && editThread === thread) ?
+                                                            <>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    onClick={() => handleEditSubmit()}
+                                                                >
+                                                                    Save
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    onClick={() => closeEditModal()}
+                                                                >
+                                                                    Cancel
+                                                                </Button>
+                                                            </>
+
+                                                            :
+                                                            <>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    onClick={() => handleEdit(thread)}
+                                                                >
+                                                                    Edit
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    color="primary"
+                                                                    size="small"
+                                                                    onClick={() => handleDelete(thread)}
+                                                                >
+                                                                    Delete
+                                                                </Button>
+                                                            </>
+                                                        }
+                                                    </div>
+                                                </Comment>
+                                            )
+                                        })}
                                     </div>
                                 )}
                             </div>

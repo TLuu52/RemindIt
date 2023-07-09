@@ -12,7 +12,7 @@ const CustomImg = styled('img')(({ theme }) => ({
     objectFit: 'cover'
 }))
 
-function ProfileIcon({ size, open, setOpen, img }) {
+function ProfileIcon({ size, open, setOpen, img, sx }) {
     const [src, setSrc] = useState(ProfileImg)
     const { user } = useContext(UserContext)
     useEffect(() => {
@@ -32,8 +32,8 @@ function ProfileIcon({ size, open, setOpen, img }) {
     return (
         // USE IMAGE FROM DB IF USER HAS CUSTOM IMAGE
         <>
-            {size === 'l' ? <CustomImg src={img === 'default' ? src : img} alt="Profile Picture" style={{ height: '150px', width: '150px' }} /> :
-                <CustomImg src={img === 'default' ? src : img} alt="Profile Picture" onClick={() => setOpen(!open)} />
+            {size === 'l' ? <CustomImg src={img === 'default' ? src : img} alt="Profile Picture" style={{ ...sx, height: '150px', width: '150px' }} /> :
+                <CustomImg src={img === 'default' ? src : img} alt="Profile Picture" onClick={() => setOpen(!open)} style={sx} />
             }
         </>
     )

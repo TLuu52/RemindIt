@@ -136,7 +136,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
     const theme = useTheme();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [activity, setActivity] = useState('');
+    const [activity, setActivity] = useState([]);
     const [time, setTime] = useState('');
     const [date, setDate] = useState('');
     const [priority, setPriority] = useState('');
@@ -259,7 +259,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
             // Clear input fields
             setTitle('');
             setDescription('');
-            setActivity('');
+            setActivity([]);
             setTime('');
             setDate('');
             setPriority('');

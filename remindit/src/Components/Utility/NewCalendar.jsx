@@ -39,6 +39,12 @@ const Calendar = styled('div')(({ theme }) => ({
     textTransform: 'uppercase',
     flexGrow: '1'
 }))
+const DailyCalendar = styled('div')(({ theme }) => ({
+    padding: '20px 0 0',
+    textTransform: 'uppercase',
+    flexGrow: '1',
+    position: 'relative'
+}))
 const Day = styled('div')(({ theme }) => ({
     width: '100%',
     border: `solid 1px ${theme.palette.secondary.main}`,
@@ -69,9 +75,10 @@ const AfterMonth = styled('p')(({ theme }) => ({
 
 }))
 const Container = styled('div')({
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
+    display: 'grid',
+    gridTemplateRows: 'auto auto auto 10fr',
+    position: 'relative',
+    height: '100%'
 })
 const SearchBar = styled('div')(({ theme }) => ({
     display: 'flex',
@@ -228,6 +235,18 @@ const WeeklyDay = styled('div')(({ theme }) => ({
     position: 'relative',
     color: theme.palette.primary.contrastText,
     paddingTop: '50px'
+}))
+const DailyDay = styled('div')(({ theme }) => ({
+    display: 'grid',
+    height: '900px',
+    gridTemplateRows: 'repeat(12, 1fr)',
+    width: '100%',
+    border: `solid 1px ${theme.palette.secondary.main}`,
+    maxHeight: '900px',
+    position: 'relative',
+    color: theme.palette.primary.contrastText,
+    paddingTop: '50px',
+    overflow: 'auto'
 }))
 const StyledTextField = styled(TextField)(({ theme }) => ({
     '& .MuiInputBase-input.MuiOutlinedInput-input.MuiInputBase-inputAdornedEnd.MuiAutocomplete-input.MuiAutocomplete-inputFocused': {
@@ -737,14 +756,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             return (<WeeklyDay><BeforeMonth sx={{ fontSize: '26px' }}>{prevMonthlast - (diff - 1)}</BeforeMonth></WeeklyDay>)
         }
         if (date.getDate() - diff > lastDay.getDate()) {
-            //need to get next month beginning
-            // date === 28
-            // diff === -5
-            // date - diff === 33
-            // last day === 31
-            // i===6 : Saturday 
-            // day === 1 : Monday
-            // NEED to return '2', (date-diff) - lastDay
             return (<WeeklyDay><AfterMonth sx={{ fontSize: '26px' }}>{(date.getDate() - diff) - lastDay.getDate()}</AfterMonth></WeeklyDay>)
         }
         const newDate = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - diff}`)
@@ -772,6 +783,52 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
             const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
             progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
         }
+        if (view === 'daily' && remindersForDay) {
+            return (
+                <DailyDay>
+                    <DuringMonth sx={{ fontSize: '26px' }}>{date.getDate() - diff}</DuringMonth>
+
+                    {
+                        remindersForDay && (reminderCount <= 8) && remindersForDay.map(r => {
+                            const time = formatAMPM(new Timestamp(r.time.seconds, r.time.nanoseconds).toDate())
+                            const hours = Number(r.duration.split(':')[0]);
+                            const minutes = Number(r.duration.split(':')[1]);
+                            if (isCategory(r)) {
+                                return (
+                                    <>
+                                        <Reminder style={{ background: r.category.color, cursor: 'pointer' }}
+                                            onClick={() => {
+                                                setSelectedReminder(r);
+                                                setShowPopup(true);
+                                            }}
+                                        >
+                                            <Typography variant='body1'>{r.title}</Typography>
+                                            <Typography variant='body1'>{time}</Typography>
+                                            <Typography variant='body1'>{hours} hour(s) {minutes} minutes</Typography>
+                                            <LinearProgress variant="determinate" value={progress} /></Reminder>
+                                    </>
+                                )
+                            }
+                        })
+                    }
+                    {
+                        (reminderCount > 8) &&
+                        <div style={{ background: theme.palette.primary.main, width: '70%', margin: 'auto', padding: '5px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
+                            onClick={() => {
+                                setAllRemindersOpen(true)
+                                setDayReminders(remindersForDay)
+                                setReminderDay(i + 1)
+                            }}
+                        >
+                            SHOW ALL REMINDERS
+                        </div>
+                    }
+                    {reminderCount > 0 && (<div style={{ position: 'absolute', bottom: '0', paddingLeft: '4px' }}>{reminderCount} {reminderCount === 1 ? 'Reminder' : 'Reminders'}</div>)}
+                </DailyDay>
+            )
+        } else if (view === 'daily') {
+            return
+        }
 
         return (
 
@@ -779,7 +836,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 <DuringMonth sx={{ fontSize: '26px' }}>{date.getDate() - diff}</DuringMonth>
 
                 {
-                    remindersForDay && (reminderCount <= 2) && remindersForDay.map(r => {
+                    remindersForDay && (reminderCount <= 8) && remindersForDay.map(r => {
                         const time = formatAMPM(new Timestamp(r.time.seconds, r.time.nanoseconds).toDate())
                         const hours = Number(r.duration.split(':')[0]);
                         const minutes = Number(r.duration.split(':')[1]);
@@ -795,14 +852,15 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <Typography variant='body1'>{r.title}</Typography>
                                         <Typography variant='body1'>{time}</Typography>
                                         <Typography variant='body1'>{hours} hour(s) {minutes} minutes</Typography>
-                                        <LinearProgress variant="determinate" value={progress} /></Reminder>
+                                        <LinearProgress variant="determinate" value={progress} />
+                                    </Reminder>
                                 </>
                             )
                         }
                     })
                 }
                 {
-                    (reminderCount > 6) &&
+                    (reminderCount > 8) &&
                     <div style={{ background: theme.palette.primary.main, width: '70%', margin: 'auto', padding: '5px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
                         onClick={() => {
                             setAllRemindersOpen(true)
@@ -1004,6 +1062,15 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     </Row>
 
                 )}
+            {view === 'daily' && (
+                <Row>
+                    {weekdays.map((weekday, i) => {
+                        if (i === date.getDay()) {
+                            return <Typography variant='h6' key={i}>{weekday}</Typography>
+                        }
+                    })}
+                </Row>
+            )}
 
             {view === 'monthly' && (
                 <Calendar>
@@ -1115,6 +1182,20 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                         </>
                     ))}
                 </Calendar>
+            )}
+            {view === 'daily' && (
+                <DailyCalendar>
+                    {weekdays.map((weekday, i) => {
+                        if (i === date.getDay()) {
+
+                            return (
+                                <>
+                                    {days(i)}
+                                </>
+                            )
+                        }
+                    })}
+                </DailyCalendar>
             )}
 
             <CustomModal open={showPopup} onClose={closePopup}>

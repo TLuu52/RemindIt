@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import { getFirestore, collection, onSnapshot, query, where } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, query, where, doc, deleteDoc } from 'firebase/firestore';
 import { auth } from "../../firebase";
 
 function NotificationBox() {
@@ -34,6 +34,7 @@ function NotificationBox() {
             const dueDate = data.date.toDate();
             const daysUntilDue = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 3600 * 24));
             data.daysUntilDue = daysUntilDue;
+            data.id = doc.id; // Assign the ID property from the document ID
             reminders.push(data);
           });
           setInbox(reminders);
@@ -123,11 +124,39 @@ function NotificationBox() {
   const renderReminder = (reminder, index) => {
     const isDueSoon = reminder.daysUntilDue <= 7; // Customize the threshold for "due soon" as needed
 
+    const handleMarkComplete = async () => {
+      try {
+        const db = getFirestore();
+
+        // Ensure reminder ID exists before proceeding
+        if (!reminder.id) {
+          console.error('Reminder ID is missing');
+          return;
+        }
+
+        const reminderRef = doc(db, 'reminders', reminder.id);
+
+        // Delete the reminder document from Firestore
+        await deleteDoc(reminderRef);
+
+        // Update the inbox state by filtering out the completed reminder
+        const updatedInbox = inbox.filter((r) => r !== reminder);
+        setInbox(updatedInbox);
+      } catch (error) {
+        console.error('Error deleting reminder:', error);
+      }
+    };
+
     return (
-      <Typography key={index} variant="body2">
-        {reminder.title} - {reminder.daysUntilDue} days until due{' '}
-        {isDueSoon && <span style={{ color: 'red' }}>⚠️</span>}
-      </Typography>
+      <Box key={index} display="flex" alignItems="center">
+        <Typography variant="body2">
+          {reminder.title} - {reminder.daysUntilDue} days until due{' '}
+          {isDueSoon && <span style={{ color: 'red' }}>⚠️</span>}
+        </Typography>
+        <Button variant="contained" color="primary" onClick={handleMarkComplete}>
+          Mark as Complete
+        </Button>
+      </Box>
     );
   };
 

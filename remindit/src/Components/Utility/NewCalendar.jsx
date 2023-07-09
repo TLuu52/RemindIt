@@ -1150,9 +1150,9 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <input
                                             type="checkbox"
+                                            disabled={dependency}
                                             checked={isComplete}
                                             onChange={(e) => setIsComplete(e.target.checked)}
-                                            disabled={!isAttachedReminderCompleted}
                                         />
                                         <Typography variant="body1">Mark as complete</Typography>
                                     </div>

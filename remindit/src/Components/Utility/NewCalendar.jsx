@@ -30,6 +30,16 @@ const Row = styled('div')(({ theme }) => ({
     borderBottom: `solid 2px ${theme.palette.secondary.main}`
 
 }))
+const DailyRow = styled('div')(({ theme }) => ({
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    justifyItems: 'center',
+    alignItems: 'center',
+    padding: '20px 0',
+    textTransform: 'uppercase',
+    borderBottom: `solid 2px ${theme.palette.secondary.main}`
+
+}))
 const Calendar = styled('div')(({ theme }) => ({
     display: 'grid',
     gridTemplateColumns: 'repeat(7, 1fr)',
@@ -785,7 +795,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }
         if (view === 'daily' && remindersForDay) {
             return (
-                <DailyDay>
+                <DailyDay sx={{ background: date.getDate() - diff === day ? theme.palette.secondary.contrastText : 'transparent', }}>
                     <DuringMonth sx={{ fontSize: '26px' }}>{date.getDate() - diff}</DuringMonth>
 
                     {
@@ -829,10 +839,11 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         } else if (view === 'daily') {
             return
         }
+        console.log('day', day)
 
         return (
 
-            <WeeklyDay>
+            <WeeklyDay sx={{ background: date.getDate() - diff === day ? theme.palette.secondary.contrastText : 'transparent', }}>
                 <DuringMonth sx={{ fontSize: '26px' }}>{date.getDate() - diff}</DuringMonth>
 
                 {
@@ -984,12 +995,13 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                         <option value="duration">Duration</option>
                                     </select>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', padding: '10px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr) auto', gridColumnGap: '20px', padding: '10px' }}>
                                     <Typography>Title</Typography>
                                     <Typography>Category</Typography>
                                     <Typography>Time</Typography>
                                     <Typography>Priority</Typography>
                                     <Typography>Duration</Typography>
+                                    <div style={{ width: '24px', marginRight: '20px' }}></div>
                                 </div>
 
                                 {searchResults && searchResults.map(reminder => {
@@ -1006,12 +1018,13 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                             }}
                                             style={{
                                                 display: 'grid',
-                                                gridTemplateColumns: 'repeat(5, 1fr)',
+                                                gridTemplateColumns: 'repeat(5, 1fr) auto',
                                                 background: theme.palette.primary.dark,
                                                 padding: '20px 10px',
                                                 borderRadius: '8px',
                                                 marginBottom: '10px',
-                                                alignItems: 'center'
+                                                alignItems: 'center',
+                                                gridColumnGap: '20px'
                                             }}
                                         >
                                             <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>
@@ -1021,7 +1034,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                                 {reminder.category.name}
                                             </Typography>
                                             <Typography variant="body1">{time}</Typography> {/* Display the time */}
-                                            <Typography variant="body1">{reminder.priority}</Typography> {/* Display the priority */}
+                                            <Typography variant="body1">{reminder.priority.toUpperCase()}</Typography> {/* Display the priority */}
                                             <Typography variant="body1">
                                                 {hours} hour(s) {minutes} minutes
                                             </Typography>
@@ -1063,13 +1076,13 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
                 )}
             {view === 'daily' && (
-                <Row>
+                <DailyRow>
                     {weekdays.map((weekday, i) => {
                         if (i === date.getDay()) {
                             return <Typography variant='h6' key={i}>{weekday}</Typography>
                         }
                     })}
-                </Row>
+                </DailyRow>
             )}
 
             {view === 'monthly' && (

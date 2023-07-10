@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import NotificationBox from './NotificationBox';
 import { auth } from '../../firebase';
 import Logo from './Logo';
+import CustomButton from './CustomButton';
 
 const End = styled('div')({
     display: 'flex',
@@ -26,8 +27,11 @@ const CustomMenuItem = styled(MenuItem)(({ theme }) => ({
 const CustomPaper = styled(Paper)(({ theme }) => ({
     background: theme.palette.primary.light,
 }));
+const CustomBox = styled(Box)(({ theme }) => ({
+    background: theme.palette.primary.border
+}))
 
-function Header({ absolute }) {
+function Header({ absolute, updateReminders }) {
     const theme = useTheme();
     const [open, setOpen] = useState(false);
     const [showNotificationBox, setShowNotificationBox] = useState(false);
@@ -101,11 +105,11 @@ function Header({ absolute }) {
                     )}
                 </Popper>
             </Container>
-            <Modal open={showNotificationBox} onClose={handleNotificationBoxClose}>
-                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                    <NotificationBox />
-                    <button onClick={handleNotificationBoxClose}>Close Notifications</button>
-                </Box>
+            <Modal open={showNotificationBox} onClose={handleNotificationBoxClose} sx={{ display: 'grid', placeItems: 'center' }}>
+                <CustomBox sx={{ padding: '20px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '10px', }}>
+                    <NotificationBox updateReminders={updateReminders} />
+                    <CustomButton sx={{ width: '100%' }} onClick={handleNotificationBoxClose} text='Close Notifications' color={0} />
+                </CustomBox>
             </Modal>
         </End>
     );

@@ -34,10 +34,11 @@ function AllReminders({ open, setOpen, reminders, setSelectedReminder, setShowPo
                 <Typography variant='h3' paddingLeft={'5px'}>All Reminders for {month} {reminderDay}</Typography>
                 <hr />
                 <div style={{ display: 'grid', }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', padding: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', padding: '10px' }}>
                         <Typography>Title</Typography>
                         <Typography>Category</Typography>
                         <Typography>Time</Typography>
+                        <Typography>Priority</Typography>
                         <Typography>Duration</Typography>
                     </div>
                     {reminders && reminders.map(reminder => {
@@ -51,11 +52,12 @@ function AllReminders({ open, setOpen, reminders, setSelectedReminder, setShowPo
                                 setSelectedReminder(reminder)
                                 setShowPopup(true)
                             }}
-                                style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center' }}
+                                style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center' }}
                             >
                                 <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>{reminder.title}</Typography>
                                 <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '180px', padding: '5px' }}>{reminder.category.name}</Typography>
                                 <Typography variant="body1">{time}</Typography>
+                                <Typography variant="body1">{reminder.priority.toUpperCase()}</Typography> {/* Display the priority */}
                                 <Typography variant="body1">{hours} hour(s) {minutes} minutes</Typography>
                                 <p style={{ placeSelf: 'end', marginRight: '20px', display: 'inline-block', cursor: 'pointer' }}>
                                     <ArrowRightIcon />

@@ -179,7 +179,7 @@ function Dashboard() {
 
     return (
         <Page>
-            <Header />
+            <Header updateReminders={fetchReminders} />
             <Main>
                 <Left>
                     <CustomCalendar onChange={onChange} value={value} reminders={reminders} />

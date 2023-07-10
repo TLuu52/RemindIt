@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { getFirestore, collection, onSnapshot, query, where, doc, deleteDoc } from 'firebase/firestore';
+import { Box, Typography, Button, ButtonGroup, InputLabel } from '@mui/material';
+import { getFirestore, collection, onSnapshot, query, where, doc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { auth } from "../../firebase";
+import styled from '@emotion/styled';
+import { useTheme } from '@emotion/react';
+import { ArrowRightIcon } from '@mui/x-date-pickers';
 
-function NotificationBox() {
+
+
+
+function NotificationBox({ updateReminders }) {
   const [inbox, setInbox] = useState([]);
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReminder, setSelectedReminder] = useState(null);
   const remindersPerPage = 10; // Adjust the number of reminders per page as needed
+  const theme = useTheme()
 
   useEffect(() => {
     const fetchReminders = async () => {
@@ -121,6 +128,17 @@ function NotificationBox() {
       </Box>
     );
   };
+  const formatAMPM = (date) => {
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    const strTime = hours + ':' + minutes + ' ' + ampm;
+    return strTime;
+  }
+
 
   const renderReminder = (reminder, index) => {
     const isDueSoon = reminder.daysUntilDue <= 7; // Customize the threshold for "due soon" as needed
@@ -147,23 +165,32 @@ function NotificationBox() {
         // Update the inbox state by filtering out the completed reminder
         const updatedInbox = inbox.filter((r) => r !== reminder);
         setInbox(updatedInbox);
+        updateReminders()
       } catch (error) {
         console.error('Error deleting reminder:', error);
       }
     };
+    const hours = Number(reminder.duration.split(':')[0]);
+    const minutes = Number(reminder.duration.split(':')[1]);
+    const time = formatAMPM(new Timestamp(reminder.time.seconds, reminder.time.nanoseconds).toDate())
 
     return (
-      <Box key={index} display="flex" alignItems="center">
-        <Button onClick={handleReminderClick} style={{ textTransform: 'none' }}>
-          <Typography variant="body2">
-            {reminder.title} - {reminder.daysUntilDue} days until due{' '}
-            {isDueSoon && <span style={{ color: 'red' }}>⚠️</span>}
-          </Typography>
-        </Button>
+      <div onClick={handleReminderClick}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr) auto', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center', gridColumnGap: '10px', }}
+      >
+
+        <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>{reminder.title}</Typography>
+        <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '180px', padding: '5px' }}>{reminder.category.name}</Typography>
+        <Typography variant="body1">{time}</Typography>
+        <Typography variant="body1">{reminder.priority.toUpperCase()}</Typography> {/* Display the priority */}
+        <Typography variant="body1">{hours} hour(s) {minutes} minutes</Typography>
         <Button variant="contained" color="primary" onClick={handleMarkComplete}>
           Mark as Complete
         </Button>
-      </Box>
+        <p style={{ margin: '0px 10px', display: 'inline-block', cursor: 'pointer', display: 'grid', placeItems: 'center' }}>
+          <ArrowRightIcon />
+        </p>
+      </div>
     );
   };
 
@@ -176,31 +203,28 @@ function NotificationBox() {
   }
 
   return (
-    <Box>
-      <Box>
-        <Button onClick={() => filterReminders('all')} disabled={filter === 'all'}>
-          All
-        </Button>
-        <Button onClick={() => filterReminders('week')} disabled={filter === 'week'}>
-          Week
-        </Button>
-        <Button onClick={() => filterReminders('month')} disabled={filter === 'month'}>
-          Month
-        </Button>
-        <Button onClick={() => filterReminders('year')} disabled={filter === 'year'}>
-          Year
-        </Button>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '900px' }}>
+      <Typography variant='h3' paddingLeft={'5px'}>Upcoming Reminders</Typography>
+      <hr />
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0' }}>
+        <ButtonGroup variant="contained" aria-label="outlined primary button group">
+          <Button onClick={() => filterReminders('all')} disabled={filter === 'all'}>All</Button>
+          <Button onClick={() => filterReminders('week')} disabled={filter === 'week'}>Week</Button>
+          <Button onClick={() => filterReminders('month')} disabled={filter === 'month'}>Month</Button>
+          <Button onClick={() => filterReminders('year')} disabled={filter === 'year'}>Year</Button>
+        </ButtonGroup>
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <InputLabel>Sort By:</InputLabel>
+          <ButtonGroup variant="contained" aria-label="outlined primary button group">
+            <Button onClick={() => sortReminders('title')} disabled={sortBy === 'title'}>Tite</Button>
+            <Button onClick={() => sortReminders('length')} disabled={sortBy === 'length'}>Length</Button>
+          </ButtonGroup>
+        </div>
       </Box>
-      <Box>
-        <Button onClick={() => sortReminders('title')} disabled={sortBy === 'title'}>
-          Sort by Title
-        </Button>
-        <Button onClick={() => sortReminders('length')} disabled={sortBy === 'length'}>
-          Sort by Length
-        </Button>
+      <Box sx={{ overflow: 'auto', flexGrow: '1', }}>
+        {remindersToShow.map(renderReminder)}
+        {renderPaginationButtons()}
       </Box>
-      {remindersToShow.map(renderReminder)}
-      {renderPaginationButtons()}
     </Box>
   );
 }

@@ -5,9 +5,9 @@ import 'react-calendar/dist/Calendar.css';
 import CustomCalendar from './Utility/CustomCalendar';
 import EventFilter from './Utility/EventFilter';
 import NewCalendar from './Utility/NewCalendar';
-import { FcAbout, FcFeedback,} from 'react-icons/fc';
+import { FcAbout, FcFeedback, } from 'react-icons/fc';
 import { BsPlus } from 'react-icons/bs';
-import { auth, firestore,} from "../firebase";
+import { auth, firestore, } from "../firebase";
 import { collection, doc, getDocs, query, where, Timestamp, getDoc } from "firebase/firestore";
 import CreateEvent from './Utility/CreateEvent';
 import { Link } from 'react-router-dom';
@@ -114,7 +114,7 @@ function Dashboard() {
                 const remindersCollectionRef = collection(firestore, 'reminders');
 
                 // Get the current date
-                const currentDate = new Date();
+                const currentDate = new Date().toLocaleDateString('en-us');
 
                 // Get the currently authenticated user
                 const user = auth.currentUser;
@@ -127,7 +127,6 @@ function Dashboard() {
                 const remindersQuery = query(
                     remindersCollectionRef,
                     where('userId', '==', user.uid),
-                    where('date', '>=', Timestamp.fromDate(currentDate))
                 );
 
                 // Execute the query and get the query snapshot
@@ -136,7 +135,10 @@ function Dashboard() {
                 // Map the query snapshot to an array of reminder objects
                 const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
 
-                setReminders(fetchedReminders);
+
+                setReminders(fetchedReminders.filter((r) => {
+                    return new Date(currentDate) <= new Date(r.date)
+                }));
 
             } catch (error) {
                 console.error('Error fetching reminders:', error);
@@ -160,15 +162,14 @@ function Dashboard() {
 
         // Filter reminders that are due today or in the future
         const upcomingReminders = reminders.filter(
-            (reminder) => reminder.date.toDate() >= currentDate
+            (reminder) => new Date(reminder.date) >= currentDate
         );
 
         // Sort reminders by date in ascending order
-        upcomingReminders.sort((a, b) => a.date.toDate() - b.date.toDate());
+        upcomingReminders.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         // Get the first 5 reminders from the upcoming reminders
         const inboxNotifications = upcomingReminders.slice(0, 5);
-        console.log(inboxNotifications)
 
 
         setInbox(inboxNotifications);

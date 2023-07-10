@@ -165,9 +165,9 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
 
 
 
+            const dateValue = new Date(date).toLocaleDateString('en-us')
+            const timeValue = new Date(time)
 
-            const timeValue = time instanceof Date ? time : new Date(time);
-            const dateValue = date instanceof Date ? date : new Date(date);
 
             // Get the current user ID
             const user = auth.currentUser;
@@ -187,8 +187,8 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     title: title,
                     description: description,
                     activity: activity,
-                    time: Timestamp.fromDate(timeValue),
-                    date: Timestamp.fromDate(dateValue),
+                    time: timeValue,
+                    date: dateValue,
                     priority: priority,
                     userId: userId, // Include the user ID in the reminder document
                     recurringOption: recurringOption, // Include the selected recurring option
@@ -217,10 +217,13 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     const recurringDate = new Date(initialDate);
 
                     // Calculate the recurring date based on the recurring option
-                    if (recurringOptionValue.weeks)
+                    if (recurringOptionValue.weeks) {
                         recurringDate.setDate(initialDate.getDate() + (recurringOptionValue.weeks * 7 * i));
-                    if (recurringOptionValue.months)
+                    }
+                    if (recurringOptionValue.months) {
+
                         recurringDate.setMonth(initialDate.getMonth() + (recurringOptionValue.months * i));
+                    }
                     if (recurringOptionValue.years)
                         recurringDate.setFullYear(initialDate.getFullYear() + (recurringOptionValue.years * i));
 
@@ -230,13 +233,14 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
 
                     // Create a new document with the same data as the initial reminder
                     const newReminderCopyDocRef = doc(remindersCollectionRef);
+                    console.log('RECURRING', recurringDate.toLocaleDateString('en-us'))
 
                     const recurringReminderData = {
                         title: title,
                         description: description,
                         activity: activity,
-                        time: Timestamp.fromDate(recurringDate),
-                        date: Timestamp.fromDate(recurringDate),
+                        time: new Date(recurringDate),
+                        date: recurringDate.toLocaleDateString('en-us'),
                         priority: priority,
                         userId: userId,
                         recurringOption: recurringOption,
@@ -248,7 +252,10 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     };
 
                     // Create the recurring reminder copy
-                    await setDoc(newReminderCopyDocRef, recurringReminderData);
+                    await setDoc(newReminderCopyDocRef, recurringReminderData).then(() => {
+                        console.log("SUCCESS")
+                    }).catch(e => console.log(e))
+                        ;
                 }
             }
 

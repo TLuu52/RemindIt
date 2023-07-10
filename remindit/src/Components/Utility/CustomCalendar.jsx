@@ -136,7 +136,7 @@ function CustomCalendar({ onChange, value }) {
                 recurringDuration = 365 * 24 * 60 * 60 * 1000; // 1 year in milliseconds
             }
 
-            let nextRecurringDate = new Date(reminder.date.toDate().getTime() + recurringDuration);
+            let nextRecurringDate = new Date(new Date(reminder.date).getTime() + recurringDuration);
 
             while (nextRecurringDate <= currentDate) {
                 updatedReminders.push({
@@ -154,7 +154,7 @@ function CustomCalendar({ onChange, value }) {
     const getRemindersForDate = (date) => {
         const formattedDate = date.toDateString();
         const remindersForDate = reminders.filter((reminder) => {
-            const reminderDate = new Date(reminder.date.toDate()).toDateString();
+            const reminderDate = new Date(reminder.date).toDateString();
             return reminderDate === formattedDate;
         });
 
@@ -164,12 +164,12 @@ function CustomCalendar({ onChange, value }) {
     const tileContent = ({ date }) => {
         const formattedDate = date.toDateString();
         const remindersForDate = reminders.filter((reminder) => {
-            const reminderDate = new Date(reminder.date.toDate()).toDateString();
+            const reminderDate = new Date(reminder.date).toDateString();
             return reminderDate === formattedDate;
         });
 
         const recurringRemindersForDate = recurringReminders.filter((reminder) => {
-            const reminderDate = new Date(reminder.date.toDate()).toDateString();
+            const reminderDate = new Date(reminder.date).toDateString();
             return reminderDate === formattedDate;
         });
 

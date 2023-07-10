@@ -63,7 +63,7 @@ function NotificationBox() {
   const filteredReminders = () => {
     const currentDate = new Date();
     let filtered = inbox.filter(
-      (reminder) => reminder.daysUntilDue >= 0 && reminder.date.toDate() >= currentDate
+      (reminder) => reminder.daysUntilDue >= 0 && new Date(reminder.date) >= currentDate
     );
 
     switch (filter) {

@@ -760,7 +760,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }
         const newDate = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - diff}`)
         const remindersForDay = reminders.filter((reminder) => {
-            const reminderTime = new Date(reminder.date.toDate());
+            const reminderTime = new Date(reminder.date)
             const isSameDay =
                 reminderTime.getUTCFullYear() === newDate.getFullYear() &&
                 reminderTime.getUTCMonth() === newDate.getMonth() &&
@@ -1084,7 +1084,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     {Array.from({ length: numDays }).map((__, i) => {
                         const reminderDay = i + 1;
                         const remindersForDay = reminders.filter((reminder) => {
-                            const reminderTime = new Date(reminder.date.toDate());
+                            const reminderTime = new Date(reminder.date);
                             const isSameDay =
                                 reminderTime.getUTCFullYear() === year &&
                                 reminderTime.getUTCMonth() === monthNumber &&

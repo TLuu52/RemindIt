@@ -32,7 +32,7 @@ function NotificationBox() {
           const reminders = [];
           snapshot.forEach((doc) => {
             const data = doc.data();
-            const dueDate = data.date.toDate();
+            const dueDate = new Date(data.date);
             const daysUntilDue = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 3600 * 24));
             data.daysUntilDue = daysUntilDue;
             data.id = doc.id; // Assign the ID property from the document ID

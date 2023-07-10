@@ -85,7 +85,7 @@ function CustomCalendar({ onChange, value }) {
         const fetchReminders = async () => {
             try {
                 const remindersCollectionRef = collection(firestore, 'reminders');
-                const currentDate = new Date();
+                const currentDate = new Date().toLocaleDateString('en-us');
                 const user = auth.currentUser;
                 if (!user) {
                     // User is not signed in, handle accordingly
@@ -95,7 +95,6 @@ function CustomCalendar({ onChange, value }) {
                 const remindersQuery = query(
                     remindersCollectionRef,
                     where('userId', '==', user.uid),
-                    where('date', '>=', Timestamp.fromDate(currentDate))
                 );
 
                 const querySnapshot = await getDocs(remindersQuery);
@@ -110,8 +109,12 @@ function CustomCalendar({ onChange, value }) {
                     ...getRecurringReminders(filteredReminders, currentDate),
                 ];
 
-                setReminders(updatedReminders);
-                setRecurringReminders(filteredReminders);
+                setReminders(fetchedReminders.filter((r) => {
+                    return new Date(currentDate) <= new Date(r.date)
+                }));
+                setRecurringReminders(filteredReminders.filter((r) => {
+                    return new Date(currentDate) <= new Date(r.date)
+                }));
             } catch (error) {
                 console.error('Error fetching reminders:', error);
             }

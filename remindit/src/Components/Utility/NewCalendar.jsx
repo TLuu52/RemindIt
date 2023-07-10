@@ -778,7 +778,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
         if (hasReminder) {
             const currentDate = new Date();
-            const reminderDate = new Date(highestPriorityReminder.time.toDate());
+            const reminderDate = new Date(highestPriorityReminder.time);
             const timeDiff = reminderDate.getTime() - currentDate.getTime();
             const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
             progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));
@@ -1102,7 +1102,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
                         if (hasReminder) {
                             const currentDate = new Date();
-                            const reminderDate = new Date(highestPriorityReminder.time.toDate());
+                            const reminderDate = new Date(highestPriorityReminder.time);
                             const timeDiff = reminderDate.getTime() - currentDate.getTime();
                             const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
                             progress = Math.max(0, Math.min(100, (7 - daysDiff) * 100 / 7));

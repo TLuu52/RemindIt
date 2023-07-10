@@ -203,7 +203,7 @@ function NotificationBox({ updateReminders }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '900px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column'}}>
       <Typography variant='h3' paddingLeft={'5px'}>Upcoming Reminders</Typography>
       <hr />
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0' }}>
@@ -216,7 +216,7 @@ function NotificationBox({ updateReminders }) {
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <InputLabel>Sort By:</InputLabel>
           <ButtonGroup variant="contained" aria-label="outlined primary button group">
-            <Button onClick={() => sortReminders('title')} disabled={sortBy === 'title'}>Tite</Button>
+            <Button onClick={() => sortReminders('title')} disabled={sortBy === 'title'}>Title</Button>
             <Button onClick={() => sortReminders('length')} disabled={sortBy === 'length'}>Length</Button>
           </ButtonGroup>
         </div>

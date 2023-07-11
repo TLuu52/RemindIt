@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+    color-scheme: dark;
+}
+
+html,
+body,
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat';
+}
+
+body,
+html,
+#root {
+    height: 100vh;
+    width: 100vw;
+}
+
+
+html {
+    background: #263238;
+}
+
+.MuiDialog-root.MuiModal-root .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded {
+    background: #222222;
+}
+
+.MuiDialog-root.MuiModal-root .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded .MuiTypography-root.MuiTypography-overline,
+.MuiPickersDay-root.MuiPickersDay-dayWithMargin,
+.MuiTypography-root.MuiTypography-caption.MuiDayCalendar-weekDayLabel,
+.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-sizeMedium.MuiPickersArrowSwitcher-button,
+.MuiButtonBase-root.MuiIconButton-root.MuiIconButton-sizeSmall.MuiPickersCalendarHeader-switchViewButton,
+span.MuiTypography-root.MuiTypography-h3.MuiPickersToolbarText-root,
+span.MuiTypography-root.MuiTypography-subtitle2.MuiTimePickerToolbar-ampmLabel.MuiPickersToolbarText-root,
+span.MuiClockNumber-root {
+    color: #fff;
+}
+
+.MuiButtonBase-root.MuiPickersDay-root.MuiPickersDay-dayWithMargin.MuiPickersDay-today {
+    border: solid 2px white;
+}
+
+.MuiPaper-root.MuiMenu-paper.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation8.MuiPopover-paper {
+    background: #222222
+}
+
+.MuiAutocomplete-popper.MuiAutocomplete-popperDisablePortal.MuiPopper-root {
+    background-color: #222222;
+}

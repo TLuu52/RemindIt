@@ -75,50 +75,12 @@ const Container = styled('div')(({ theme }) => ({
 
 }))
 
-function CustomCalendar({ onChange, value }) {
+function CustomCalendar({ onChange, value, fetchReminders, recurringReminders }) {
     const [reminders, setReminders] = useState([]);
     const [userId, setUserId] = useState('');
     const { user } = useContext(UserContext)
-    const [recurringReminders, setRecurringReminders] = useState([]);
 
     useEffect(() => {
-        const fetchReminders = async () => {
-            try {
-                const remindersCollectionRef = collection(firestore, 'reminders');
-                const currentDate = new Date().toLocaleDateString('en-us');
-                const user = auth.currentUser;
-                if (!user) {
-                    // User is not signed in, handle accordingly
-                    return;
-                }
-
-                const remindersQuery = query(
-                    remindersCollectionRef,
-                    where('userId', '==', user.uid),
-                );
-
-                const querySnapshot = await getDocs(remindersQuery);
-
-                const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
-                const filteredReminders = fetchedReminders.filter(
-                    (reminder) => reminder.recurringOption && reminder.recurringOption !== ''
-                );
-
-                const updatedReminders = [
-                    ...fetchedReminders,
-                    ...getRecurringReminders(filteredReminders, currentDate),
-                ];
-
-                setReminders(fetchedReminders.filter((r) => {
-                    return new Date(currentDate) <= new Date(r.date)
-                }));
-                setRecurringReminders(filteredReminders.filter((r) => {
-                    return new Date(currentDate) <= new Date(r.date)
-                }));
-            } catch (error) {
-                console.error('Error fetching reminders:', error);
-            }
-        };
         if (user.currentUser) {
             setTimeout(() => {
                 fetchReminders();
@@ -126,33 +88,6 @@ function CustomCalendar({ onChange, value }) {
         }
     }, [user.currentUser, auth]);
 
-    const getRecurringReminders = (recurringReminders, currentDate) => {
-        const updatedReminders = [];
-
-        recurringReminders.forEach((reminder) => {
-            let recurringDuration = 0;
-            if (reminder.recurringOption === '1 week') {
-                recurringDuration = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
-            } else if (reminder.recurringOption === '1 month') {
-                recurringDuration = 30 * 24 * 60 * 60 * 1000; // 1 month in milliseconds
-            } else if (reminder.recurringOption === '1 year') {
-                recurringDuration = 365 * 24 * 60 * 60 * 1000; // 1 year in milliseconds
-            }
-
-            let nextRecurringDate = new Date(new Date(reminder.date).getTime() + recurringDuration);
-
-            while (nextRecurringDate <= currentDate) {
-                updatedReminders.push({
-                    ...reminder,
-                    date: Timestamp.fromDate(nextRecurringDate),
-                });
-
-                nextRecurringDate = new Date(nextRecurringDate.getTime() + recurringDuration);
-            }
-        });
-
-        return updatedReminders;
-    };
 
     const getRemindersForDate = (date) => {
         const formattedDate = date.toDateString();

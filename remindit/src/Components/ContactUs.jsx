@@ -64,7 +64,7 @@ const ContactForm = () => {
 
         } catch (error) {
             console.error('Error adding document: ', error);
-            setMessage({ text: 'Error adding document', severity: 'eror' })
+            setMessage({ text: 'Error submitting issue!', severity: 'eror' })
             setOpen(true)
         }
     };

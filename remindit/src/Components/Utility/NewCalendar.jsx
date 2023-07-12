@@ -533,16 +533,17 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 fetchReminders()
                 setAttachmentName('')
                 setAttachmentURL('')
-                setMessage({ text: 'Category Created!', severity: 'success' })
+                setMessage({ text: 'Reminder updated!', severity: 'success' })
                 setOpen(true)
             }).catch(() => {
-                setMessage({ text: 'Error creating category!', severity: 'Error' })
+                setMessage({ text: 'Error updating reminder!', severity: 'Error' })
                 setOpen(true)
             });;
 
             if (isComplete) {
                 // Delete the reminder and mark it as completed
                 await deleteDoc(reminderRef);
+                fetchReminders()
                 setIsComplete(false);
             } else {
                 // Update the reminder with the new data
@@ -555,10 +556,10 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     attachments: updatedAttachments,
                     category: category,
                 }).then(() => {
-                    setMessage({ text: 'Reminder changed!', severity: 'success' })
+                    setMessage({ text: 'Reminder updated!', severity: 'success' })
                     setOpen(true)
                 }).catch(() => {
-                    setMessage({ text: 'Error changing reminder!', severity: 'Error' })
+                    setMessage({ text: 'Error updated reminder!', severity: 'Error' })
                     setOpen(true)
                 });;
                 // Perform any additional logic or UI updates for an updated reminder

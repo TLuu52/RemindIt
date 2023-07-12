@@ -1,6 +1,6 @@
 import { Box, FormLabel, Input, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography, styled, FormControlLabel, Checkbox, Autocomplete, TextField, Popper } from "@mui/material"
 import ProfileIcon from "./ProfileIcon"
-import { DatePicker, TimePicker } from "@mui/x-date-pickers"
+import { DatePicker, DateTimePicker, DesktopDatePicker, MobileDatePicker, MobileTimePicker, TimePicker } from "@mui/x-date-pickers"
 import CustomButton from "./CustomButton"
 import { BsCircleFill } from "react-icons/bs"
 import { useTheme } from "@emotion/react"
@@ -24,7 +24,7 @@ const CustomModal = styled(Modal)(({ theme }) => ({
         padding: '30px',
         '& .MuiInput-root': {
             color: theme.palette.primary.contrastText,
-            width: '100%',
+            // width: '100%',
             padding: '0px 10px',
             fontSize: '30px'
 
@@ -41,7 +41,6 @@ const CustomModal = styled(Modal)(({ theme }) => ({
         },
     }
 }))
-
 const StyledTextarea = styled(TextareaAutosize)(({ theme }) => ({
     width: '100%',
     color: theme.palette.primary.contrastText,
@@ -61,6 +60,27 @@ const ModalLeft = styled('div')(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: '30px'
+}))
+const Title = styled(Typography)({
+    textTransform: 'uppercase'
+})
+const DurationSelect = styled(Select)(({ theme }) => ({
+    color: '#fff',
+    width: '70px !important',
+    padding: '0px !important',
+    height: '30px',
+    border: 'none',
+    outline: 'none',
+    fontWeight: '400',
+    '& .MuiOutlinedInput-notchedOutline': {
+        border: 'none'
+    },
+    '& .MuiSelect-select.MuiSelect-outlined.MuiInputBase-input.MuiOutlinedInput-input': {
+        padding: '0px !important',
+        marginLeft: '10px',
+        marginTop: '4px'
+    },
+    background: theme.palette.primary.light
 }))
 const ModalRight = styled('div')(({ theme }) => ({
     flexGrow: '1',
@@ -85,7 +105,6 @@ const Flex = styled('div')(({ theme }) => ({
         flexDirection: 'column'
     }
 }))
-
 const StyledSelect = styled(Select)(({ theme }) => ({
     borderRadius: '6px',
     outline: 'none',
@@ -139,15 +158,17 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
     const [activity, setActivity] = useState([]);
     const [time, setTime] = useState('');
     const [date, setDate] = useState('');
-    const [priority, setPriority] = useState('');
-    const [recurringOption, setRecurringOption] = useState('');
+    const [priority, setPriority] = useState('low');
+    const [recurringOption, setRecurringOption] = useState('No');
     const [duration, setDuration] = useState('');
     const [category, setCategory] = useState('');
-    const { user } = useContext(UserContext)
+    const { user, setOpen, setMessage } = useContext(UserContext)
     const [dependency, setDependency] = useState(false);
     const [dependencyValue, setDependencyValue] = useState('None');
     const [dependantReminder, setDependantReminder] = useState('')
     const [inputValue, setInputValue] = useState('');
+    const [durationHours, setDurationHours] = useState('00')
+    const [durationMin, setDurationMin] = useState('00')
 
 
 
@@ -157,7 +178,6 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
         setDate(newDate);
         setTime(newDate);
     };
-
     const submit = async (e) => {
         e.preventDefault();
 
@@ -167,7 +187,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
 
             const dateValue = new Date(date).toLocaleDateString('en-us')
             const timeValue = new Date(time)
-
+            const totalDuration = `${durationHours}:${durationMin}`
 
             // Get the current user ID
             const user = auth.currentUser;
@@ -192,7 +212,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     priority: priority,
                     userId: userId, // Include the user ID in the reminder document
                     recurringOption: recurringOption, // Include the selected recurring option
-                    duration: duration, // Include the duration of the reminder,
+                    duration: totalDuration, // Include the duration of the reminder,
                     category: NewCategory,
                     docId: newReminderDocRef.id,
                     dependency: dependantReminder ? dependantReminder.docId : '', // Include the dependency option
@@ -244,7 +264,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                         priority: priority,
                         userId: userId,
                         recurringOption: recurringOption,
-                        duration: duration,
+                        duration: totalDuration,
                         category: NewCategory,
                         docId: newReminderCopyDocRef.id,
                         dependency: dependantReminder ? dependantReminder.docId : '', // Include the dependency option
@@ -275,12 +295,15 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
             // Close the modal
             handleClose();
 
+            setMessage({ text: 'Reminder Created!', severity: 'success' })
+            setOpen(true)
             console.log('Reminder saved successfully. Document ID:', newReminderDocRef.id);
         } catch (error) {
+            setMessage({ text: 'Error creating reminder!', severity: 'error' })
+            setOpen(true)
             console.error('Error adding document: ', error);
         }
     };
-
     useEffect(() => {
         if (user.currentUser && categories === null) {
             setTimeout(() => {
@@ -288,7 +311,6 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
             }, 400);
         }
     }, [user.currentUser])
-
     const changeCategory = (e) => {
         setCategory(e.target.value);
     }
@@ -301,7 +323,6 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
         })
         return uniqueNames
     }
-
     const getNewVal = (newVal) => {
         if (newVal === null) {
             return
@@ -348,45 +369,47 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     <Flex>
                         <div>
                             <FormLabel>Date</FormLabel>
-                            <DatePicker value={date} onChange={handleDateChange} sx={{
-                                '& .MuiInputBase-root': {
-                                    padding: '0px 20px'
-                                }
+                            <MobileDatePicker value={date} onChange={handleDateChange} sx={{
+                                '& .MuiInputBase-input': { marginLeft: '20px' }
                             }} />
                         </div>
                         <div>
                             <FormLabel>Time</FormLabel>
-                            <TimePicker value={time} onChange={setTime} sx={{
-                                '& .MuiInputBase-root': {
-                                    padding: '0px 20px'
-                                }
+                            <MobileTimePicker value={time} onChange={setTime} sx={{
+                                '& .MuiInputBase-input': { marginLeft: '20px' }
                             }} />
                         </div>
                         <div>
-                            <FormLabel>Duration</FormLabel>
-                            <OutlinedInput
-                                placeholder={'Enter Duration (e.g., 00:00)'}
-                                value={duration}
-                                onChange={(e) => {
-                                    const input = e.target.value;
-                                    // Remove non-time characters except ':'
-                                    const formattedInput = input.replace(/[^0-9:]/g, '');
-                                    // Limit the input to 4 to 5 numbers
-                                    const limitedInput = formattedInput.slice(0, 5);
-                                    // Split the limited input into hours and minutes
-                                    const [hours, minutes] = limitedInput.split(':');
-                                    // Format the hours and minutes as '00' if they exist
-                                    const formattedHours = hours ? hours.padStart(2, '0') : '';
-                                    const formattedMinutes = minutes ? minutes.padStart(2, '0') : '';
-                                    // Combine the hours and minutes with a colon separator
-                                    const formattedDuration = `${formattedHours}:${formattedMinutes}`;
-                                    // Update the state with the formatted duration
-                                    setDuration(formattedDuration);
-                                }}
-                                inputProps={{
-                                    style: { textAlign: 'center' }
-                                }}
-                            />
+
+
+                            <FormLabel variant='h6' sx={{ fontSize: '16px' }}>Duration</FormLabel>
+                            <div style={{ width: 'auto', display: 'flex', flexDirection: 'row', gap: '20px', alignItems: 'center', paddingBottom: '10px' }}>
+                                <DurationSelect value={durationHours} onChange={(e) => setDurationHours(e.target.value)}>
+                                    <MenuItem value={'00'}>00</MenuItem>
+                                    <MenuItem value={'01'}>01</MenuItem>
+                                    <MenuItem value={'02'}>02</MenuItem>
+                                    <MenuItem value={'03'}>03</MenuItem>
+                                    <MenuItem value={'04'}>04</MenuItem>
+                                    <MenuItem value={'05'}>05</MenuItem>
+                                    <MenuItem value={'06'}>06</MenuItem>
+                                    <MenuItem value={'07'}>07</MenuItem>
+                                    <MenuItem value={'08'}>08</MenuItem>
+                                    <MenuItem value={'09'}>09</MenuItem>
+                                    <MenuItem value={'10'}>10</MenuItem>
+                                    <MenuItem value={'11'}>11</MenuItem>
+                                    <MenuItem value={'12'}>12</MenuItem>
+                                </DurationSelect>
+                                <Typography variant='body1'>Hour(s)</Typography>
+                            </div>
+                            <div style={{ width: 'auto', display: 'flex', flexDirection: 'row', gap: '20px', alignItems: 'center' }}>
+                                <DurationSelect value={durationMin} onChange={(e) => setDurationMin(e.target.value)}>
+                                    <MenuItem value={'00'}>00</MenuItem>
+                                    <MenuItem value={'15'}>15</MenuItem>
+                                    <MenuItem value={'30'}>30</MenuItem>
+                                    <MenuItem value={'45'}>45</MenuItem>
+                                </DurationSelect>
+                                <Typography variant='body1'>Minutes</Typography>
+                            </div>
                         </div>
                         <div>
                             <FormLabel>Priority</FormLabel>

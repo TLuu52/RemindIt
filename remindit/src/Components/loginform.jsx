@@ -9,6 +9,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from "../firebase";
 import { UserContext } from '../App';
+import { Alert, Snackbar } from '@mui/material';
 
 const Title = styled('h1')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
@@ -66,7 +67,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState("");
     const { user, setUser } = useContext(UserContext)
     const navigate = useNavigate();
-    const [error, setError] = useState(null);
+    const { setOpen, setMessage } = useContext(UserContext)
 
     const loginForm = async (e) => {
         e.preventDefault();
@@ -75,9 +76,12 @@ const LoginForm = () => {
             if (auth.currentUser) {
                 setUser(auth);
                 navigate("/dashboard");
+                setMessage({ severity: 'success', text: "Login Successful" }); // Set error message
+                setOpen(true)
             }
         } catch (err) {
-            setError("Invalid email or password"); // Set error message
+            setMessage({ severity: 'error', text: "Invalid email or password" }); // Set error message
+            setOpen(true)
             console.log(err);
         }
     };
@@ -103,7 +107,6 @@ const LoginForm = () => {
                         <CustomInput placeholder={'Password'} size={'m'} style={{ margin: 'auto' }} type='password' value={password} onChange={(e) => setPassword(e.target.value)} />
                     </Group>
                     <CustomButton text={'Log in'} color={1} type={'submit'} />
-                    {error && <p>{error}</p>} { }
                     <CustomLine text={'Or Sign in With'} />
                     <CustomGoogleButton />
                     <BottomText>Don't have an account yet? <CustomLink to='/signup'>Sign Up.</CustomLink></BottomText>

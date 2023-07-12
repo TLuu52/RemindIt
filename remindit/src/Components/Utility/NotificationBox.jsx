@@ -45,7 +45,7 @@ function NotificationBox({ updateReminders }) {
             data.id = doc.id; // Assign the ID property from the document ID
             reminders.push(data);
           });
-          setInbox(reminders);
+          setInbox(reminders.sort((a, b) => new Timestamp(a.time.seconds, a.time.nanoseconds).toDate() - new Timestamp(b.time.seconds, b.time.nanoseconds).toDate()));
         });
 
         return () => unsubscribe();
@@ -69,9 +69,7 @@ function NotificationBox({ updateReminders }) {
 
   const filteredReminders = () => {
     const currentDate = new Date();
-    let filtered = inbox.filter(
-      (reminder) => reminder.daysUntilDue >= 0 && new Date(reminder.date) >= currentDate
-    );
+    let filtered = inbox
 
     switch (filter) {
       case 'week':
@@ -116,9 +114,9 @@ function NotificationBox({ updateReminders }) {
 
     return (
       <Box>
-        {Array.from({ length: pageNumbers }, (_, index) => index + 1).map((pageNumber) => (
+        {Array.from({ length: pageNumbers }, (_, index) => index + 1).map((pageNumber, idx) => (
           <Button
-            key={pageNumber}
+            key={idx}
             onClick={() => handlePageChange(pageNumber)}
             disabled={currentPage === pageNumber}
           >
@@ -176,12 +174,13 @@ function NotificationBox({ updateReminders }) {
 
     return (
       <div onClick={handleReminderClick}
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr) auto', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center', gridColumnGap: '10px', }}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr) auto', background: theme.palette.primary.dark, padding: '20px 10px', borderRadius: '8px', marginBottom: '10px', alignItems: 'center', gridColumnGap: '10px', }}
       >
 
         <Typography variant="body1" sx={{ fontSize: '16px', fontWeight: '600' }}>{reminder.title}</Typography>
         <Typography variant="body1" sx={{ background: reminder.category.color, maxWidth: '180px', padding: '5px' }}>{reminder.category.name}</Typography>
         <Typography variant="body1">{time}</Typography>
+        <Typography variant="body1">{reminder.date}</Typography>
         <Typography variant="body1">{reminder.priority.toUpperCase()}</Typography> {/* Display the priority */}
         <Typography variant="body1">{hours} hour(s) {minutes} minutes</Typography>
         <Button variant="contained" color="primary" onClick={handleMarkComplete}>
@@ -203,7 +202,7 @@ function NotificationBox({ updateReminders }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column'}}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography variant='h3' paddingLeft={'5px'}>Upcoming Reminders</Typography>
       <hr />
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0' }}>
@@ -222,6 +221,18 @@ function NotificationBox({ updateReminders }) {
         </div>
       </Box>
       <Box sx={{ overflow: 'auto', flexGrow: '1', }}>
+        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(7, 1fr) auto auto', padding: '10px', columnGap: '10px' }}>
+          <Typography variant='h6'>Title</Typography>
+          <Typography variant='h6'>Category</Typography>
+          <Typography variant='h6'>Time</Typography>
+          <Typography variant='h6'>Date</Typography>
+          <Typography variant='h6'>Priority</Typography>
+          <Typography variant='h6'>Duration</Typography>
+          <div></div>
+          <p style={{ margin: '0px 10px', display: 'inline-block', cursor: 'pointer', display: 'grid', placeItems: 'center', color: 'transparent' }}>
+            <ArrowRightIcon />
+          </p>
+        </div>
         {remindersToShow.map(renderReminder)}
         {renderPaginationButtons()}
       </Box>

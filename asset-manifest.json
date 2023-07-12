@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/RemindIt/static/css/main.18254fa3.css",
+    "main.js": "/RemindIt/static/js/main.3f3dc931.js",
+    "static/media/reminder.png": "/RemindIt/static/media/reminder.81a6198612df8dd0c0d7.png",
+    "static/media/logo.png": "/RemindIt/static/media/logo.3f2b58ff9cc59f1f2022.png",
+    "index.html": "/RemindIt/index.html",
+    "main.18254fa3.css.map": "/RemindIt/static/css/main.18254fa3.css.map",
+    "main.3f3dc931.js.map": "/RemindIt/static/js/main.3f3dc931.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.18254fa3.css",
+    "static/js/main.3f3dc931.js"
+  ]
+}

@@ -65,7 +65,7 @@ const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    const { user, setUser } = useContext(UserContext)
+    const { user, setUser, setOpen, setMessage } = useContext(UserContext)
 
     const signUp = async (e) => {
         e.preventDefault();
@@ -81,9 +81,14 @@ const SignUp = () => {
                 bio: '', // Add the user's bio here
             });
             await auth.signOut(); // Sign out the user
+            setMessage({ severity: 'success', text: 'Sign up Sucessful!' })
+            setOpen(true)
+
             navigate('/'); // Redirect to login page
         } catch (err) {
             console.log(err);
+            setMessage({ severity: 'error', text: 'Sign up failed' })
+            setOpen(true)
         }
     };
 

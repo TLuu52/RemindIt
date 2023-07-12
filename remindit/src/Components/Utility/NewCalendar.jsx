@@ -1,5 +1,5 @@
 import { ButtonGroup, Button, Typography, styled, useTheme, LinearProgress, TextField, Select, MenuItem, Box, Modal, TextareaAutosize, OutlinedInput, Input, Popover, Autocomplete, Popper } from '@mui/material';
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { collection, getDocs, doc, deleteDoc, updateDoc, Timestamp, getDoc, query, where } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { auth, firestore } from "../../firebase";
@@ -8,6 +8,7 @@ import { BsClipboard2, BsLink, BsPencilFill, BsUpload, BsTrashFill, BsCircleFill
 import ProfileIcon from './ProfileIcon';
 import AllReminders from './AllReminders';
 import { ArrowRightIcon } from '@mui/x-date-pickers';
+import { UserContext } from '../../App';
 
 
 
@@ -341,6 +342,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
     const [inputValue, setInputValue] = useState('');
     const [dependencyValue, setDependencyValue] = useState('None')
     const [comment, setComment] = useState('')
+    const { setOpen, setMessage } = useContext(UserContext)
 
     const closeEditAttachment = () => {
         setAnchorEl(null)
@@ -400,14 +402,6 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         fetchReminders();
 
         resetAct()
-        // collection(firestore, "reminders").get().then(function (querySnapshot) {
-        //     querySnapshot.forEach(function (doc) {
-        //         // doc.ref.update({
-        //         //     capital: true
-        //         // });
-        //         console.log(doc.ref)
-        //     });
-        // });
     }, [date, auth]);
 
     const resetAct = async () => {
@@ -539,7 +533,12 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 fetchReminders()
                 setAttachmentName('')
                 setAttachmentURL('')
-            })
+                setMessage({ text: 'Category Created!', severity: 'success' })
+                setOpen(true)
+            }).catch(() => {
+                setMessage({ text: 'Error creating category!', severity: 'Error' })
+                setOpen(true)
+            });;
 
             if (isComplete) {
                 // Delete the reminder and mark it as completed
@@ -555,11 +554,18 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     title: title,
                     attachments: updatedAttachments,
                     category: category,
-                });
+                }).then(() => {
+                    setMessage({ text: 'Reminder changed!', severity: 'success' })
+                    setOpen(true)
+                }).catch(() => {
+                    setMessage({ text: 'Error changing reminder!', severity: 'Error' })
+                    setOpen(true)
+                });;
                 // Perform any additional logic or UI updates for an updated reminder
             }
 
             closePopup();
+
 
         } catch (error) {
             console.error('Error adding document: ', error);
@@ -763,10 +769,10 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         const lastDay = new Date(date.getYear(), date.getMonth() + 1, 0)
         if (date.getDate() - diff < 1) {
             //need to get prev month ending
-            return (<WeeklyDay><BeforeMonth sx={{ fontSize: '26px' }}>{prevMonthlast - (diff - 1)}</BeforeMonth></WeeklyDay>)
+            return (<WeeklyDay key={i}><BeforeMonth sx={{ fontSize: '26px' }}>{prevMonthlast - (diff - 1)}</BeforeMonth></WeeklyDay>)
         }
         if (date.getDate() - diff > lastDay.getDate()) {
-            return (<WeeklyDay><AfterMonth sx={{ fontSize: '26px' }}>{(date.getDate() - diff) - lastDay.getDate()}</AfterMonth></WeeklyDay>)
+            return (<WeeklyDay key={i}><AfterMonth sx={{ fontSize: '26px' }}>{(date.getDate() - diff) - lastDay.getDate()}</AfterMonth></WeeklyDay>)
         }
         const newDate = new Date(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate() - diff}`)
         const remindersForDay = reminders.filter((reminder) => {
@@ -795,7 +801,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
         }
         if (view === 'daily' && remindersForDay) {
             return (
-                <DailyDay sx={{ background: date.getDate() - diff === day ? theme.palette.secondary.contrastText : 'transparent', }}>
+                <DailyDay key={i} sx={{ background: date.getDate() - diff === day ? theme.palette.secondary.contrastText : 'transparent', }}>
                     <DuringMonth sx={{ fontSize: '26px' }}>{date.getDate() - diff}</DuringMonth>
 
                     {
@@ -843,7 +849,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
         return (
 
-            <WeeklyDay sx={{ background: date.getDate() - diff === day ? theme.palette.secondary.contrastText : 'transparent', }}>
+            <WeeklyDay key={i} sx={{ background: date.getDate() - diff === day ? theme.palette.secondary.contrastText : 'transparent', }}>
                 <DuringMonth sx={{ fontSize: '26px' }}>{date.getDate() - diff}</DuringMonth>
 
                 {

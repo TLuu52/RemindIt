@@ -8,7 +8,7 @@ import NewCalendar from './Utility/NewCalendar';
 import { FcAbout, FcFeedback, } from 'react-icons/fc';
 import { BsPlus } from 'react-icons/bs';
 import { auth, firestore, } from "../firebase";
-import { collection, doc, getDocs, query, where, Timestamp, getDoc } from "firebase/firestore";
+import { collection, doc, getDocs, query, where, Timestamp, getDoc, deleteDoc } from "firebase/firestore";
 import CreateEvent from './Utility/CreateEvent';
 import { Link } from 'react-router-dom';
 import { UserContext } from '../App';
@@ -134,17 +134,26 @@ function Dashboard() {
 
                 // Map the query snapshot to an array of reminder objects
                 const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
-
-
-                setReminders(fetchedReminders.filter((r) => {
+                const dueReminders = fetchedReminders.filter(r => new Date(currentDate) > new Date(r.date))
+                const activeReminders = fetchedReminders.filter((r) => {
                     return new Date(currentDate) <= new Date(r.date)
-                }));
+                })
+
+                setReminders(activeReminders.sort((a, b) => a.time.seconds - b.time.seconds));
+                deleteReminders(dueReminders)
 
             } catch (error) {
                 console.error('Error fetching reminders:', error);
             }
         }, 400)
     };
+
+    const deleteReminders = (dueReminders) => {
+        dueReminders.forEach(async (r) => {
+            const reminderRef = doc(firestore, 'reminders', r.docId);
+            await deleteDoc(reminderRef).then(() => { console.log('DEL') })
+        })
+    }
     const getCategories = async (setCategories) => {
         const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
         const docSnap = await getDoc(categoryDocRef)

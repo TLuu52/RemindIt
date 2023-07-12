@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Box, Button, TextField, Typography, styled, Snackbar } from '@mui/material';
 import Header from './Utility/Header';
-import { Link } from 'react-router-dom';
-import { collection, addDoc,} from "firebase/firestore"
+import { Link, useNavigate } from 'react-router-dom';
+import { collection, addDoc, } from "firebase/firestore"
 import { firestore } from "../firebase"
+import { UserContext } from '../App';
 
 const Page = styled('div')({
     padding: '20px',
@@ -26,6 +27,9 @@ const ContactForm = () => {
     const [issueTitle, setIssueTitle] = useState('');
     const [description, setDescription] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const { setOpen, setMessage } = useContext(UserContext)
+    const navigate = useNavigate();
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -53,8 +57,15 @@ const ContactForm = () => {
             setIsSubmitted(true);
 
             console.log('Issue saved successfully. Document ID:', newIssueDocRef.id);
+            setMessage({ text: 'Issue saved successfully!', severity: 'success' })
+            setOpen(true)
+            navigate("/dashboard");
+
+
         } catch (error) {
             console.error('Error adding document: ', error);
+            setMessage({ text: 'Error adding document', severity: 'eror' })
+            setOpen(true)
         }
     };
 

@@ -58,7 +58,7 @@ function CreateCategory({ open, handleClose, categories, setCategories }) {
 
     const [color, setColor] = useState(theme.palette.primary.main);
     const [categoryName, setCategoryName] = useState('');
-    const { user } = useContext(UserContext)
+    const { user, setOpen, setMessage } = useContext(UserContext)
 
     const getCategories = async () => {
         const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
@@ -90,10 +90,22 @@ function CreateCategory({ open, handleClose, categories, setCategories }) {
         if (docSnap.exists()) {
             await updateDoc(categoryDocRef, {
                 categories: updatedCategories
+            }).then(() => {
+                setMessage({ text: 'Category Created!', severity: 'success' })
+                setOpen(true)
+            }).catch(() => {
+                setMessage({ text: 'Error creating category!', severity: 'Error' })
+                setOpen(true)
             });
         } else {
             await setDoc(categoryDocRef, {
                 categories: updatedCategories
+            }).then(() => {
+                setMessage({ text: 'Category Created!', severity: 'success' })
+                setOpen(true)
+            }).catch(() => {
+                setMessage({ text: 'Error creating category!', severity: 'Error' })
+                setOpen(true)
             });
         }
 
@@ -108,6 +120,12 @@ function CreateCategory({ open, handleClose, categories, setCategories }) {
         const categoryDocRef = doc(firestore, 'categories', user.currentUser.uid);
         await updateDoc(categoryDocRef, {
             categories: updatedCategories
+        }).then(() => {
+            setMessage({ text: 'Category Deleted!', severity: 'success' })
+            setOpen(true)
+        }).catch(() => {
+            setMessage({ text: 'Error deleting category!', severity: 'Error' })
+            setOpen(true)
         });
 
         getCategories();

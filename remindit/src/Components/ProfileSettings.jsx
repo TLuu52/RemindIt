@@ -76,7 +76,7 @@ function ProfileSettings() {
     const [email, setEmail] = useState('');
     const [picture, setPicture] = useState('default');
     const [bio, setBio] = useState('');
-    const { user } = useContext(UserContext)
+    const { user, setOpen, setMessage } = useContext(UserContext)
     const navigate = useNavigate();
 
 
@@ -104,8 +104,7 @@ function ProfileSettings() {
         }
     }, [user.currentUser, auth]);
 
-    const submit = async (e) => {
-        e.preventDefault();
+    const submit = async () => {
         try {
             // Update the user's display name and email
             await updateProfile(auth.currentUser, {
@@ -135,10 +134,11 @@ function ProfileSettings() {
             });
 
             navigate("/dashboard");
-
-            console.log("Profile settings saved successfully.");
+            setMessage({ text: 'Profile settings saved successfully!', severity: 'success' })
+            setOpen(true)
         } catch (err) {
-            console.log(err);
+            setMessage({ text: 'Profile settings not saved!', severity: 'error' })
+            setOpen(true)
         }
     };
 
@@ -165,53 +165,51 @@ function ProfileSettings() {
 
     return (
         <Page>
-            <form onSubmit={(e) => submit(e)}>
-                <Header />
-                <Title>Profile Settings</Title>
-                <CustomHr />
-                <Row>
-                    <Typography variant="h5" >First Name</Typography>
-                    <CustomInput placeholder="First Name" size={'s'} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                </Row>
-                <Row>
-                    <Typography variant="h5" >Last Name</Typography>
-                    <CustomInput placeholder="Last Name" size={'s'} value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                </Row>
-                <CustomHr />
-                <Row>
-                    <Typography variant="h5" >Email</Typography>
-                    {
-                        user.currentUser.providerData[0].providerId === 'password'
-                            ?
-                            <CustomInput placeholder="Email" size={'s'} value={email} onChange={(e) => setEmail(e.target.value)} />
-                            :
-                            < Typography variant="h6">{email}</Typography>
-                    }
-                </Row>
+            <Header />
+            <Title>Profile Settings</Title>
+            <CustomHr />
+            <Row>
+                <Typography variant="h5" >First Name</Typography>
+                <CustomInput placeholder="First Name" size={'s'} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+            </Row>
+            <Row>
+                <Typography variant="h5" >Last Name</Typography>
+                <CustomInput placeholder="Last Name" size={'s'} value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            </Row>
+            <CustomHr />
+            <Row>
+                <Typography variant="h5" >Email</Typography>
+                {
+                    user.currentUser?.providerData[0].providerId === 'password'
+                        ?
+                        <CustomInput placeholder="Email" size={'s'} value={email} onChange={(e) => setEmail(e.target.value)} />
+                        :
+                        < Typography variant="h6">{email}</Typography>
+                }
+            </Row>
 
-                <CustomHr />
-                <Row>
-                    <Typography variant="h5" >Profile Picture</Typography>
-                    <Section>
-                        <ProfileIcon size={'l'} img={picture} />
-                        <CustomLabel>
-                            <input type="file" accept=".png, .jpg, .jpeg, image/png, image/jpeg" onChange={newPicture} />
-                            <BsUpload size={"20px"} />
-                            Upload new Image
-                        </CustomLabel>
-                    </Section>
-                </Row>
-                <CustomHr />
-                <Row>
-                    <Typography variant="h5" sx={{ alignSelf: 'start' }} >Bio </Typography>
-                    <CustomInput placeholder="Bio" size={'s'} value={bio} onChange={(e) => setBio(e.target.value)} />
-                </Row>
-                <CustomHr />
-                <End>
-                    <CustomButton text={'Cancel'} color={0} size={'s'} link={'/dashboard'} />
-                    <CustomButton type={'submit'} text={'Save'} color={1} size={'s'} />
-                </End>
-            </form>
+            <CustomHr />
+            <Row>
+                <Typography variant="h5" >Profile Picture</Typography>
+                <Section>
+                    <ProfileIcon size={'l'} img={picture} />
+                    <CustomLabel>
+                        <input type="file" accept=".png, .jpg, .jpeg, image/png, image/jpeg" onChange={newPicture} />
+                        <BsUpload size={"20px"} />
+                        Upload new Image
+                    </CustomLabel>
+                </Section>
+            </Row>
+            <CustomHr />
+            <Row>
+                <Typography variant="h5" sx={{ alignSelf: 'start' }} >Bio </Typography>
+                <CustomInput placeholder="Bio" size={'s'} value={bio} onChange={(e) => setBio(e.target.value)} />
+            </Row>
+            <CustomHr />
+            <End>
+                <CustomButton text={'Cancel'} color={0} size={'s'} link={'/dashboard'} />
+                <CustomButton type={'submit'} text={'Save'} color={1} size={'s'} onClick={() => submit()} />
+            </End>
         </Page >
 
     )

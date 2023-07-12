@@ -10,6 +10,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { auth } from './firebase';
 import React, { useState } from 'react';
 import Dashboard from './Components/Dashboard';
+import { Alert, Snackbar } from '@mui/material';
 
 
 
@@ -84,11 +85,23 @@ export const UserContext = React.createContext()
 //App Component
 function App() {
   const [user, setUser] = useState(auth)
-  const value = { user, setUser };
+  const [message, setMessage] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  const closeSnackbar = () => {
+    setOpen(false)
+    setTimeout(() => {
+      setMessage(null)
+    }, 1000)
+  }
+  const value = { user, setUser, message, setMessage, open, setOpen, closeSnackbar };
   return (
     <UserContext.Provider value={value}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <ThemeProvider theme={theme}>
+          <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'center' }} open={open} autoHideDuration={3000} onClose={() => closeSnackbar()}>
+            <Alert severity={message?.severity}>{message?.text}</Alert>
+          </Snackbar>
           {/* REMINDER TO REDIRECT IF USER IS NOT LOGGED IN */}
           <RouterProvider router={router} />
         </ThemeProvider>

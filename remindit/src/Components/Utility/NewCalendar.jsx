@@ -533,16 +533,17 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                 fetchReminders()
                 setAttachmentName('')
                 setAttachmentURL('')
-                setMessage({ text: 'Category Created!', severity: 'success' })
+                setMessage({ text: 'Reminder updated!', severity: 'success' })
                 setOpen(true)
             }).catch(() => {
-                setMessage({ text: 'Error creating category!', severity: 'Error' })
+                setMessage({ text: 'Error updating reminder!', severity: 'Error' })
                 setOpen(true)
             });;
 
             if (isComplete) {
                 // Delete the reminder and mark it as completed
                 await deleteDoc(reminderRef);
+                fetchReminders()
                 setIsComplete(false);
             } else {
                 // Update the reminder with the new data
@@ -555,10 +556,10 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                     attachments: updatedAttachments,
                     category: category,
                 }).then(() => {
-                    setMessage({ text: 'Reminder changed!', severity: 'success' })
+                    setMessage({ text: 'Reminder updated!', severity: 'success' })
                     setOpen(true)
                 }).catch(() => {
-                    setMessage({ text: 'Error changing reminder!', severity: 'Error' })
+                    setMessage({ text: 'Error updated reminder!', severity: 'Error' })
                     setOpen(true)
                 });;
                 // Perform any additional logic or UI updates for an updated reminder
@@ -1377,7 +1378,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
                                 <Title>Activity:</Title>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
-                                    <ProfileIcon img='default' />
+                                    <ProfileIcon img='default' setOpen={() => { }} />
                                     <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={comment} onChange={(e) => setComment(e.target.value)} endAdornment={<BsSend size={24} onClick={handleSaveDiscussion} />} />
                                 </div>
 
@@ -1392,7 +1393,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                             }
                                             return (
                                                 <Comment key={index}>
-                                                    <ProfileIcon img={thread.photoURL} sx={{ gridRowStart: 1, gridRowEnd: 3 }} />
+                                                    <ProfileIcon img={thread.photoURL} sx={{ gridRowStart: 1, gridRowEnd: 3 }} setOpen={() => { }} />
                                                     <Typography variant="h6" >{thread.email}</Typography>
                                                     <Typography variant="body1" sx={{ fontSize: '12px', opacity: '.5', alignSelf: 'center', textAlign: 'right' }}>{datetime}</Typography>
                                                     {(editModalOpen && editThread === thread) ?

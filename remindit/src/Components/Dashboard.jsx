@@ -102,10 +102,40 @@ function Dashboard() {
     const [inbox, setInbox] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([])
     const [categories, setCategories] = useState(null)
+    const [recurringReminders, setRecurringReminders] = useState([]);
+
 
 
     const [open, setOpen] = useState(false);
     const handleClose = () => setOpen(false);
+    const getRecurringReminders = (recurringReminders, currentDate) => {
+        const updatedReminders = [];
+
+        recurringReminders.forEach((reminder) => {
+            let recurringDuration = 0;
+            if (reminder.recurringOption === '1 week') {
+                recurringDuration = 7 * 24 * 60 * 60 * 1000; // 1 week in milliseconds
+            } else if (reminder.recurringOption === '1 month') {
+                recurringDuration = 30 * 24 * 60 * 60 * 1000; // 1 month in milliseconds
+            } else if (reminder.recurringOption === '1 year') {
+                recurringDuration = 365 * 24 * 60 * 60 * 1000; // 1 year in milliseconds
+            }
+
+            let nextRecurringDate = new Date(new Date(reminder.date).getTime() + recurringDuration);
+
+            while (nextRecurringDate <= currentDate) {
+                updatedReminders.push({
+                    ...reminder,
+                    date: Timestamp.fromDate(nextRecurringDate),
+                });
+
+                nextRecurringDate = new Date(nextRecurringDate.getTime() + recurringDuration);
+            }
+        });
+
+        return updatedReminders;
+    };
+
     const fetchReminders = async () => {
         setTimeout(async () => {
 
@@ -134,12 +164,23 @@ function Dashboard() {
 
                 // Map the query snapshot to an array of reminder objects
                 const fetchedReminders = querySnapshot.docs.map((doc) => doc.data());
+                const filteredReminders = fetchedReminders.filter(
+                    (reminder) => reminder.recurringOption && reminder.recurringOption !== ''
+                );
                 const dueReminders = fetchedReminders.filter(r => new Date(currentDate) > new Date(r.date))
+                const updatedReminders = [
+                    ...fetchedReminders,
+                    ...getRecurringReminders(filteredReminders, currentDate),
+                ];
+
                 const activeReminders = fetchedReminders.filter((r) => {
                     return new Date(currentDate) <= new Date(r.date)
                 })
 
                 setReminders(activeReminders.sort((a, b) => a.time.seconds - b.time.seconds));
+                setRecurringReminders(filteredReminders.filter((r) => {
+                    return new Date(currentDate) <= new Date(r.date)
+                }));
                 deleteReminders(dueReminders)
 
             } catch (error) {
@@ -191,7 +232,7 @@ function Dashboard() {
             <Header updateReminders={fetchReminders} />
             <Main>
                 <Left>
-                    <CustomCalendar onChange={onChange} value={value} reminders={reminders} />
+                    <CustomCalendar onChange={onChange} value={value} reminders={reminders} fetchReminders={fetchReminders} recurringReminders={recurringReminders} />
                     <EventFilter selectedCategories={selectedCategories} setSelectedCategories={setSelectedCategories} getCategories={getCategories} categories={categories} setCategories={setCategories} />
                     <BottomSection>
                         <div>

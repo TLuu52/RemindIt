@@ -1378,7 +1378,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
 
                                 <Title>Activity:</Title>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '10px' }}>
-                                    <ProfileIcon img='default' />
+                                    <ProfileIcon img='default' setOpen={() => { }} />
                                     <OutlinedInput sx={{ color: '#fff' }} placeholder="Write a comment..." value={comment} onChange={(e) => setComment(e.target.value)} endAdornment={<BsSend size={24} onClick={handleSaveDiscussion} />} />
                                 </div>
 
@@ -1393,7 +1393,7 @@ function NewCalendar({ date, setDate, fetchReminders, reminders, setReminders, c
                                             }
                                             return (
                                                 <Comment key={index}>
-                                                    <ProfileIcon img={thread.photoURL} sx={{ gridRowStart: 1, gridRowEnd: 3 }} />
+                                                    <ProfileIcon img={thread.photoURL} sx={{ gridRowStart: 1, gridRowEnd: 3 }} setOpen={() => { }} />
                                                     <Typography variant="h6" >{thread.email}</Typography>
                                                     <Typography variant="body1" sx={{ fontSize: '12px', opacity: '.5', alignSelf: 'center', textAlign: 'right' }}>{datetime}</Typography>
                                                     {(editModalOpen && editThread === thread) ?

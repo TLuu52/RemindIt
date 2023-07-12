@@ -359,7 +359,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                     </div>
                     <Typography variant='h4'>Activity</Typography>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                        <ProfileIcon img='default' />
+                        <ProfileIcon img='default' setOpen={() => { }} />
                         <OutlinedInput placeholder={'Write a comment...'} value={activity} onChange={(e) => setActivity(e.target.value)} />
                     </div>
                     <Comments />
@@ -452,6 +452,11 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
                                 id="reminder-attachment"
                                 PopperComponent={(props) => <Popper sx={{ color: 'black !important' }} {...props} placement='bottom'></Popper >}
                                 renderInput={(params) => <StyledTextField {...params} placeholder="Reminder Title" />}
+                                sx={{
+                                    '.MuiAutocomplete-endAdornment': {
+                                        flexDirection: 'row'
+                                    }
+                                }}
                             />
                         </StyledAutoCompleteDiv>
                         <div style={{ display: 'flex', gap: '10px', flexDirection: 'row', }}>

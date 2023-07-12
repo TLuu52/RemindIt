@@ -192,7 +192,7 @@ function ProfileSettings() {
             <Row>
                 <Typography variant="h5" >Profile Picture</Typography>
                 <Section>
-                    <ProfileIcon size={'l'} img={picture} />
+                    <ProfileIcon size={'l'} img={picture} setOpen={() => { }} />
                     <CustomLabel>
                         <input type="file" accept=".png, .jpg, .jpeg, image/png, image/jpeg" onChange={newPicture} />
                         <BsUpload size={"20px"} />

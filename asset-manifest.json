@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/RemindIt/remindit/static/css/main.18254fa3.css",
-    "main.js": "/RemindIt/remindit/static/js/main.e27fc246.js",
-    "static/media/reminder.png": "/RemindIt/remindit/static/media/reminder.81a6198612df8dd0c0d7.png",
-    "static/media/logo.png": "/RemindIt/remindit/static/media/logo.3f2b58ff9cc59f1f2022.png",
-    "index.html": "/RemindIt/remindit/index.html",
-    "main.18254fa3.css.map": "/RemindIt/remindit/static/css/main.18254fa3.css.map",
-    "main.e27fc246.js.map": "/RemindIt/remindit/static/js/main.e27fc246.js.map"
+    "main.css": "/RemindIt/static/css/main.18254fa3.css",
+    "main.js": "/RemindIt/static/js/main.3f3dc931.js",
+    "static/media/reminder.png": "/RemindIt/static/media/reminder.81a6198612df8dd0c0d7.png",
+    "static/media/logo.png": "/RemindIt/static/media/logo.3f2b58ff9cc59f1f2022.png",
+    "index.html": "/RemindIt/index.html",
+    "main.18254fa3.css.map": "/RemindIt/static/css/main.18254fa3.css.map",
+    "main.3f3dc931.js.map": "/RemindIt/static/js/main.3f3dc931.js.map"
   },
   "entrypoints": [
     "static/css/main.18254fa3.css",
-    "static/js/main.e27fc246.js"
+    "static/js/main.3f3dc931.js"
   ]
 }

@@ -1,21 +1,20 @@
 import { Box, InputLabel, Modal, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react'
-
 import CustomButton from './CustomButton';
 import styled from '@emotion/styled';
 import CustomInput from './CustomInput';
 import { useTheme } from '@emotion/react';
-import { FieldValue, collection, doc, getDoc, query, updateDoc, where, setDoc } from 'firebase/firestore';
-import { auth, firestore } from '../../firebase';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { firestore } from '../../firebase';
 import { UserContext } from '../../App';
-import { BsCircle, BsCircleFill } from 'react-icons/bs';
+import { BsCircleFill } from 'react-icons/bs';
 
-const CustomModal = styled(Modal)(({ }) => ({
+const CustomModal = styled(Modal)(({
     display: 'grid',
     placeItems: 'center'
 }));
 
-const ColorPicker = styled('input')(({ }) => ({
+const ColorPicker = styled('input')(({
     width: "50px",
     height: "50px",
     outline: 'none',
@@ -24,7 +23,7 @@ const ColorPicker = styled('input')(({ }) => ({
     cursor: 'pointer'
 }))
 
-const Flex = styled('div')(({ }) => ({
+const Flex = styled('div')(({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -72,12 +71,14 @@ function CreateCategory({ open, handleClose, categories, setCategories }) {
     }
 
     useEffect(() => {
+        // DELETE ME
+        console.log("GETTING CATS")
         if (user.currentUser && categories === null) {
             setTimeout(() => {
                 getCategories();
             }, 400);
         }
-    }, [user.currentUser, categories]);
+    }, [user.currentUser, categories, getCategories]);
 
     const onSubmit = async () => {
         const newCategory = { name: categoryName, color: color };

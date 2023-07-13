@@ -9,7 +9,7 @@ import { auth, firestore, storage } from "../firebase";
 import { UserContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import { updateEmail, updateProfile } from "firebase/auth";
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const Title = styled('h1')(({ theme }) => ({
@@ -102,7 +102,7 @@ function ProfileSettings() {
                 fetchUserData();
             }, 400);
         }
-    }, [user.currentUser, auth]);
+    }, [user.currentUser]);
 
     const submit = async () => {
         try {

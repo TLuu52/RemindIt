@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { styled } from '@mui/material';
 import Calendar from 'react-calendar';
-import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
-import { auth, firestore } from "../../firebase";
+import { auth } from "../../firebase";
 import { UserContext } from '../../App';
 
 const Container = styled('div')(({ theme }) => ({
@@ -75,9 +74,7 @@ const Container = styled('div')(({ theme }) => ({
 
 }))
 
-function CustomCalendar({ onChange, value, fetchReminders, recurringReminders }) {
-    const [reminders, setReminders] = useState([]);
-    const [userId, setUserId] = useState('');
+function CustomCalendar({ onChange, value, fetchReminders, recurringReminders, reminders }) {
     const { user } = useContext(UserContext)
 
     useEffect(() => {
@@ -86,18 +83,7 @@ function CustomCalendar({ onChange, value, fetchReminders, recurringReminders })
                 fetchReminders();
             }, 400);
         }
-    }, [user.currentUser, auth]);
-
-
-    const getRemindersForDate = (date) => {
-        const formattedDate = date.toDateString();
-        const remindersForDate = reminders.filter((reminder) => {
-            const reminderDate = new Date(reminder.date).toDateString();
-            return reminderDate === formattedDate;
-        });
-
-        return remindersForDate;
-    };
+    }, [user.currentUser]);
 
     const tileContent = ({ date }) => {
         const formattedDate = date.toDateString();

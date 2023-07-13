@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react"
 import { BsCircleFill, BsPlus } from "react-icons/bs"
 import CreateCategory from "./CreateCategory"
 import { UserContext } from "../../App"
-import { doc, getDoc, updateDoc } from "firebase/firestore"
+import { doc, updateDoc } from "firebase/firestore"
 import { firestore } from "../../firebase"
 
 const CustomContainer = styled(Container)(({ theme }) => ({
@@ -57,6 +57,7 @@ function EventFilter({ getCategories, setSelectedCategories, selectedCategories,
         newCategories.map(c => {
             if (c.name === category.name) {
                 c.active = !c.active
+                return
             }
         })
         try {

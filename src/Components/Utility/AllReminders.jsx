@@ -1,26 +1,9 @@
 import { useTheme } from "@emotion/react";
 import styled from "@emotion/styled";
 import { Box, Modal, Typography } from "@mui/material";
-import { BsArrowBarRight, BsCircleFill } from "react-icons/bs";
-import CustomButton from "./CustomButton";
 import { Timestamp } from "firebase/firestore";
 import { ArrowRightIcon } from "@mui/x-date-pickers";
 
-
-const ReminderItem = styled('div')(({ theme }) => ({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '8px',
-    borderRadius: '4px',
-    background: theme.palette.primary.dark,
-    marginBottom: '4px',
-    '& div': {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px'
-    }
-}))
 
 function AllReminders({ open, setOpen, reminders, setSelectedReminder, setShowPopup, reminderDay, month, formatAMPM }) {
     const theme = useTheme()

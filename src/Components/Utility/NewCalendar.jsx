@@ -195,9 +195,6 @@ const DurationSelect = styled(Select)(({ theme }) => ({
 const Title = styled(Typography)({
     textTransform: 'uppercase'
 })
-const Comments = styled('div')(({ theme }) => ({
-    flexGrow: '1'
-}))
 const CustomLabel = styled('label')(({ theme }) => ({
     color: theme.palette.primary.contrastText,
     '& input[type="file"]': {
@@ -211,13 +208,12 @@ const CustomLabel = styled('label')(({ theme }) => ({
     },
     display: 'flex',
     alignItems: 'center',
-    border: `1px solid ${theme.palette.primary.light}`,
     gap: '10px',
     padding: '20px 20px',
     borderRadius: '8px',
     border: `none`,
 }))
-const Attachment = styled('div')(({ }) => ({
+const Attachment = styled('div')(({
     background: '#333',
     padding: '8px',
     borderRadius: '6px',

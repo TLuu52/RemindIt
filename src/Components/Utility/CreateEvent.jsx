@@ -1,11 +1,11 @@
-import { Box, FormLabel, Input, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography, styled, FormControlLabel, Checkbox, Autocomplete, TextField, Popper } from "@mui/material"
+import { Box, FormLabel, Input, MenuItem, Modal, OutlinedInput, Select, TextareaAutosize, Typography, styled, Autocomplete, TextField, Popper } from "@mui/material"
 import ProfileIcon from "./ProfileIcon"
-import { DatePicker, DateTimePicker, DesktopDatePicker, MobileDatePicker, MobileTimePicker, TimePicker } from "@mui/x-date-pickers"
+import { MobileDatePicker, MobileTimePicker, } from "@mui/x-date-pickers"
 import CustomButton from "./CustomButton"
 import { BsCircleFill } from "react-icons/bs"
 import { useTheme } from "@emotion/react"
 import { useContext, useEffect, useState } from "react"
-import { collection, addDoc, getDocs, setDoc, Timestamp, doc, getDoc } from "firebase/firestore"
+import { collection, setDoc, doc, } from "firebase/firestore"
 import { auth, firestore } from "../../firebase"
 import { UserContext } from "../../App"
 
@@ -61,9 +61,6 @@ const ModalLeft = styled('div')(({ theme }) => ({
     flexDirection: 'column',
     gap: '30px'
 }))
-const Title = styled(Typography)({
-    textTransform: 'uppercase'
-})
 const DurationSelect = styled(Select)(({ theme }) => ({
     color: '#fff',
     width: '70px !important',
@@ -143,12 +140,6 @@ const StyledAutoCompleteDiv = styled('div')(({ theme }) => ({
         background: '#333'
     }
 }))
-const CustomPopper = styled(Popper)({
-    '&.MuiPopper-root': {
-        background: '#222 !important',
-
-    }
-})
 
 
 function CreateEvent({ open, handleClose, fetchReminders, categories, getCategories, setCategories, reminders }) {
@@ -160,10 +151,8 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
     const [date, setDate] = useState('');
     const [priority, setPriority] = useState('low');
     const [recurringOption, setRecurringOption] = useState('No');
-    const [duration, setDuration] = useState('');
     const [category, setCategory] = useState('');
     const { user, setOpen, setMessage } = useContext(UserContext)
-    const [dependency, setDependency] = useState(false);
     const [dependencyValue, setDependencyValue] = useState('None');
     const [dependantReminder, setDependantReminder] = useState('')
     const [inputValue, setInputValue] = useState('');
@@ -290,7 +279,8 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
             setTime('');
             setDate('');
             setPriority('');
-            setDuration('');
+            setDurationHours('00');
+            setDurationMin('00');
 
             // Close the modal
             handleClose();
@@ -327,7 +317,7 @@ function CreateEvent({ open, handleClose, fetchReminders, categories, getCategor
         if (newVal === null) {
             return
         }
-        if (newVal != 'None') {
+        if (newVal !== 'None') {
             setDependencyValue(reminders.filter(r => r.title === newVal)[0].title)
             setDependantReminder(reminders.filter(r => r.title === newVal)[0])
         } else {

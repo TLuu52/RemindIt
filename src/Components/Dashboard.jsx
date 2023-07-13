@@ -96,10 +96,8 @@ function Dashboard() {
 
 
     const [value, onChange] = useState(new Date());
-    const [view, setView] = useState({ view: 'monthly', day: '2023-06-13' })
     const [reminders, setReminders] = useState([]);
     const { user } = useContext(UserContext)
-    const [inbox, setInbox] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState([])
     const [categories, setCategories] = useState(null)
     const [recurringReminders, setRecurringReminders] = useState([]);
@@ -168,10 +166,6 @@ function Dashboard() {
                     (reminder) => reminder.recurringOption && reminder.recurringOption !== ''
                 );
                 const dueReminders = fetchedReminders.filter(r => new Date(currentDate) > new Date(r.date))
-                const updatedReminders = [
-                    ...fetchedReminders,
-                    ...getRecurringReminders(filteredReminders, currentDate),
-                ];
 
                 const activeReminders = fetchedReminders.filter((r) => {
                     return new Date(currentDate) <= new Date(r.date)
@@ -206,26 +200,6 @@ function Dashboard() {
         }
     }
 
-    // Add an inbox notification when a reminder is due
-    useEffect(() => {
-        const currentDate = new Date();
-
-        // Filter reminders that are due today or in the future
-        const upcomingReminders = reminders.filter(
-            (reminder) => new Date(reminder.date) >= currentDate
-        );
-
-        // Sort reminders by date in ascending order
-        upcomingReminders.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        // Get the first 5 reminders from the upcoming reminders
-        const inboxNotifications = upcomingReminders.slice(0, 5);
-
-
-        setInbox(inboxNotifications);
-
-    }, [reminders, selectedCategories]);
-
 
     return (
         <Page>
@@ -253,7 +227,7 @@ function Dashboard() {
                     </BottomSection>
                 </Left>
                 <Right>
-                    <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} categories={categories} selectedCategories={selectedCategories} view={view} />
+                    <NewCalendar date={value} setDate={onChange} reminders={reminders} fetchReminders={fetchReminders} setReminders={setReminders} categories={categories} selectedCategories={selectedCategories} />
                     <BottomRight onClick={() => setOpen(true)}>
                         <BsPlus color={'white'} />
                     </BottomRight>

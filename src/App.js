@@ -8,9 +8,10 @@ import ContactUs from './Components/ContactUs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { auth } from './firebase';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Dashboard from './Components/Dashboard';
-import { Alert, Snackbar } from '@mui/material';
+import { Alert, Snackbar, Typography } from '@mui/material';
+import Logo from './Components/Utility/Logo';
 
 
 
@@ -94,6 +95,33 @@ function App() {
       setMessage(null)
     }, 1000)
   }
+  const [width, setWidth] = useState(window.innerWidth);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    }
+  }, []);
+
+  const isMobile = width <= 768;
+
+  if (isMobile) {
+    return (
+      <div style={{ overflow: 'hidden', height: '100%', width: '100%', display: 'grid', placeItems: 'center' }}>
+        <div style={{ width: '85%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px', justifyContent: 'center', alignItems: 'center' }}>
+          <Logo size='60%' />
+          <Typography variant='h5'>Please use a Desktop or a Laptop to access this web application</Typography>
+          <hr style={{ width: '100%' }} />
+          <Typography variant='body1'>Mobile Application coming soon...</Typography>
+        </div>
+      </div>
+    )
+  }
+
   const value = { user, setUser, message, setMessage, open, setOpen, closeSnackbar };
   return (
     <UserContext.Provider value={value}>

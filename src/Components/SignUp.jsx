@@ -4,7 +4,7 @@ import CustomButton from "./Utility/CustomButton"; // Importing the CustomButton
 import Logo from "./Utility/Logo"; // Importing the Logo component
 import { Link, useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useState } from 'react';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, firestore } from '../firebase';
 import { UserContext } from '../App';
 import { doc, setDoc } from 'firebase/firestore';
@@ -65,7 +65,7 @@ const SignUp = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
-    const { user, setUser, setOpen, setMessage } = useContext(UserContext)
+    const { setUser, setOpen, setMessage } = useContext(UserContext)
 
     const signUp = async (e) => {
         e.preventDefault();
@@ -91,14 +91,17 @@ const SignUp = () => {
             setOpen(true)
         }
     };
-
-    useEffect(() => {
+    const checkSignin = () => {
         setTimeout(() => {
             if (auth.currentUser) {
                 setUser(auth)
                 navigate('/dashboard')
             }
-        }, 200)
+        }, 300)
+    }
+
+    useEffect(() => {
+        checkSignin()
     }, [])
 
 
